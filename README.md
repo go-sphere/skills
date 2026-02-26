@@ -11,11 +11,15 @@ Use `sphere-framework` when working on:
 - Sphere runtime packages (`cache`, `mq`, `storage`, `server`, `core`, `utils`, `infra`)
 - Sphere templates (`sphere-layout`, `sphere-simple-layout`, `sphere-bun-layout`)
 - Supporting libraries (`httpx`, `confstore`, `entc-extensions`)
+- End-to-end feature implementation aligned with `sphere-layout` source-of-truth and code generation boundaries
 
 ## What You Get
 
-- A decision-oriented `SKILL.md` for day-to-day execution
-- Focused reference docs for API, ORM, auth, troubleshooting, and package selection
+- Task-oriented sub-skills for common Sphere development work:
+  - `proto-http-api-from-input-ent`
+  - `db-schema-from-requirements`
+  - `sphere-layout-feature-workflow`
+- Focused reference docs for API, ORM, generation boundaries, and implementation checklists
 - Clear source-of-truth boundaries (what to edit vs what is generated)
 - Standard generation order aligned with Sphere layout best practices
 
@@ -40,13 +44,12 @@ The skill is triggered when the task clearly matches Sphere framework work, or w
 
 ## Skill Structure
 
-- `skills/sphere-framework/SKILL.md`: execution guide and constraints
-- `skills/sphere-framework/references/`: deep-dive docs loaded only when needed
-- `skills/sphere-framework/assets/`: optional output assets (minimal by default)
-- `skills/sphere-framework/scripts/`: optional automation scripts (minimal by default)
+- `skills/sphere-framework/proto-http-api-from-input-ent/`: proto + HTTP API contract design
+- `skills/sphere-framework/db-schema-from-requirements/`: requirement-to-Ent schema design
+- `skills/sphere-framework/sphere-layout-feature-workflow/`: end-to-end feature implementation workflow for scaffold projects
 
 ## Version
 
-- Version: 2.1.0
+- Version: 2.2.0
 - Scope: Sphere monorepo
-- Last updated: 2026-02-09
+- Last updated: 2026-02-26
