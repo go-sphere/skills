@@ -1,9 +1,9 @@
 ---
-name: db-schema-from-requirements
+name: ent-schema-generator
 description: Summarize database schema design from requirement inputs and produce implementation-ready outputs for Go + Ent in this repository. Use when the input may be a prompt, Markdown requirement document, repository folder, or runnable demo behavior and you need entity extraction, field/constraint design, weak-relation ID strategy, index planning, Ent schema guidance, and concrete bind/render/service integration impacts.
 ---
 
-# DB Schema From Requirements
+# Ent Schema Generator
 
 将需求输入整理成可直接落地到 `sphere-layout` 的 DB schema 方案，强调可执行性与可审查性。
 

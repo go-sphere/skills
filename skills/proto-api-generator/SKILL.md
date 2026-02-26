@@ -1,9 +1,9 @@
 ---
-name: proto-http-api-from-input-ent
+name: proto-api-generator
 description: Design proto3 + HTTP API contracts for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement.
 ---
 
-# Proto HTTP API From Input Ent
+# Proto API Generator
 
 ## Overview
 

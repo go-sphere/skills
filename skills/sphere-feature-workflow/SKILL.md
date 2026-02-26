@@ -1,9 +1,9 @@
 ---
-name: sphere-layout-feature-workflow
+name: sphere-feature-workflow
 description: Implement end-to-end feature changes in go-sphere scaffold projects by following sphere-layout conventions and generation workflow. Use when adding or modifying APIs, protobuf contracts, Ent schemas, bind/map registration, service logic, or cross-layer refactors that must stay protocol-first and avoid manual edits to generated files.
 ---
 
-# Sphere Layout Feature Workflow
+# Sphere Feature Workflow
 
 将需求变更落地为可合并代码，保持 `proto`、`schema`、`service`、`render` 一致演进，避免 generated drift。
 

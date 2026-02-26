@@ -1,5 +1,5 @@
 ---
-name: ent-seed-sql
+name: ent-seed-sql-generator
 description: Generate deterministic INSERT SQL seed data from Go Ent schemas and mixed inputs (prompt requirements, product docs, demo code). Use when Codex must infer entities and relationships, create meaningful linked sample records, and output one executable SQL seed artifact with stable IDs (not random) for dev/test data initialization.
 ---
 

@@ -253,7 +253,7 @@ rg -n "entbind\\.|entmap\\.|conv\\.Page|DeleteOneID|UpdateOneID|IDIn\\(" interna
 rg -n "type Service struct|func NewService\\(" internal/service
 ```
 
-If `sphere-layout-feature-workflow` is available, use it together with this skill:
+If `sphere-feature-workflow` is available, use it together with this skill:
 1. Let it guide end-to-end Sphere feature integration.
 2. Keep this skill focused on service file coverage and method implementation shape.
 3. Prefer framework-native flow over custom duplicated code.

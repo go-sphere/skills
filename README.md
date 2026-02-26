@@ -2,11 +2,22 @@
 
 A collection of AI skills designed for the go-sphere ecosystem and related technology stacks.
 
+## Skills Quick List
+
+| Skill Name | Description |
+| --- | --- |
+| `ent-schema-generator` | Design implementation-ready Go + Ent database schema plans from requirements and project context. |
+| `ent-seed-sql-generator` | Generate deterministic executable SQL seed data from Ent schemas and related inputs. |
+| `proto-api-generator` | Design scaffold-compatible proto3 + HTTP API contracts for go-sphere projects. |
+| `proto-service-generator` | Generate or complete service skeletons from generated `*ServiceHTTPServer` interfaces. |
+| `sphere-feature-workflow` | Execute end-to-end feature delivery in sphere-layout with protocol-first generated-code-safe workflow. |
+| `pure-admin-crud-generator` | Generate pure-admin-thin CRUD pages and route modules from swagger-ts-api methods. |
+
 ## Skills Overview
 
 ### Database & Schema
 
-#### db-schema-from-requirements
+#### ent-schema-generator
 Generate production-ready Go + Ent database schema designs from requirement documents, prompts, or existing code.
 
 **Use cases:**
@@ -15,7 +26,7 @@ Generate production-ready Go + Ent database schema designs from requirement docu
 - Plan weak-relation ID strategies and indexes
 - Design database migration strategies
 
-#### ent-seed-sql
+#### ent-seed-sql-generator
 Generate deterministic SQL seed data from Ent schema definitions.
 
 **Use cases:**
@@ -26,7 +37,7 @@ Generate deterministic SQL seed data from Ent schema definitions.
 
 ### API & Protocol
 
-#### proto-http-api-from-input-ent
+#### proto-api-generator
 Design proto3 + HTTP API contracts for go-sphere scaffold projects.
 
 **Use cases:**
@@ -35,7 +46,7 @@ Design proto3 + HTTP API contracts for go-sphere scaffold projects.
 - Choose between entpb/shared/custom messages
 - HTTP route conflict detection and error handling conventions
 
-#### proto-service-skeleton
+#### proto-service-generator
 Generate service implementation skeletons from generated API interfaces.
 
 **Use cases:**
@@ -46,7 +57,7 @@ Generate service implementation skeletons from generated API interfaces.
 
 ### Full-Stack Workflows
 
-#### sphere-layout-feature-workflow
+#### sphere-feature-workflow
 Implement end-to-end feature changes in go-sphere scaffold projects.
 
 **Use cases:**
@@ -55,7 +66,7 @@ Implement end-to-end feature changes in go-sphere scaffold projects.
 - Multi-layer coordinated changes (proto → schema → service → render)
 - Avoid manual edits to generated files
 
-#### pure-admin-thin-crud-gen
+#### pure-admin-crud-generator
 Generate CRUD pages and route modules for pure-admin-thin admin backends.
 
 **Use cases:**
@@ -70,12 +81,12 @@ Install any skill using the `npx skills` command:
 
 ```bash
 # Install a single skill
-npx skills add https://github.com/go-sphere/skills --skill db-schema-from-requirements
+npx skills add https://github.com/go-sphere/skills --skill ent-schema-generator
 
 # Install multiple skills
 npx skills add https://github.com/go-sphere/skills \
-  --skill proto-http-api-from-input-ent \
-  --skill sphere-layout-feature-workflow
+  --skill proto-api-generator \
+  --skill sphere-feature-workflow
 
 # Install all skills
 npx skills add https://github.com/go-sphere/skills --all
@@ -90,7 +101,7 @@ After installation, skills are automatically activated when matching scenarios a
 User: Help me design a database schema for user management
 
 # Explicit invocation
-User: Use the proto-http-api-from-input-ent skill to generate API definitions
+User: Use the proto-api-generator skill to generate API definitions
 ```
 
 ## Skill Composition
@@ -100,15 +111,15 @@ These skills work together to cover the complete development workflow:
 ```
 Requirements Input
   ↓
-db-schema-from-requirements (Design schema)
+ent-schema-generator (Design schema)
   ↓
-proto-http-api-from-input-ent (Design API)
+proto-api-generator (Design API)
   ↓
-sphere-layout-feature-workflow (End-to-end implementation)
-  ├─ proto-service-skeleton (Generate service skeleton)
-  └─ ent-seed-sql (Generate test data)
+sphere-feature-workflow (End-to-end implementation)
+  ├─ proto-service-generator (Generate service skeleton)
+  └─ ent-seed-sql-generator (Generate test data)
   ↓
-pure-admin-thin-crud-gen (Generate admin backend)
+pure-admin-crud-generator (Generate admin backend)
 ```
 
 ## Tech Stack

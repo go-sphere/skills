@@ -1,5 +1,5 @@
 ---
-name: pure-admin-thin-crud-gen
+name: pure-admin-crud-generator
 description: Generate CRUD pages and router module files for pure-admin-thin by parsing src/api/swagger/Api.ts and src/api/api.ts in this repository. Use when asked to scaffold backend admin list/edit/detail pages, CRUD actions, and route modules from swagger-ts-api methods without external generators.
 ---
 

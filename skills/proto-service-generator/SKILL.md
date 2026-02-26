@@ -1,9 +1,9 @@
 ---
-name: proto-service-skeleton
+name: proto-service-generator
 description: Generate or complete `internal/service/<module>/*.go` service implementation skeletons from generated `api/<module>/v1/*.sphere.pb.go` HTTP interfaces in this repository. Use when proto and generated API files already exist and you need per-service files, interface assertion checks, safe append-only updates, simple CRUD direct Ent implementation, and fallback stub methods for unknown business logic.
 ---
 
-# Proto Service Skeleton
+# Proto Service Generator
 
 Turn generated `*ServiceHTTPServer` interfaces into compilable service files under `internal/service/<module>/`.
 
@@ -14,15 +14,15 @@ Read before generating:
 
 ## Companion Skill Policy
 
-When `sphere-layout-feature-workflow` is available in the current session, use it together with this skill.
+When `sphere-feature-workflow` is available in the current session, use it together with this skill.
 
 Collaboration rules:
-1. Let `sphere-layout-feature-workflow` drive framework-native feature assembly (middleware, auth, errors, routing, wiring flow).
-2. Let `proto-service-skeleton` focus on per-service file generation/completion from `*ServiceHTTPServer`.
+1. Let `sphere-feature-workflow` drive framework-native feature assembly (middleware, auth, errors, routing, wiring flow).
+2. Let `proto-service-generator` focus on per-service file generation/completion from `*ServiceHTTPServer`.
 3. Prefer shared framework capabilities over custom implementation.
 4. Avoid implementing duplicate functionality when an equivalent capability already exists in this repository or the Sphere stack.
 
-If `sphere-layout-feature-workflow` is unavailable, continue with this skill and enforce the Reuse-First Checklist below.
+If `sphere-feature-workflow` is unavailable, continue with this skill and enforce the Reuse-First Checklist below.
 
 ## Scope
 
