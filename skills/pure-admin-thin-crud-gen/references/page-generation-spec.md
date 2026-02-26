@@ -220,6 +220,13 @@ Access response with repository-first assumption:
 
 Keep request helpers local to each page; do not create shared abstractions.
 
+Runtime shape guard rule (mandatory):
+
+- never call array methods (`join`, `map`, `filter`, `forEach`) directly on API fields without runtime guard
+- use `Array.isArray(...)` (or dedicated normalizer helpers) before array operations
+- for uncertain fields, provide safe format helpers that return fallback display strings (`"-"`/`""`) instead of throwing
+- templates must avoid crash-prone expressions like `foo?.join(", ")` when `foo` may be non-array at runtime
+
 ## 8. Verification Checklist
 Before final answer:
 

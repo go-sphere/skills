@@ -107,6 +107,7 @@ Mandatory behavior:
 - invalid route id must not fallback to create; show error and leave page safely
 - detail page must show explicit empty state when payload is empty
 - dashboard/list pages must satisfy visual quality baseline (hierarchy, spacing, table readability, semantic status style)
+- rendering must be runtime-safe: no direct array method calls on uncertain API fields without `Array.isArray` guard/normalizer
 
 Required snippets:
 

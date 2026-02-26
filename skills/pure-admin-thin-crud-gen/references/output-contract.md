@@ -68,3 +68,4 @@ Verify all of the following:
 11. invalid route id handling is explicit (error + safe navigation), never silent fallback to create mode
 12. detail page includes explicit empty state when payload is empty
 13. response states at least 3 concrete UI polish points applied (layout hierarchy, spacing density, table readability, status tags, responsive wrap)
+14. template rendering is runtime-safe: uncertain API fields are guarded/normalized before `join/map/filter` and cannot crash page render
