@@ -36,6 +36,12 @@ Use:
 - `el-select` or `el-switch` for status-like fields
 - `el-date-picker` with `daterange` when time range exists
 
+Filter source-of-truth rule:
+
+- only generate API-backed filter fields that exist in list query params
+- if list query only contains pagination fields, do not generate fake backend filter form items
+- in pagination-only APIs, avoid "query" behavior that is actually client-side filtering on current page rows
+
 Buttons:
 
 - query: `el-button type="primary"`
@@ -67,6 +73,12 @@ Use `el-pagination` with required mapping:
 
 Run initial fetch in `onMounted` for page index `0`.
 
+Server pagination consistency rule:
+
+- when API is paginated by server, `total` must come from server response fields
+- do not override total with client-side filtered current-page length
+- do not apply client-only filtering to paged subsets unless explicitly labeled as local filter
+
 ### 2.4 Feedback and loading
 Use:
 
@@ -97,6 +109,12 @@ On mounted:
 
 Use `v-loading="loading"` and `ElMessage.error("Load failed")` on fetch failure.
 
+Invalid route id guard (mandatory):
+
+- if route carries an id but parsing fails, do not silently fallback to create mode
+- show `ElMessage.error` and navigate back to list (or router.back)
+- apply the same guard to `detail.vue`
+
 ## 3.2 Field-to-control mapping
 Apply this default mapping:
 
@@ -116,6 +134,7 @@ When generated, it must:
 - auto-fetch detail in `onMounted`
 - use `v-loading` and message feedback
 - render with `el-descriptions` or `el-card` + `el-row` + `el-col`
+- render `el-empty` when request succeeds but detail payload is empty
 
 Do not create custom display components.
 
@@ -220,6 +239,12 @@ Build dashboard pages with this structure:
 Recommended path:
 
 - `src/views/<module>/dashboard.vue` or `src/views/<module>/index.vue` (if dashboard-only module)
+
+Dashboard polish baseline:
+
+- use titled sections/cards with clear hierarchy instead of one flat container
+- use `el-space`/`el-row`/`el-col` for stable rhythm and responsive wrapping
+- key data should be visually scannable (KPI cards, status tags, aligned numeric columns)
 
 ## 10. Unified Error and Retry
 Every async block should keep explicit status:

@@ -102,6 +102,11 @@ Mandatory behavior:
 - 0-based backend paging mapped to 1-based `el-pagination`
 - unified error and retry behavior for each async block (table/card/chart)
 - request abstraction is AI-selected: `useRequest` is optional and only used when it clearly simplifies complex async flows
+- list filters must align with real API query fields (no fake backend filters)
+- server-paged list must keep server `total` semantics (no client-side current-page total override)
+- invalid route id must not fallback to create; show error and leave page safely
+- detail page must show explicit empty state when payload is empty
+- dashboard/list pages must satisfy visual quality baseline (hierarchy, spacing, table readability, semantic status style)
 
 Required snippets:
 
