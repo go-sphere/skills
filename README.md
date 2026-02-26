@@ -1,55 +1,130 @@
-# Sphere Skills
+# Go-Sphere Skills
 
-This directory contains AI skills for the Sphere ecosystem. The primary skill is `sphere-framework`, which helps an AI agent choose the right Sphere component, follow the correct code-generation workflow, and avoid editing generated files.
+A collection of AI skills designed for the go-sphere ecosystem and related technology stacks.
 
-## What This Skill Is For
+## Skills Overview
 
-Use `sphere-framework` when working on:
+### Database & Schema
 
-- Sphere Protocol-First backend development
-- Protobuf + codegen workflow (`protoc-gen-sphere*`, `protoc-gen-route`)
-- Sphere runtime packages (`cache`, `mq`, `storage`, `server`, `core`, `utils`, `infra`)
-- Sphere templates (`sphere-layout`, `sphere-simple-layout`, `sphere-bun-layout`)
-- Supporting libraries (`httpx`, `confstore`, `entc-extensions`)
-- End-to-end feature implementation aligned with `sphere-layout` source-of-truth and code generation boundaries
+#### db-schema-from-requirements
+Generate production-ready Go + Ent database schema designs from requirement documents, prompts, or existing code.
 
-## What You Get
+**Use cases:**
+- Extract and design entity models from requirements
+- Design Ent schema fields with proper constraints
+- Plan weak-relation ID strategies and indexes
+- Design database migration strategies
 
-- Task-oriented sub-skills for common Sphere development work:
-  - `proto-http-api-from-input-ent`
-  - `db-schema-from-requirements`
-  - `sphere-layout-feature-workflow`
-- Focused reference docs for API, ORM, generation boundaries, and implementation checklists
-- Clear source-of-truth boundaries (what to edit vs what is generated)
-- Standard generation order aligned with Sphere layout best practices
+#### ent-seed-sql
+Generate deterministic SQL seed data from Ent schema definitions.
+
+**Use cases:**
+- Initialize data for dev/test environments
+- Create realistic sample data with relationships
+- Output executable SQL seed files
+- Generate datasets with stable (non-random) IDs
+
+### API & Protocol
+
+#### proto-http-api-from-input-ent
+Design proto3 + HTTP API contracts for go-sphere scaffold projects.
+
+**Use cases:**
+- Protocol-first API design
+- Generate protobuf definitions from requirements/Ent schemas
+- Choose between entpb/shared/custom messages
+- HTTP route conflict detection and error handling conventions
+
+#### proto-service-skeleton
+Generate service implementation skeletons from generated API interfaces.
+
+**Use cases:**
+- Generate service files from `*ServiceHTTPServer` interfaces
+- CRUD service templates with direct Ent integration
+- Interface assertion checks and safe append-only updates
+- Placeholder stubs for unknown business logic
+
+### Full-Stack Workflows
+
+#### sphere-layout-feature-workflow
+Implement end-to-end feature changes in go-sphere scaffold projects.
+
+**Use cases:**
+- Add or modify APIs, proto definitions, and Ent schemas
+- Protocol-first development workflow
+- Multi-layer coordinated changes (proto → schema → service → render)
+- Avoid manual edits to generated files
+
+#### pure-admin-thin-crud-gen
+Generate CRUD pages and route modules for pure-admin-thin admin backends.
+
+**Use cases:**
+- Generate admin pages from swagger-ts-api output
+- Scaffold list/edit/detail pages
+- Auto-configure route modules
+- Vue 3 + Element Plus backend development
 
 ## Installation
 
-### Option 1: Manual Install (recommended if local)
-
-Copy the skill folder into your Codex skills directory:
+Install any skill using the `npx skills` command:
 
 ```bash
-mkdir -p "$CODEX_HOME/skills"
-cp -R skills/sphere-framework "$CODEX_HOME/skills/sphere-framework"
+# Install a single skill
+npx skills add https://github.com/go-sphere/skills --skill db-schema-from-requirements
+
+# Install multiple skills
+npx skills add https://github.com/go-sphere/skills \
+  --skill proto-http-api-from-input-ent \
+  --skill sphere-layout-feature-workflow
+
+# Install all skills
+npx skills add https://github.com/go-sphere/skills --all
 ```
 
-### Option 2: Install with Skill Installer
+## Usage
 
-If you use the built-in `skill-installer` workflow, install this skill from the repository path instead of copying files manually.
+After installation, skills are automatically activated when matching scenarios are detected, or can be explicitly invoked:
 
-## Activation
+```
+# Auto-activation (when task matches skill scenarios)
+User: Help me design a database schema for user management
 
-The skill is triggered when the task clearly matches Sphere framework work, or when explicitly referenced (for example: `use sphere-framework`).
+# Explicit invocation
+User: Use the proto-http-api-from-input-ent skill to generate API definitions
+```
 
-## Skill Structure
+## Skill Composition
 
-- `skills/sphere-framework/proto-http-api-from-input-ent/`: proto + HTTP API contract design
-- `skills/sphere-framework/db-schema-from-requirements/`: requirement-to-Ent schema design
-- `skills/sphere-framework/sphere-layout-feature-workflow/`: end-to-end feature implementation workflow for scaffold projects
+These skills work together to cover the complete development workflow:
 
-## Version
+```
+Requirements Input
+  ↓
+db-schema-from-requirements (Design schema)
+  ↓
+proto-http-api-from-input-ent (Design API)
+  ↓
+sphere-layout-feature-workflow (End-to-end implementation)
+  ├─ proto-service-skeleton (Generate service skeleton)
+  └─ ent-seed-sql (Generate test data)
+  ↓
+pure-admin-thin-crud-gen (Generate admin backend)
+```
 
-- Version: 2.2.0
-- Scope: Sphere monorepo
-- Last updated: 2026-02-26
+## Tech Stack
+
+- **Backend Framework**: [go-sphere](https://github.com/go-sphere)
+- **ORM**: [ent](https://entgo.io/)
+- **Protocol**: Protocol Buffers (proto3)
+- **Frontend Framework**: Vue 3 + Element Plus (pure-admin-thin)
+- **Code Generation**: protoc-gen-sphere*, protoc-gen-route
+
+## License
+
+MIT
+
+## Contributing
+
+Issues and Pull Requests are welcome to improve these skills.
+
+Detailed documentation for each skill is located in the corresponding `SKILL.md` file.
