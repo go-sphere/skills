@@ -62,7 +62,7 @@ Verify all of the following:
 5. output includes missing endpoint degradations when applicable
 6. route module contains root `redirect` to `/index` child and hidden edit/detail routes use `showLink: false` (with `activePath` when applicable)
 7. when dashboard is requested, output includes dashboard skeleton blocks (filter, metrics, main content) and per-block retry behavior
-8. request abstraction choice is explicit: `useRequest` is optional (never mandatory), only considered when dependency exists and complexity justifies it
+8. request abstraction choice is explicit: VueUse composables are optional (never mandatory), only considered when dependency exists and complexity justifies it
 9. list filter items are backed by actual API query fields; pagination-only APIs do not fake query semantics
 10. server-paged lists keep server total semantics and avoid client-side current-page total overrides
 11. invalid route id handling is explicit (error + safe navigation), never silent fallback to create mode

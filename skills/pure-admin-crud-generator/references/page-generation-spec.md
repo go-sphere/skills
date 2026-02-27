@@ -268,31 +268,31 @@ UI behavior:
 
 Do not only toast errors. Keep visible recoverable state on the page.
 
-## 11. `useRequest` Rule (`vue-hooks-plus`)
-You can simplify request state management with:
+## 11. VueUse Composable Rule
+You can simplify request state management with VueUse composables, for example:
 
 ```ts
-import useRequest from "vue-hooks-plus/es/useRequest";
+import { useAsyncState } from "@vueuse/core";
 ```
 
 Use this policy (optional, not mandatory):
 
-1. first check if project already has `vue-hooks-plus`
+1. first check if project already has `@vueuse/core`
 2. if dependency is missing, do not add it automatically; fallback to `ref/reactive` + manual `loading/error` states
-3. if dependency exists, AI should decide whether `useRequest` reduces complexity; do not force it on every page
+3. if dependency exists, AI should decide whether VueUse reduces complexity; do not force it on every page
 4. generated code must remain runnable under repository constraints
 
 Dependency check options:
 
 - inspect `package.json` dependencies
-- or run `pnpm ls vue-hooks-plus --depth=0`
+- or run `pnpm ls @vueuse/core --depth=0`
 
 Decision guideline:
 
-- use `useRequest` when page has multiple async regions, retry flows, or polling requirements
+- use VueUse when page has multiple async regions, retry flows, or polling requirements
 - keep manual state when page is small and direct `async/await` is clearer
 
-When using `useRequest`, keep these behaviors:
+When using VueUse composables, keep these behaviors:
 
 - keep 0-based and 1-based pagination mapping unchanged
 - keep `route.params.id ?? route.query.id` detail auto-fetch logic unchanged
@@ -300,8 +300,8 @@ When using `useRequest`, keep these behaviors:
 
 Recommended best practices:
 
-- list request: `manual: true` and call `run` on query/pagination change
-- detail request: gate with `ready` to avoid invalid id requests
-- retry: bind retry button to `refresh`
-- action request: use `runAsync` and `onSuccess` to refresh list
-- avoid stale updates with `cancel` on route leave when needed
+- list request: call `execute`/refresh function on query and pagination change
+- detail request: gate by valid id and trigger only when id exists
+- retry: bind retry button to the same request executor
+- action request: keep explicit success callback and refresh list after mutation
+- avoid stale updates with abort/cleanup on route leave when needed

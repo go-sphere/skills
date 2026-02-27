@@ -101,7 +101,7 @@ Mandatory behavior:
 - edit/detail route id parsing and auto-fetch
 - 0-based backend paging mapped to 1-based `el-pagination`
 - unified error and retry behavior for each async block (table/card/chart)
-- request abstraction is AI-selected: `useRequest` is optional and only used when it clearly simplifies complex async flows
+- request abstraction is AI-selected: VueUse composables are optional and only used when they clearly simplify complex async flows
 - list filters must align with real API query fields (no fake backend filters)
 - server-paged list must keep server `total` semantics (no client-side current-page total override)
 - invalid route id must not fallback to create; show error and leave page safely
@@ -161,8 +161,9 @@ Load only needed files:
 - Dashboard best practices: `references/dashboard-best-practices.md`
 - Response/output contract: `references/output-contract.md`
 
-If considering `useRequest`, follow repository-safe policy:
+If considering VueUse composables, follow repository-safe policy:
 
-- use import path `vue-hooks-plus/es/useRequest`
+- prefer built-in VueUse utilities (for example `useAsyncState`, `useDebounceFn`, `useThrottleFn`) for request and interaction orchestration
 - do not add dependency automatically
 - keep manual state flow when complexity is low
+- when available for this session, you may apply the `vueuse-functions` skill for composable selection and usage patterns

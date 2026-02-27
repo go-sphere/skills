@@ -108,19 +108,15 @@ UI elements:
 - retry trigger: `el-button`
 - global toast: `ElMessage.error` for immediate feedback
 
-## 4. `useRequest` Integration Rule
-If `vue-hooks-plus` is available in project dependencies, AI may use:
-
-```ts
-import useRequest from "vue-hooks-plus/es/useRequest";
-```
+## 4. VueUse Integration Rule
+If `@vueuse/core` is available in project dependencies, AI may use VueUse composables (for example `useAsyncState`, `useDebounceFn`, `useIntervalFn`) to organize request orchestration.
 
 Recommended usage:
 
-- list fetch: `manual: true` with `run`/`refresh`
-- detail fetch: use `ready` to avoid empty-id requests
-- action requests: `runAsync` + `onSuccess` to refresh list
-- dashboard auto-refresh (only when needed): use `pollingInterval`; set `pollingWhenHidden: false`
+- list fetch: trigger unified request executor from query/pagination events
+- detail fetch: guard by valid id to avoid empty-id requests
+- action requests: run mutation then refresh list in success branch
+- dashboard auto-refresh (only when needed): use interval composables and pause when hidden
 
 Fallback:
 
@@ -129,11 +125,11 @@ Fallback:
 
 Decision rule:
 
-- do not force `useRequest` on every dashboard
+- do not force VueUse on every dashboard
 - use it when it clearly simplifies multi-source loading/error/retry orchestration
 
 ## 5. Non-negotiable Compatibility Rules
-Even with dashboard mode and `useRequest`:
+Even with dashboard mode and VueUse composables:
 
 - keep 0-based backend page index and 1-based UI page
 - keep `route.params.id ?? route.query.id` id extraction
