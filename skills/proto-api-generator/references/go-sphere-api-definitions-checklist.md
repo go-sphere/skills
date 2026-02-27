@@ -19,13 +19,22 @@ Use this checklist with:
 
 ### A. Scaffold Fit (Required)
 
-- [ ] Choose target package style (`api.v1`, `dash.v1`, `shared.v1`, `bot.v1`) before drafting endpoints.
+- [ ] Choose a scaffold-valid target package style before drafting endpoints (for example `api.v1`, `dash.v1`, `shared.v1`, `bot.v1`).
 - [ ] Define one stable service-level route prefix namespace before adding service RPC paths.
 - [ ] Follow scaffold path/method conventions for that package.
 - [ ] Keep scaffold-compatible pagination style unless requirements explicitly demand otherwise.
 - [ ] Preserve compatibility-driven field naming where existing clients depend on it.
 
-### B. Route Conflict Safety (Required)
+### B. File Mode and Structure (Required)
+
+- [ ] Confirm this checklist is applied only to proto files generated or modified by this skill in the current task.
+- [ ] Classify file mode explicitly as either `service proto` or `message-only proto`.
+- [ ] If file mode is `service proto`, enforce exactly one `service` in the file.
+- [ ] If file mode is `service proto`, enforce strict file-prefix mapping: `snake_case` file prefix must match `PascalCase` `Service/Error` prefix.
+- [ ] If file mode is `service proto`, enforce declaration order: `service` -> `message` -> `error enum`.
+- [ ] If file mode is `message-only proto`, exempt service-only structure/error checks and record the exemption in validation notes.
+
+### C. Route Conflict Safety (Required for `service proto`)
 
 - [ ] Confirm each service route set stays under its own prefix namespace.
 - [ ] Detect static-vs-param sibling collisions for the same method scope.
@@ -34,13 +43,13 @@ Use this checklist with:
 - [ ] Ensure greedy wildcard routes do not shadow fixed routes unexpectedly.
 - [ ] If backend target is unknown, keep routes Gin-safe by default.
 
-### C. Reuse Decision (Required)
+### D. Reuse Decision (Required)
 
 - [ ] Check whether an existing `entpb` message can be reused directly.
 - [ ] Check whether the message should live in or reuse `shared.v1`.
 - [ ] Document why a custom DTO/VO is needed when not reusing existing messages.
 
-### D. HTTP and Binding (Required)
+### E. HTTP and Binding (Required for HTTP-exposed `service proto`)
 
 - [ ] Add `google.api.http` annotation to every exposed RPC.
 - [ ] Mark URI fields with `BINDING_LOCATION_URI` when required.
@@ -48,7 +57,7 @@ Use this checklist with:
 - [ ] Use explicit `body` rules for write APIs (`"*"` or specific field).
 - [ ] Avoid `oneof` in HTTP-exposed request/response messages.
 
-### E. API Contract (Required)
+### F. API Contract (Required)
 
 - [ ] Confirm use case and mock validation happened before final proto output.
 - [ ] Ensure list APIs include pagination parameters.
@@ -57,24 +66,24 @@ Use this checklist with:
 - [ ] Add concise business comments for exposed RPCs, core messages, and key enum values (for generated swagger/openapi readability).
 - [ ] Use `//` single-line style for these business comments by default.
 
-### F. Error Contract (Required)
+### G. Error Contract (Required with mode-aware behavior)
 
-- [ ] Define at least one domain error enum (or explicitly reuse one).
-- [ ] Keep service-specific business errors in the same proto file as the owning service.
+- [ ] If file mode is `service proto`, define at least one domain error enum (or explicitly reuse one).
+- [ ] If file mode is `service proto`, keep service-specific business errors in the same proto file as the owning service.
 - [ ] Use shared proto errors only for cross-service/common errors.
-- [ ] Include `*_UNSPECIFIED = 0`.
-- [ ] Set enum `default_status`.
-- [ ] Set per-value `status/reason/message` for key business errors.
-- [ ] Document runtime error composition (`Join`, `JoinWithMessage`).
+- [ ] If file mode is `service proto`, include `*_UNSPECIFIED = 0`.
+- [ ] If file mode is `service proto`, set enum `default_status`.
+- [ ] If file mode is `service proto`, set per-value `status/reason/message` for key business errors.
+- [ ] If file mode is `service proto`, document runtime error composition (`Join`, `JoinWithMessage`).
 
-### G. Package, Runtime, and Codegen (Required)
+### H. Package, Runtime, and Codegen (Required)
 
 - [ ] Confirm package/version layout is coherent with scaffold proto organization.
 - [ ] Confirm imports align with selected annotations/features (`sphere/binding`, `sphere/errors`, etc.).
 - [ ] Confirm response/error assumptions match go-sphere runtime behavior.
 - [ ] Confirm design fits protocol-first generation and does not require manual generated-file edits.
 
-### H. Final QA (Required)
+### I. Final QA (Required)
 
 - [ ] Ensure no sensitive/internal storage fields leak into external contracts.
 - [ ] Ensure error outputs are machine-readable and stable.

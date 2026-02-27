@@ -12,6 +12,8 @@ Design implementation-ready `proto3 + HTTP` contracts for go-sphere scaffolds.
 This skill targets go-sphere scaffold projects only.
 Do not optimize for generic/non-scaffold project structures unless explicitly requested.
 Directory conventions (`proto/`, `internal/`, `api/`) are assumed scaffold defaults.
+All constraints in this skill are AI generation-time rules and output self-check rules.
+Do not rely on scripts, lint plugins, or external automation to enforce them.
 
 ## Required Reading Order
 
@@ -39,6 +41,14 @@ Examples:
 3. Preserve compatibility-driven field naming exceptions.
 4. Keep one stable route namespace prefix per service (for example `AdminService` -> `/api/admin...`).
 
+When this skill generates or modifies a proto file:
+
+1. First classify file mode:
+   - `service proto`: contains a `service` definition.
+   - `message-only proto`: defines messages/enums only and has no `service`.
+2. Enforce single-service topology rules only for `service proto`.
+3. Allow `message-only proto` and exempt it from service-only topology checks.
+
 ## Reuse Policy
 
 Apply this reuse order by default:
@@ -51,9 +61,10 @@ Apply this reuse order by default:
 
 Use scaffold error placement rules:
 
-1. Define service-specific business errors in the same `.proto` file as the service.
-2. Put only cross-service/common errors in `proto/shared/v1` (or shared proto package).
-3. Do not create a separate dedicated error package/file for each service unless explicitly requested.
+1. For `service proto`, define service-specific business errors in the same `.proto` file as the service.
+2. For `service proto`, put only cross-service/common errors in `proto/shared/v1` (or shared proto package).
+3. For `service proto`, do not create a separate dedicated error package/file for each service unless explicitly requested.
+4. For `message-only proto`, exempt service-local error placement requirements; still enforce naming/import/codegen/runtime consistency checks.
 
 Use custom DTO/VO only when at least one condition is true:
 
@@ -82,16 +93,18 @@ Use custom DTO/VO only when at least one condition is true:
 
 ## Workflow
 
-1. Extract use cases (`Create`, `Get`, `List`, `Patch/Update`, `BatchGet`).
-2. Draft mock JSON for list, detail, and error responses.
-3. Make a documented reuse decision for each response object.
-4. Select scaffold-compatible path/method style for the target package (`api.v1`, `dash.v1`, `shared.v1`, `bot.v1`).
-5. Define HTTP bindings and request/response messages.
-6. Define error enums with `sphere.errors` options.
-7. Run a route conflict check against Gin/Fiber/Echo compatibility rules.
-8. Validate package structure, imports, and codegen assumptions against this skill's references.
-9. Add validation constraints and machine-readable error behavior.
-10. Run the checklist before final output.
+1. Determine file mode for each target proto (`service proto` or `message-only proto`).
+2. Extract use cases (`Create`, `Get`, `List`, `Patch/Update`, `BatchGet`) for `service proto`.
+3. Draft mock JSON for list, detail, and error responses.
+4. Make a documented reuse decision for each response object.
+5. Select scaffold-compatible path/method style for a scaffold-valid target package (for example `api.v1`, `dash.v1`, `shared.v1`, `bot.v1`) when service APIs are involved.
+6. Define HTTP bindings and request/response messages for `service proto`.
+7. Define error enums with `sphere.errors` options based on file mode rules.
+8. Run a proto structure check (mode, one-service rule, prefix mapping, section order, exemptions).
+9. Run a route conflict check against Gin/Fiber/Echo compatibility rules when service routes exist.
+10. Validate package structure, imports, and codegen assumptions against this skill's references.
+11. Add validation constraints and machine-readable error behavior.
+12. Run the checklist before final output.
 
 ## Hard Rules
 
@@ -112,22 +125,29 @@ Use custom DTO/VO only when at least one condition is true:
 15. If any hard rule fails, stop and output `Validation Notes -> Blocking Issues` with corrected route/error proposals.
 16. Add business-facing comments to exposed `service/rpc`, core `message`, and key `enum` values so generated swagger/openapi output remains readable.
 17. Prefer `//` single-line comment style in proto files for business annotations; avoid block comments unless a tool requires them.
+18. For any `service proto`, enforce exactly one `service` in that proto file.
+19. For any `service proto`, file prefix and service/error prefix must map strictly (`snake_case` file prefix <-> `PascalCase` prefix). Example: `admin_session.proto` -> `AdminSessionService` and `AdminSessionError`.
+20. For any `service proto`, keep top-level declaration order as `service` -> `message` -> `error enum`.
+21. For any `message-only proto`, exempt rules 18-20 and service-local error requirements, but still enforce naming/import/codegen/runtime consistency checks.
 
 ## Output Contract
 
 Produce output in this exact order:
 
 1. `Scaffold Fit Decision`
-2. `Route Conflict Check`
-3. `Error Placement Check`
-4. `Comment Coverage Check`
-5. `API Capability Matrix`
-6. `Mock JSON`
-7. `Reuse Decision`
-8. `Proto3 Contract`
-9. `Error Enum Design`
-10. `Ent -> Proto Mapping`
-11. `Validation Notes`
+2. `Proto Structure Check`
+3. `Route Conflict Check`
+4. `Error Placement Check`
+5. `Comment Coverage Check`
+6. `API Capability Matrix`
+7. `Mock JSON`
+8. `Reuse Decision`
+9. `Proto3 Contract`
+10. `Error Enum Design`
+11. `Ent -> Proto Mapping`
+12. `Validation Notes`
+13. `Blocking Issues` (only if any required check fails)
+14. `Mandatory Confirmation`
 
 Use [references/proto-output-template.md](references/proto-output-template.md) as the output shape.
 

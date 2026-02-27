@@ -17,7 +17,21 @@ Do not skip required sections.
 
 Explain why this package/style is chosen.
 
-## 2) Route Conflict Check
+## 2) Proto Structure Check
+
+| File Mode | Check Item | Result | Evidence |
+| --- | --- | --- | --- |
+| service proto | Exactly one service in file | pass | `admin_session.proto` defines only `AdminSessionService` |
+| service proto | File prefix vs Service/Error prefix mapping | pass | `admin_session` <-> `AdminSessionService` / `AdminSessionError` |
+| service proto | Declaration order (`service -> message -> error enum`) | pass | service block first, then messages, then `AdminSessionError` |
+
+If `File Mode` is `message-only proto`, output:
+
+- `Exemption Applied`: service-only structure rules are skipped.
+- `Reason`: no `service` declaration exists in the target proto.
+- Continue with naming/import/runtime checks.
+
+## 3) Route Conflict Check
 
 | Check Item | Result | Evidence |
 | --- | --- | --- |
@@ -28,14 +42,14 @@ Explain why this package/style is chosen.
 | Greedy shadowing risk | pass | fixed routes declared before greedy patterns (if applicable) |
 | Backend portability | pass | route set is Gin-safe and works for Fiber/Echo matching rules |
 
-## 3) Error Placement Check
+## 4) Error Placement Check
 
 | Check Item | Result | Evidence |
 | --- | --- | --- |
 | Service-local business errors | pass | `AdminError` is defined in `dash/v1/admin.proto` |
 | Shared errors only for common semantics | pass | no service-only errors pushed to `shared` |
 
-## 4) Comment Coverage Check
+## 5) Comment Coverage Check
 
 | Check Item | Result | Evidence |
 | --- | --- | --- |
@@ -43,15 +57,15 @@ Explain why this package/style is chosen.
 | Message business comments | pass | externally visible request/response messages are documented with `//` comments |
 | Enum business comments | pass | key business error/status enum values include `//` intent comments |
 
-## 5) API Capability Matrix
+## 6) API Capability Matrix
 
 | Use Case | RPC | HTTP | Request Key Fields | Response Key Fields | Index Driver |
 | --- | --- | --- | --- | --- | --- |
 | ListAdmins | ListAdmins | GET /api/admin/list | page, page_size | admins, total_size, total_page | (id desc) |
 
-## 6) Mock JSON
+## 7) Mock JSON
 
-### 5.1 List Response
+### 7.1 List Response
 
 ```json
 {
@@ -61,7 +75,7 @@ Explain why this package/style is chosen.
 }
 ```
 
-### 5.2 Detail Response
+### 7.2 Detail Response
 
 ```json
 {
@@ -72,7 +86,7 @@ Explain why this package/style is chosen.
 }
 ```
 
-### 5.3 Error Response Example
+### 7.3 Error Response Example
 
 ```json
 {
@@ -83,7 +97,7 @@ Explain why this package/style is chosen.
 }
 ```
 
-## 7) Reuse Decision
+## 8) Reuse Decision
 
 | Domain Object | Reuse Choice | Location | Reason |
 | --- | --- | --- | --- |
@@ -97,7 +111,7 @@ Rules:
 2. Prefer `shared.v1` for cross-service reuse.
 3. Use custom DTO only with explicit justification.
 
-## 8) Proto3 Contract
+## 9) Proto3 Contract
 
 ```proto
 syntax = "proto3";
@@ -157,7 +171,7 @@ enum AdminError {
 }
 ```
 
-## 9) Error Enum Design
+## 10) Error Enum Design
 
 | Enum Value | Code | HTTP Status | Reason | Message | Trigger Condition |
 | --- | --- | --- | --- | --- | --- |
@@ -168,7 +182,7 @@ Runtime usage guidance:
 - `AdminError_ADMIN_ERROR_CANNOT_DELETE_SELF.Join(err)`
 - `AdminError_ADMIN_ERROR_CANNOT_DELETE_SELF.JoinWithMessage("...", err)`
 
-## 10) Ent -> Proto Mapping
+## 11) Ent -> Proto Mapping
 
 | Ent Field | Proto Field | Exposed | Notes |
 | --- | --- | --- | --- |
@@ -176,7 +190,7 @@ Runtime usage guidance:
 | username | username | yes | direct mapping via entpb |
 | password | password | conditional | clear/mask if response must not expose sensitive data |
 
-## 11) Validation Notes
+## 12) Validation Notes
 
 Always include:
 
@@ -184,7 +198,7 @@ Always include:
 - Risks
 - Open Questions
 
-## 12) Blocking Issues (Only if Any Required Check Fails)
+## 13) Blocking Issues (Only if Any Required Check Fails)
 
 Use this section only when fail-fast is triggered.
 
@@ -196,7 +210,7 @@ Format:
 
 If this section exists, the draft is non-deliverable.
 
-## 13) Mandatory Confirmation
+## 14) Mandatory Confirmation
 
 Include exactly one of the following:
 
