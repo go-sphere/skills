@@ -4,6 +4,10 @@
 
 Prevent generated HTTP paths from causing runtime router conflicts or ambiguous matches across Go router backends used by Sphere (`gin`, `fiber`, `echo`).
 
+## When To Load
+
+Load this reference whenever the output includes service routes, path templates, wildcard segments, or backend portability claims.
+
 ## Source
 
 - Gin source (router conflict/panic rules): https://raw.githubusercontent.com/gin-gonic/gin/master/tree.go
@@ -19,6 +23,15 @@ A proto path that is syntactically valid can still fail at runtime, for example 
 - `':task_id' in new path '/v1/tasks/:task_id/risks' conflicts with existing wildcard ':id' ...`
 
 This skill must pre-check route compatibility before finalizing paths.
+
+## Table of Contents
+
+- [Gin / HttpRouter Rules (Strict)](#gin--httprouter-rules-strict)
+- [Fiber Rules (Order-sensitive)](#fiber-rules-order-sensitive)
+- [Echo Rules (Priority-driven)](#echo-rules-priority-driven)
+- [Cross-Backend Design Rules (Required)](#cross-backend-design-rules-required)
+- [Pre-Delivery Route Conflict Check](#pre-delivery-route-conflict-check)
+- [Required Fail-Fast Rule](#required-fail-fast-rule)
 
 ## Gin / HttpRouter Rules (Strict)
 

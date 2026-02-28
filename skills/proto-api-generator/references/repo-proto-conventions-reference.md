@@ -10,6 +10,26 @@ This document is the source of truth for scaffold conventions used by this skill
 Rules in this document are AI generation-time constraints and output self-check expectations.
 Do not depend on scripts or automation to enforce them.
 
+## When To Load
+
+Load this reference first for every proto API task. Use it to decide package style, route namespace strategy, paging style, reuse defaults, and topology gates before reading detailed HTTP/error references.
+
+## Table of Contents
+
+- [Proto File Modes](#proto-file-modes)
+- [Package and Domain Boundaries](#package-and-domain-boundaries)
+- [HTTP Path and Method Style](#http-path-and-method-style)
+- [Service-Level Route Namespace Rule](#service-level-route-namespace-rule)
+- [Pagination and List Response Style](#pagination-and-list-response-style)
+- [Binding and Validation Patterns](#binding-and-validation-patterns)
+- [Error Enum Patterns](#error-enum-patterns)
+- [Message Reuse Strategy (Scaffold-First)](#message-reuse-strategy-scaffold-first)
+- [Naming and Compatibility Notes](#naming-and-compatibility-notes)
+- [Proto Topology Rules for Skill Outputs](#proto-topology-rules-for-skill-outputs)
+- [Codegen and Lint Signals From Scaffold](#codegen-and-lint-signals-from-scaffold)
+- [Route Conflict Guardrails for Scaffold](#route-conflict-guardrails-for-scaffold)
+- [Hard Gate Behavior](#hard-gate-behavior)
+
 ## Proto File Modes
 
 For proto files generated or modified by this skill in the current task:

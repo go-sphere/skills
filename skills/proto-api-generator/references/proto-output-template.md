@@ -9,6 +9,27 @@ Provide a strict, stable output structure for generated API proposals.
 Use this template in final responses with the same section order.
 Do not skip required sections.
 
+## When To Load
+
+Load this reference when formatting the final deliverable. Keep drafting notes separate, then normalize to this shape before final output.
+
+## Table of Contents
+
+- [1) Scaffold Fit Decision](#1-scaffold-fit-decision)
+- [2) Proto Structure Check](#2-proto-structure-check)
+- [3) Route Conflict Check](#3-route-conflict-check)
+- [4) Error Placement Check](#4-error-placement-check)
+- [5) Comment Coverage Check](#5-comment-coverage-check)
+- [6) API Capability Matrix](#6-api-capability-matrix)
+- [7) Mock JSON](#7-mock-json)
+- [8) Reuse Decision](#8-reuse-decision)
+- [9) Proto3 Contract](#9-proto3-contract)
+- [10) Error Enum Design](#10-error-enum-design)
+- [11) Ent -> Proto Mapping](#11-ent---proto-mapping)
+- [12) Validation Notes](#12-validation-notes)
+- [13) Blocking Issues (Only if Any Required Check Fails)](#13-blocking-issues-only-if-any-required-check-fails)
+- [14) Mandatory Confirmation](#14-mandatory-confirmation)
+
 ## 1) Scaffold Fit Decision
 
 | Target Package | Service Prefix | Route Style | Pagination Style | Error Placement | Naming Exceptions | Notes |

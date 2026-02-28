@@ -16,9 +16,18 @@ Provide a full local copy of go-sphere package/runtime concepts that affect bind
 2. Validate that proposed API contracts map cleanly to Sphere runtime request/response behavior.
 3. Check runtime envelope/error assumptions before finalizing proto design.
 
+## When To Load
+
+Load this reference when the design depends on binding annotations, runtime response envelopes, generated handler behavior, or custom runtime extensibility assumptions.
+
 ## Skill Override Note
 
 If a generic example in the upstream copy conflicts with this skill's scaffold conventions or hard gates, follow the skill's rules and keep this reference as background material.
+
+## Table of Contents
+
+- [Proto Packages Overview](#proto-packages-overview)
+- [Runtime Layer](#runtime-layer)
 
 ## Official Document (Full Local Copy)
 

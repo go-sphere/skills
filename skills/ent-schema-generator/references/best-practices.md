@@ -1,18 +1,34 @@
 # Best Practices for DB Schema Summary (sphere-layout)
 
+Use this reference for schema decision-making rules.  
+For response shape and section order, use `references/output-template.md`.
+
 ## Table of Contents
 
-1. Extract Entities from Requirements
-2. Design Fields, Comments, and Nullability
-3. Decide ID Strategy
-4. Decide Relation Strategy
-5. Build Minimal Indexes
-6. Implement with Ent in Weak-Relation Style
-7. Query with Batch `WHERE IN`
-8. Integrate with Bind/Render/Service Layers
-9. Improve Evolvability and Consistency
+1. Evidence Priority
+2. Extract Entities from Requirements
+3. Design Fields, Comments, and Nullability
+4. Decide ID Strategy
+5. Decide Relation Strategy
+6. Build Minimal Indexes
+7. Implement with Ent in Weak-Relation Style
+8. Query with Batch `WHERE IN`
+9. Integrate with Bind/Render/Service Layers
+10. Improve Evolvability and Consistency
+11. Post-Change Commands and Validation
 
-## 1. Extract Entities from Requirements
+## 1. Evidence Priority
+
+Use this evidence order when inputs conflict:
+
+1. Explicit user requirement or accepted assumptions
+2. Repository source-of-truth files (`proto`, Ent schema, maintained service code)
+3. Existing generated artifacts (`entpb`, bind/map outputs)
+4. Generic best practices
+
+Always report conflicts and resolution choices explicitly.
+
+## 2. Extract Entities from Requirements
 
 - Extract domain nouns and API resources into candidate entities.
 - Define per entity:
@@ -25,7 +41,7 @@
   - large low-frequency fields (long text/blob)
   - high-frequency updates on a few fields create write hotspots
 
-## 2. Design Fields, Comments, and Nullability
+## 3. Design Fields, Comments, and Nullability
 
 - Add business comments for each schema and key fields.
 - Decide each field policy explicitly:
@@ -38,13 +54,13 @@
 - Add `deleted_at` only when soft-delete policy exists.
 - Prefer `NULL` for missing semantics; avoid empty-string-as-missing.
 
-## 3. Decide ID Strategy
+## 4. Decide ID Strategy
 
 - Default: do not manually define `id` field in each schema.
 - Prefer centralized ent generator ID configuration when available.
 - Define custom `id` manually only for explicit business needs, and describe bind/proto impact.
 
-## 4. Decide Relation Strategy
+## 5. Decide Relation Strategy
 
 ### One-to-many / many-to-one
 
@@ -60,7 +76,7 @@
 
 JSON is exception-only, not default modeling strategy.
 
-## 5. Build Minimal Indexes
+## 6. Build Minimal Indexes
 
 Create indexes only for:
 - primary key / unique key
@@ -76,13 +92,13 @@ Rule of thumb:
 - "Try one index per hot query path."
 - "Ship first, observe slow query logs, then add indexes."
 
-## 6. Implement with Ent in Weak-Relation Style
+## 7. Implement with Ent in Weak-Relation Style
 
 - Keep target references as scalar fields (e.g. `field.Int64("user_id")`).
 - Avoid forcing `edge` for all relations.
 - Add edge only when query readability or ORM composition clearly benefits.
 
-## 7. Query with Batch `WHERE IN`
+## 8. Query with Batch `WHERE IN`
 
 Typical flow:
 1. Query source rows and collect target IDs.
@@ -95,7 +111,7 @@ When ID list is large:
 - cap batch API request size
 - use singleflight + cache when repeatedly queried
 
-## 8. Integrate with Bind/Render/Service Layers
+## 9. Integrate with Bind/Render/Service Layers
 
 - New entities must be registered in `cmd/tools/bind/main.go#createFilesConf`.
 - Review `WithIgnoreFields` for:
@@ -104,7 +120,7 @@ When ID list is large:
 - Ensure render/service code consumes generated bind/map changes.
 - Do not consider task complete with schema-only changes.
 
-## 9. Improve Evolvability and Consistency
+## 10. Improve Evolvability and Consistency
 
 - Add denormalized snapshots for historical read consistency.
 - Prefer typed/array fields for proto-friendly contract evolution.
@@ -112,3 +128,19 @@ When ID list is large:
 - When skipping foreign key constraints, add:
   - write-path existence validation (sync or async)
   - periodic dangling-reference checks
+
+## 11. Post-Change Commands and Validation
+
+Minimum commands after schema-affecting decisions:
+
+```bash
+make gen/proto
+go test ./...
+```
+
+Validation expectations:
+
+1. `entpb/proto` changes are reviewed and consumed.
+2. bind/map generated changes are consumed in render/service code.
+3. New entities are registered in `createFilesConf`.
+4. `WithIgnoreFields` rules are reviewed for system-managed and sensitive fields.

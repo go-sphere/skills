@@ -5,98 +5,99 @@ description: Summarize database schema design from requirement inputs and produc
 
 # Ent Schema Generator
 
-将需求输入整理成可直接落地到 `sphere-layout` 的 DB schema 方案，强调可执行性与可审查性。
+## Overview
 
-## AI-First Workflow
+Turn requirement inputs into implementation-ready DB schema plans for `sphere-layout` projects.
+Focus on decisions that are directly actionable in Ent schema code and downstream
+`bind/render/service` integration.
 
-1. Gather inputs from all available sources.
-- 读取提示词、需求文档（`.md`）、接口定义（`.proto`）、现有 schema、service/dao/render 代码。
-- 如有 demo 行为，先抽取对象、状态流转、关键动作。
+This skill is repository-specific. Prefer local scaffold conventions over generic patterns
+unless the user explicitly requests otherwise.
 
-2. Extract entities and lifecycle.
-- 从业务名词与 API 资源抽候选实体。
-- 每个实体明确：status/state、关键时间点、关键约束。
-- 仅在明确必要时拆表（可选字段组、低频大字段、写热点冲突）。
+## Required Reading Order
 
-3. Design fields and null strategy.
-- schema 与关键字段必须有业务注释。
-- 每个字段必须明确 Optional/Nillable/Unique/Immutable/Default。
-- 状态字段使用 Ent 原生 `field.Enum`，并设置默认值。
-- 统一 `created_at/updated_at`；仅在需要软删时添加 `deleted_at`。
-- 缺失语义优先 `NULL`，避免空字符串哨兵。
+Read these references before producing a final schema brief:
 
-4. Apply ID policy.
-- 默认不在 schema 手写 `id`。
-- 优先使用 ent generator 集中 ID 配置。
-- 仅在业务明确需要时手写自定义 `id`，并说明对 bind/proto 的影响。
+1. [references/best-practices.md](references/best-practices.md)
+2. [references/output-template.md](references/output-template.md)
 
-5. Choose relation strategy.
-- 关系字段优先弱关联 ID（如 `user_id` / `order_id`）。
-- many-to-many 优先级固定：relation-entity > array(确认方言支持) > join table > JSON(最后兜底)。
-- JSON 不是常规方案，必须写明 typed/array/join table 不可行原因。
+Load conditionally when needed:
 
-6. Plan indexes from real query paths.
-- 基于真实 list/filter/sort/query 使用路径设计索引。
-- 优先主键/唯一、高选择性过滤、分页排序复合索引。
-- 避免仅建低基数 status 单列索引（除非有明确收益）。
+1. [references/go-ent-service-patterns.md](references/go-ent-service-patterns.md)
+   Use when the task includes DAO/service/render consumption details.
+2. [references/ent-schema-examples.md](references/ent-schema-examples.md)
+   Use when concrete Ent schema snippets are required.
 
-7. Produce Ent + Go implementation guidance.
-- Ent 侧优先 ID 字段表达关系，不强制 edge。
-- Go 侧给出批量查询方案：收集 IDs -> 去重 -> `IDIn(...)` -> map 回填。
-- IDs 很大时给出 chunk 策略与跨服务 `BatchGet*` 建议。
+## Input Modes
 
-8. Add evolution and consistency safeguards.
-- 读优化可加快照冗余字段（如 name/price snapshot）。
-- 优先 typed/array 结构；JSON 只作例外。
-- 弱关联场景必须给出 dangling refs 校验点。
+1. Prompt-only:
+   - infer entities, lifecycle, and query paths from text
+   - state assumptions explicitly
+2. Requirement document / repo folder:
+   - treat requirement docs as business truth
+   - treat local code and generated artifacts as integration truth
+3. Runnable demo behavior:
+   - extract objects, state transitions, and key actions before schema design
 
-## Repository Contract (sphere-layout)
+## Workflow
 
-必须显式对齐以下生成链路与接入点：
-- Ent 生成入口：`cmd/tools/ent/main.go`
-- Bind/Mapper 生成入口：`cmd/tools/bind/main.go`
-- 统一后置命令：`make gen/proto`
+1. Gather evidence from prompt/docs/proto/schema/service/dao/render.
+2. Extract candidate entities and lifecycle states.
+3. Design field-level policy per field:
+   - `Optional/Nillable/Unique/Immutable/Default`
+   - enum defaults
+   - timestamp and soft-delete strategy
+4. Decide ID strategy:
+   - generator-managed by default
+   - custom `id` only with explicit business need and compatibility note
+5. Decide relation strategy with fixed priority:
+   - relation-entity > array (if dialect-safe) > join table > JSON fallback
+6. Build query-driven index plan from real list/filter/sort paths.
+7. Add Ent + Go implementation guidance:
+   - weak relation IDs first
+   - batch `IDIn(...)` retrieval and map backfill
+   - chunk strategy for large ID sets
+8. Map repository integration impact:
+   - `cmd/tools/ent/main.go`
+   - `cmd/tools/bind/main.go#createFilesConf`
+   - render/dao/service touchpoints
+9. Add consistency controls:
+   - snapshot fields where history consistency matters
+   - dangling-reference checks when using weak relations
+10. Produce final brief with the required template.
 
-输出中必须判断并说明：
-- `ent tool config impact`：`IDType` / ent features / autoproto 影响。
-- `bind registration impact`：是否需要更新 `createFilesConf`。
-- `render/dao/service touchpoints`：哪些层要补代码。
+## Hard Rules
 
-## 新增实体必改清单
+1. Do not stop at schema-only output when integration is impacted.
+2. If new entities are introduced, explicitly check bind registration impact.
+3. If bind/render mapping is affected, explicitly review `WithIgnoreFields`
+for system-managed or sensitive fields.
+4. Always include post-change commands, at minimum:
+   - `make gen/proto`
+   - `go test ./...` (or explicit alternative)
+5. Always include a generation diff checklist for `entpb/proto/bind/map`.
 
-如果方案引入新实体，必须逐项检查并在输出中写明：
-- 新 schema 文件与字段/索引。
-- `cmd/tools/bind/main.go` 中 `createFilesConf` 注册。
-- render 层（`entmap`/`entbind` 消费点）接入。
-- DAO 层批量查询 helper 与去重策略。
-- service 层分页/查询/映射接入。
-- 生成命令执行与变更 diff 消费（entpb/proto/bind/map）。
+## Failure Conditions
 
-## 失败处理约束
+Do not consider the task complete when any of the following is true:
 
-以下情况不允许视为完成：
-- 只改 schema，未评估或未说明 bind 注册影响。
-- 涉及绑定字段但未补 `WithIgnoreFields` 影响说明（例如 `created_at/updated_at` 或敏感字段）。
-- 输出缺少 post-change commands 或 generation diff checklist。
+1. Schema change is proposed but bind registration impact is missing.
+2. Mapping-sensitive fields are discussed without `WithIgnoreFields` impact.
+3. Post-change commands are missing.
+4. Generation diff checklist is missing.
 
 ## Output Format
 
-使用 `references/output-template.md`。
-
-最终输出必须包含：
-- 11 段结构化内容。
-- sphere-layout 生成链路影响说明。
-- post-change commands（至少 `make gen/proto` 与测试命令）。
-- generation diff checklist。
+Use [references/output-template.md](references/output-template.md) exactly.
+Keep all 11 sections and the generation diff checklist.
 
 ## Resources
 
-- `references/best-practices.md`
-- `references/output-template.md`
-- `references/go-ent-service-patterns.md`
-- `references/ent-schema-examples.md`
+- [references/best-practices.md](references/best-practices.md)
+- [references/output-template.md](references/output-template.md)
+- [references/go-ent-service-patterns.md](references/go-ent-service-patterns.md)
+- [references/ent-schema-examples.md](references/ent-schema-examples.md)
 
 ## Notes
 
-- 本 skill 是 AI 推理驱动，不依赖本地脚本自动生成草稿。
-- 语言默认中文说明 + 英文技术关键词（命令/类型/API 名不翻译）。
+This skill is AI-first and does not rely on local scripts for drafting.

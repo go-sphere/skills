@@ -6,164 +6,110 @@ description: Generate CRUD pages and router module files for pure-admin-thin by 
 # Pure Admin Thin CRUD Generator
 
 ## Overview
-Generate runnable Vue pages under `src/views/<module>/` and route modules under `src/router/modules/` from swagger-ts-api output in `src/api/swagger/Api.ts` plus the wrapper behavior in `src/api/api.ts`.
+Generate runnable Vue pages under `src/views/<module>/` and route modules under `src/router/modules/` from local swagger-ts-api output in `src/api/swagger/Api.ts` and API wrapper behavior in `src/api/api.ts`.
 
-Keep generation AI-driven. Do not run external OpenAPI generators. Do not add helper generation scripts.
+This is an AI-first generator skill. Do not use external OpenAPI generators and do not add helper codegen scripts.
 
-## Input Contract
-Require these inputs before generation:
+## When to Use
+Use this skill when the user asks to scaffold or update pure-admin-thin admin pages from existing swagger methods, including:
 
-- `moduleSelector` (required): select target module by `tag`, entity name, or path keyword.
-- `selectorMode` (optional): default `auto`. Allowed values: `auto`, `tag`, `entity`, `path`.
-- `forceDetailPage` (optional): default `auto`. Allowed values: `auto`, `true`, `false`.
-- `pageMode` (optional): default `crud`. Allowed values: `crud`, `dashboard`, `mixed`.
-- `routeBase` (optional): default `/<kebab-module>`.
-- `outputMode` (fixed): always output full file contents.
-
-If the user only gives a vague module name, resolve it with `selectorMode=auto` and state the matched methods explicitly.
+- CRUD pages (`index.vue`, `edit.vue`, optional `detail.vue`)
+- dashboard-first admin pages
+- route module files under `src/router/modules`
+- action buttons backed by non-CRUD APIs (retry/enable/disable/export etc.)
 
 ## Hard Constraints
-Follow all rules below:
+1. Parse and generate from local `Api.ts` + `api.ts` only.
+2. Do not regenerate API clients with external tools.
+3. Do not create reusable business UI component libraries.
+4. Use Element Plus components for page UI.
+5. Do not add runtime dependencies only for generated pages.
+6. Keep repository conventions first; only fallback to generic heuristics if local patterns are missing.
 
-1. Parse and generate by AI from local `Api.ts` and `api.ts`.
-2. Do not regenerate APIs with external tools.
-3. Do not build reusable business UI component libraries.
-4. Use only Element Plus components for page UI.
-5. Generate pages by mode:
-   - `crud`/`mixed`: generate at least `index.vue` and `edit.vue` (plus optional `detail.vue`)
-   - `dashboard`: generate `dashboard.vue` or `index.vue`; add `edit.vue` only when create/update flow is required
-6. Create `src/router/modules/<kebab-module>.ts`.
-7. Use repository conventions first; only fall back to generic heuristics if needed.
-8. Do not add new runtime dependencies just for generated pages.
+## Required Reading Order
+Read references with progressive disclosure to keep context lean.
 
-## Repository-First Facts
-Assume and use these local facts:
+Always read:
+1. `references/output-contract.md`
+2. `references/api-parsing-rules.md`
+3. `references/page-generation-spec.md`
 
-- API calls are made through `API` from `src/api/api.ts`.
-- `API` unwraps axios response once and returns swagger response objects directly.
-- Swagger methods live in `src/api/swagger/Api.ts` inside `new Api().api` method map.
+Read only when `pageMode=dashboard` or dashboard UI is explicitly requested:
+1. `references/dashboard-best-practices.md`
+
+## Input Contract
+Required and optional generation inputs:
+
+- `moduleSelector` (required): module tag/entity/path keyword.
+- `selectorMode` (optional, default `auto`): `auto | tag | entity | path`.
+- `forceDetailPage` (optional, default `auto`): `auto | true | false`.
+- `pageMode` (optional, default `crud`): `crud | dashboard | mixed`.
+- `routeBase` (optional, default `/<kebab-module>`).
+- `outputMode` (fixed): full file contents only.
+
+If the user provides only a vague module name, resolve with `selectorMode=auto` and explicitly state matched methods.
+
+## Repository Facts
+Use these local assumptions first:
+
+- API calls go through `API` from `src/api/api.ts`.
+- `API` already unwraps axios response once.
+- Swagger methods are under `new Api().api` in `src/api/swagger/Api.ts`.
 - Method doc blocks include `@tags`, `@name`, `@summary`, `@request`.
-- Router static modules are auto-collected by `import.meta.glob("./modules/**/*.ts")`; usually no `src/router/index.ts` edits are needed.
+- Routes are auto-collected via `import.meta.glob("./modules/**/*.ts")`; route index edits are usually unnecessary.
 
 ## Workflow
-Execute this sequence every time.
+Follow this sequence every run.
 
-### 1) Parse target API methods
-Group candidate methods using `@tags`, path, and method names.
+1. Resolve module and classify endpoints.
+Use `references/api-parsing-rules.md` for module resolution, CRUD/action classification, and tie-break rules.
 
-Identify:
+2. Infer request/response structures.
+Identify query/form/detail fields, pagination keys, items key, and total key from local TypeScript types.
 
-- list: `/list` or method names ending with `List`
-- detail: `/detail/{id}` or path with `/{id}` plus GET semantics
-- create: `/create` or POST with create semantics
-- update: `/update` or PUT/PATCH or POST update semantics
-- delete: DELETE with `/{id}` or `/delete`
-- action: non-CRUD operation (`retry`, `enable`, `disable`, `reset`, `export`, `vip`, etc.)
+3. Decide file set.
+- `crud | mixed`: `index.vue`, `edit.vue`, route module, and optional `detail.vue`.
+- `dashboard`: `dashboard.vue` (or `index.vue` if appropriate), optional `edit.vue`, route module.
 
-Read detailed rules from `references/api-parsing-rules.md`.
+4. Generate pages by spec.
+Apply `references/page-generation-spec.md` and ensure mandatory behaviors:
+- safe route id parsing
+- 0-based backend paging mapped to 1-based UI paging
+- `ElMessageBox.confirm` for destructive operations
+- runtime-safe rendering for uncertain API field shapes
 
-### 2) Infer request/response shapes
-Infer from `Dashv1*Request/Response`, `Entpb*`, `Sharedv1*`, and `GinxDataResponse*`.
+5. Apply dashboard spec only when needed.
+For dashboard requests, apply `references/dashboard-best-practices.md` for layout, state regions, and visual quality.
 
-Determine:
+6. Generate route module.
+Create `src/router/modules/<kebab-module>.ts` using repository route conventions.
 
-- query fields
-- pagination fields and base index
-- list data key (`users`, `admins`, `voice_generate_text`, etc.)
-- total key (`total_size`, `total`, `count`, fallback)
-- form fields and scalar types
+7. Verify before final output.
+Run at least `pnpm typecheck`. Fix generated files if checks fail.
 
-### 3) Decide generated files
-Default set (`pageMode=crud|mixed`):
-
-- `src/views/<module>/index.vue`
-- `src/views/<module>/edit.vue`
-- `src/router/modules/<module>.ts`
-
-Mode adjustment:
-
-- `pageMode=dashboard`: allow `src/views/<module>/dashboard.vue` as main page and skip `edit.vue` when module has no create/update requirement.
-
-Generate `src/views/<module>/detail.vue` when:
-
-- `forceDetailPage=true`, or
-- a clear detail endpoint exists and read-only view improves usability, or
-- field count and density make list-only preview unreasonable.
-
-### 4) Apply required UI behavior
-Read exact page rules from `references/page-generation-spec.md`.
-When user asks dashboard pages, additionally apply `references/dashboard-best-practices.md`.
-
-Mandatory behavior:
-
-- list page filtering, table, pagination, loading, errors, success messages
-- delete and action operations behind `ElMessageBox.confirm`
-- edit/detail route id parsing and auto-fetch
-- 0-based backend paging mapped to 1-based `el-pagination`
-- unified error and retry behavior for each async block (table/card/chart)
-- request abstraction is AI-selected: VueUse composables are optional and only used when they clearly simplify complex async flows
-- list filters must align with real API query fields (no fake backend filters)
-- server-paged list must keep server `total` semantics (no client-side current-page total override)
-- invalid route id must not fallback to create; show error and leave page safely
-- detail page must show explicit empty state when payload is empty
-- dashboard/list pages must satisfy visual quality baseline (hierarchy, spacing, table readability, semantic status style)
-- rendering must be runtime-safe: no direct array method calls on uncertain API fields without `Array.isArray` guard/normalizer
-
-Required snippets:
-
-```ts
-const id = computed(() => route.params.id ?? route.query.id);
-```
-
-```ts
-const pageIndex = ref(0);
-// UI current-page = pageIndex + 1
-// onCurrentChange(uiPage) => pageIndex = uiPage - 1
-```
-
-### 5) Generate route module
-Create `src/router/modules/<module>.ts` using local route style:
-
-- `const Layout = () => import("@/layout/index.vue");`
-- `export default { ... } satisfies RouteConfigsTable;`
-- include menu `meta.title` and default icon when user does not specify one.
-- route object must include `path`, `redirect`, `meta`, and `children`.
-- default root `path` is `routeBase` or `/<module>`.
-- default root `redirect` is `<rootPath>/index`.
-- list child route uses `<rootPath>/index` and `showLink: true`.
-- edit child route uses `<rootPath>/edit/:id?` and `showLink: false`.
-- detail child route (when generated) uses `<rootPath>/detail/:id` and `showLink: false`.
-- hidden child routes should set `meta.activePath` to list route path for menu highlight consistency.
-
-### 6) Verify generated result
-Run at least:
-
-- `pnpm typecheck`
-
-If typecheck fails, fix generated files before final output.
-
-### 7) Return output in fixed contract
-Always respond in the exact 4 sections defined in `references/output-contract.md`.
+8. Return the result with the fixed contract.
+Use exactly the four output sections defined by `references/output-contract.md`.
 
 ## Degrade Gracefully
-If the selected module lacks full CRUD endpoints:
+When full CRUD is not available:
 
-- generate only valid pages and operations
+- generate only valid pages/operations
 - remove unsupported actions from UI
-- state missing endpoints in section 1 (API recognition)
+- explicitly report missing CRUD endpoints
 - keep code runnable and predictable
 
-## References
-Load only needed files:
+## Optional VueUse Policy
+VueUse composables are optional. Use them only when complexity justifies it and `@vueuse/core` already exists in the project.
 
-- API parsing rules: `references/api-parsing-rules.md`
-- Page generation specification: `references/page-generation-spec.md`
-- Dashboard best practices: `references/dashboard-best-practices.md`
-- Response/output contract: `references/output-contract.md`
-
-If considering VueUse composables, follow repository-safe policy:
-
-- prefer built-in VueUse utilities (for example `useAsyncState`, `useDebounceFn`, `useThrottleFn`) for request and interaction orchestration
 - do not add dependency automatically
-- keep manual state flow when complexity is low
-- when available for this session, you may apply the `vueuse-functions` skill for composable selection and usage patterns
+- keep manual `ref/reactive` flow for simple pages
+- when available in this session, `vueuse-functions` can be used for composable selection patterns
+
+## Completion Checklist
+Before returning:
+
+1. Output section order matches `output-contract.md` exactly.
+2. Generated files compile under project typecheck.
+3. Pagination semantics preserve backend totals and page index mapping.
+4. Invalid route id handling is explicit and safe (no silent fallback to create mode).
+5. List filters reflect real API query fields (no fabricated backend filters).

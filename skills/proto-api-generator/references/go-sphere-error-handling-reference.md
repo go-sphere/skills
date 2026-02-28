@@ -16,9 +16,25 @@ Provide a full local copy of the official go-sphere error handling guide so the 
 2. Apply `sphere.errors` enum options exactly as documented.
 3. Ensure final output includes both API error schema and runtime usage guidance.
 
+## When To Load
+
+Load this reference when defining error enums, status/reason/message metadata, or runtime error composition guidance.
+
 ## Skill Override Note
 
 If a generic example in the upstream copy conflicts with this skill's scaffold conventions or hard gates, follow the skill's rules and keep this reference as background material.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration with Buf](#configuration-with-buf)
+- [Defining Errors in `.proto`](#defining-errors-in-proto)
+- [Using the Generated Code](#using-the-generated-code)
+- [Error Configuration Options](#error-configuration-options)
+- [Best Practices](#best-practices)
+- [Common HTTP Status Codes](#common-http-status-codes)
+- [Integration with buf](#integration-with-buf)
+- [Error Composition](#error-composition)
 
 ## Official Document (Full Local Copy)
 

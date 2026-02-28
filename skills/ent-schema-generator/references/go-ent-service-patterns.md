@@ -4,12 +4,13 @@
 
 1. ID De-duplication Helper
 2. DAO Batch Query Pattern
-3. Service List Pagination Pattern
-4. Render Post-Processing Pattern
-5. Bind Registration Pattern (`createFilesConf`)
-6. Sensitive Field Handling Pattern
-7. Post-Schema Generation Pattern
-8. New Entity Integration Checklist
+3. DAO Chunked Batch Query Pattern
+4. Service List Pagination Pattern
+5. Render Post-Processing Pattern
+6. Bind Registration Pattern (`createFilesConf`)
+7. Sensitive Field Handling Pattern
+8. Post-Schema Generation Pattern
+9. New Entity Integration Checklist
 
 ## 1. ID De-duplication Helper
 
@@ -39,7 +40,11 @@ func UniqueSortedNonZero[T cmp.Ordered](origin []T) []T {
 
 ```go
 func (d *Dao) GetUsers(ctx context.Context, ids []int64) (map[int64]*ent.User, error) {
-    ids = conv.UniqueSorted(ids)
+    ids = conv.UniqueSortedNonZero(ids)
+    if len(ids) == 0 {
+        return map[int64]*ent.User{}, nil
+    }
+
     users, err := d.User.Query().Where(user.IDIn(ids...)).All(ctx)
     if err != nil {
         return nil, err
@@ -53,7 +58,38 @@ func (d *Dao) GetUsers(ctx context.Context, ids []int64) (map[int64]*ent.User, e
 }
 ```
 
-## 3. Service List Pagination Pattern
+## 3. DAO Chunked Batch Query Pattern
+
+Use chunking when ID sets can exceed practical SQL placeholder limits.
+
+```go
+func (d *Dao) GetUsersChunked(ctx context.Context, ids []int64) (map[int64]*ent.User, error) {
+    ids = conv.UniqueSortedNonZero(ids)
+    out := make(map[int64]*ent.User, len(ids))
+    if len(ids) == 0 {
+        return out, nil
+    }
+
+    const chunkSize = 800
+    for start := 0; start < len(ids); start += chunkSize {
+        end := start + chunkSize
+        if end > len(ids) {
+            end = len(ids)
+        }
+
+        rows, err := d.User.Query().Where(user.IDIn(ids[start:end]...)).All(ctx)
+        if err != nil {
+            return nil, err
+        }
+        for _, row := range rows {
+            out[row.ID] = row
+        }
+    }
+    return out, nil
+}
+```
+
+## 4. Service List Pagination Pattern
 
 ```go
 query := s.db.Admin.Query()
@@ -63,9 +99,15 @@ if err != nil {
 }
 
 totalPage, pageSize := conv.Page(count, int(req.PageSize))
+offset := pageSize * int(req.Page)
+if req.Page > 0 {
+    // Use this branch when request page is 1-based.
+    offset = pageSize * int(req.Page-1)
+}
+
 rows, err := query.Clone().
     Limit(pageSize).
-    Offset(pageSize * int(req.Page)).
+    Offset(offset).
     Order(admin.ByID(sql.OrderDesc())).
     All(ctx)
 if err != nil {
@@ -73,7 +115,7 @@ if err != nil {
 }
 ```
 
-## 4. Render Post-Processing Pattern
+## 5. Render Post-Processing Pattern
 
 Use generated `entmap` as baseline and perform repository-specific post-processing in hook callback.
 
@@ -84,7 +126,7 @@ val, _ := entmap.ToProtoUser(value, func(source *ent.User, target *sharedv1.User
 })
 ```
 
-## 5. Bind Registration Pattern (`createFilesConf`)
+## 6. Bind Registration Pattern (`createFilesConf`)
 
 New entities must be registered in `cmd/tools/bind/main.go#createFilesConf`.
 
@@ -99,7 +141,7 @@ conf.NewEntity(
 
 If entity is missing here, schema-only changes are incomplete.
 
-## 6. Sensitive Field Handling Pattern
+## 7. Sensitive Field Handling Pattern
 
 Sensitive fields must be explicitly constrained in bind/render flows.
 
@@ -111,17 +153,18 @@ Pattern examples:
 - `conf.WithIgnoreFields(admin.FieldPassword)`
 - Render stage explicit clear: `target.Password = ""`
 
-## 7. Post-Schema Generation Pattern
+## 8. Post-Schema Generation Pattern
 
 After schema updates, run repository-native generation commands before testing.
 
 ```bash
 make gen/proto
+go test ./...
 ```
 
 This ensures Ent code, proto artifacts, and bind/map generated code are synchronized.
 
-## 8. New Entity Integration Checklist
+## 9. New Entity Integration Checklist
 
 1. Add Ent schema fields/indexes and comments.
 2. Confirm ID strategy (generator-managed by default).

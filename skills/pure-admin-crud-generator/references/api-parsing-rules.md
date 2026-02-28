@@ -1,12 +1,32 @@
 # API Parsing Rules
 
-## Purpose
-Map swagger-ts-api methods in `src/api/swagger/Api.ts` to module CRUD capabilities for pure-admin-thin.
+## Table of Contents
+- [Scope](#scope)
+- [Parsing Output](#parsing-output)
+- [1. Module Resolution](#1-module-resolution)
+- [2. Endpoint Classification](#2-endpoint-classification)
+- [3. Type Inference](#3-type-inference)
+- [4. Pagination and List Payload Inference](#4-pagination-and-list-payload-inference)
+- [5. Conflict Resolution](#5-conflict-resolution)
+- [6. Current-Repo Priority Rules](#6-current-repo-priority-rules)
+- [7. Useful Extraction Commands](#7-useful-extraction-commands)
+
+## Scope
+Map swagger-ts-api methods in `src/api/swagger/Api.ts` to module CRUD capabilities for pure-admin-thin generation.
+
+## Parsing Output
+The parser should produce a structured decision set for one target module:
+
+- selected module key (`kebab-case`)
+- recognized methods and classifications (`list | detail | create | update | delete | action`)
+- key request params (query/body/path id)
+- response interpretation (`itemsKey`, `totalKey`, detail payload key)
+- explicit missing CRUD capabilities
 
 ## 1. Module Resolution
 Resolve module name with this priority:
 
-1. explicit user selection by tag/entity/path
+1. explicit user selection (`selectorMode=tag|entity|path`)
 2. service tag suffix in `@tags` (preferred)
 3. first stable path segment after `/api/`
 
@@ -33,47 +53,47 @@ Examples:
 - `/api/voice-generate/list` -> `voice-generate`
 
 ## 2. Endpoint Classification
-Classify methods by request metadata and method name.
+Classify methods by request metadata and method naming.
 
-## 2.1 List
+### 2.1 List
 Match when any condition is true:
 
 - request path ends with `/list`
 - method name contains `List`
-- GET with query containing pagination-like keys (`page`, `page_size`, `size`, `limit`)
+- GET with query keys including pagination-like fields (`page`, `page_size`, `size`, `limit`)
 
-## 2.2 Detail
+### 2.2 Detail
 Match when any condition is true:
 
 - request path contains `/detail/{id}`
-- GET path has `/{id}` and is not list
+- GET path has `/{id}` and is not a list endpoint
 - method name contains `Detail`
 
-## 2.3 Create
+### 2.3 Create
 Match when any condition is true:
 
 - path ends with `/create`
 - POST or PUT method name contains `Create`
-- request body type maps to create payload semantics
+- request body shape indicates create semantics
 
-## 2.4 Update
+### 2.4 Update
 Match when any condition is true:
 
 - path ends with `/update`
 - path has `/{id}` with PUT/PATCH semantics
 - method name contains `Update`
 
-Note: in this repository many updates are POST `/update`.
+Note: in this repository, many update operations are POST `/update`.
 
-## 2.5 Delete
+### 2.5 Delete
 Match when any condition is true:
 
 - HTTP DELETE
 - path contains `/delete/{id}` or `/delete`
 - method name contains `Delete`
 
-## 2.6 Action
-Everything not selected by CRUD and still module-related is action.
+### 2.6 Action
+Everything module-related that is not classified as CRUD is `action`.
 
 Common action indicators:
 
@@ -84,58 +104,72 @@ Use local type aliases and interfaces:
 
 - `type XxxData = GinxDataResponseYyy`
 - `interface GinxDataResponseYyy { data?: Zzz }`
-- `interface Zzz` may include list keys and totals
+- `interface Zzz` may include list keys, totals, and detail data
 
-Infer in this order:
+Inference order:
 
 1. parse method return alias `XxxData`
 2. resolve `GinxDataResponse*` wrapper
-3. inspect nested `data` interface for list keys and totals
-4. inspect entity interface for form fields
+3. inspect nested `data` interface for list keys and total keys
+4. inspect entity/detail interfaces for form fields
 
-## 4. Pagination Inference
+## 4. Pagination and List Payload Inference
 Internal page state must be 0-based.
 
+### 4.1 Query keys
 Interpret query keys:
 
 - page-like: `page`, `pageIndex`, `pageNo`, `current`
 - size-like: `size`, `pageSize`, `page_size`, `limit`
 
-If multiple keys exist, use repository-observed keys first (`page`, `page_size`).
+If multiple keys exist, prefer repository-observed defaults (`page`, `page_size`).
 
-UI mapping rule:
+### 4.2 UI paging mapping
+Use this mapping:
 
 - UI page = `pageIndex + 1`
 - backend page = `uiPage - 1`
 
-## 5. List Payload Inference
+### 4.3 List item key priority
 Preferred list keys under `res.data`:
 
 1. `records`
 2. `list`
 3. `items`
-4. module-named arrays (`users`, `admins`, `voice_generate_text`, etc.)
+4. module-shaped arrays (`users`, `admins`, `voice_generate_text`, etc.)
 
+### 4.4 Total key priority
 Preferred total keys under `res.data`:
 
 1. `total`
 2. `total_size`
 3. `count`
-4. `total_page` (only as fallback)
-5. fallback `array.length`
+4. `total_page` (fallback only)
+5. fallback `array.length` (last resort)
 
-If only `total_page` exists, derive total carefully:
+If only `total_page` exists:
 
-- prefer `total = total_page * pageSize` when semantics are clearly total pages
-- otherwise keep backend paging UI usable with conservative fallback and explain assumption in output section 1
+- use `total = total_page * pageSize` only when semantics are clearly total pages
+- otherwise use conservative fallback and report assumption in recognized API notes
+
+## 5. Conflict Resolution
+When multiple interpretations are possible, resolve with this order:
+
+1. explicit user selector and user intent
+2. stronger request-path semantics
+3. method name semantics
+4. repository-specific conventions
+5. conservative fallback with explicit assumption
+
+Never hide ambiguity. Record assumptions in output section 1.
 
 ## 6. Current-Repo Priority Rules
 Use these repository-specific interpretations first:
 
-- list endpoints often use GET `/api/<module>/list`
-- detail endpoints may use GET `/api/<module>/detail/{id}`
+- list endpoints are commonly GET `/api/<module>/list`
+- detail endpoints may be GET `/api/<module>/detail/{id}`
 - update may be POST `/api/<module>/update`
-- responses are already unwrapped once by `API` (`src/api/api.ts`)
+- `API` already unwraps axios response once (`src/api/api.ts`)
 
 ## 7. Useful Extraction Commands
 Use shell inspection commands when needed.

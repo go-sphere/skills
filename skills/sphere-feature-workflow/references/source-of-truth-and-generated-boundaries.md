@@ -6,6 +6,7 @@
 2. Generated Outputs (Do Not Edit)
 3. Generation Entrypoints
 4. Boundary Rules
+5. Conflict Resolution
 
 ## 1. Editable Source of Truth
 
@@ -13,10 +14,10 @@ Prioritize edits in these locations:
 
 1. `proto/**`: API contract, routing annotations, error enums, validation.
 2. `internal/pkg/database/schema/**`: Ent model schema.
-3. `cmd/tools/bind/main.go`: bind/map entity registration policy.
+3. `cmd/tools/bind/main.go`: bind/map entity registration and ignore-field policy.
 4. `internal/service/**`: business API implementation.
 5. `internal/pkg/dao/**`: query and mutation orchestration.
-6. `internal/pkg/render/**` (non-generated wrappers/utilities): response conversion policy.
+6. `internal/pkg/render/**` non-generated wrappers/utilities: response conversion and masking policy.
 
 ## 2. Generated Outputs (Do Not Edit)
 
@@ -29,21 +30,35 @@ Treat these as generated artifacts:
 5. `swagger/**`.
 6. `cmd/app/wire_gen.go`.
 
-If business behavior appears to require edits in those files, modify source-of-truth inputs and regenerate instead.
+If behavior seems to require edits in generated files, change the upstream source-of-truth files and regenerate.
 
 ## 3. Generation Entrypoints
 
 `sphere-layout` standard command chain:
 
-1. `make gen/db` -> `cmd/tools/ent/main.go` runs Ent + autoproto extension.
-2. `make gen/proto` -> runs buf generators and then `cmd/tools/bind/main.go`.
-3. `make gen/docs` -> generates swagger from source contracts.
-4. `make gen/wire` -> regenerates dependency injection wiring.
+1. `make gen/db`
+- runs `cmd/tools/ent/main.go` for Ent + autoproto extension
+2. `make gen/proto`
+- runs buf generation and then `cmd/tools/bind/main.go`
+3. `make gen/docs`
+- regenerates swagger/openapi artifacts from contracts
+4. `make gen/wire`
+- regenerates dependency injection wiring
 
 ## 4. Boundary Rules
 
 1. Keep protocol-first flow: define contract/schema first, then regenerate.
-2. Never patch generated file to fix compile errors; fix source-of-truth file.
-3. Confirm `createFilesConf` coverage for every entity exposed to bind/map.
-4. Review sensitive/system field handling through `WithIgnoreFields`.
-5. Keep route and error ownership stable at service scope unless a shared contract is explicitly required.
+2. Never patch generated files to resolve compile errors.
+3. Every entity exposed via bind/map must be covered by `createFilesConf` policy.
+4. Review sensitive/system fields with `WithIgnoreFields`.
+5. Keep route ownership and error ownership stable at service scope unless explicit sharing is required.
+
+## 5. Conflict Resolution
+
+When generated output and manual code diverge:
+
+1. Verify which source-of-truth file should own the change.
+2. Reapply edits in source-of-truth files only.
+3. Rerun required generation commands.
+4. Reconcile compile errors in manual code (`service/dao/render` non-generated files).
+5. Re-run tests before claiming completion.

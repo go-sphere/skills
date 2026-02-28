@@ -16,10 +16,26 @@ Provide a full local copy of the official go-sphere API definitions guide so the
 2. Follow path/binding/body/response conventions from this document.
 3. Use the checklist file to verify compliance after drafting.
 
+## When To Load
+
+Load this reference when choosing `google.api.http` method/path mapping, URI/query/body binding behavior, or response shaping rules.
+
 ## Skill Override Note
 
 This document is an official full-copy reference.
 If any generic example here conflicts with scaffold conventions or hard gates in this skill, follow the skill rules.
+
+## Table of Contents
+
+- [Getting Started: A Basic Example](#getting-started-a-basic-example)
+- [URL Path Mapping](#url-path-mapping)
+- [HTTP Methods and Body Binding](#http-methods-and-body-binding)
+- [Field Binding Locations](#field-binding-locations)
+- [Advanced Binding Configuration](#advanced-binding-configuration)
+- [Request Body Patterns](#request-body-patterns)
+- [Response Body Patterns](#response-body-patterns)
+- [Best Practices](#best-practices)
+- [Integration with buf](#integration-with-buf)
 
 ## Official Document (Full Local Copy)
 

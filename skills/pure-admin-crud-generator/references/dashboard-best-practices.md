@@ -1,10 +1,23 @@
 # Dashboard Best Practices
 
+## Table of Contents
+- [Scope](#scope)
+- [1. Dashboard Skeleton Contract](#1-dashboard-skeleton-contract)
+- [2. Visual Quality Baseline (Mandatory)](#2-visual-quality-baseline-mandatory)
+- [3. Unified Error and Retry Contract](#3-unified-error-and-retry-contract)
+- [4. VueUse Integration Rule](#4-vueuse-integration-rule)
+- [5. Non-negotiable Compatibility Rules](#5-non-negotiable-compatibility-rules)
+- [6. Visual Anti-patterns (Do Not Generate)](#6-visual-anti-patterns-do-not-generate)
+- [7. Final Dashboard Self-check](#7-final-dashboard-self-check)
+
+## Scope
+Apply this reference only when the request is dashboard-first (`pageMode=dashboard` or explicit dashboard requirement).
+
 ## 1. Dashboard Skeleton Contract
-Use this layout contract for admin dashboards.
+Use this block layout for admin dashboards.
 
 ### 1.1 Filter row
-Use `el-form` with `inline` to provide global filters.
+Use `el-form` with `inline`.
 
 Typical controls:
 
@@ -12,7 +25,7 @@ Typical controls:
 - status/type: `el-select`
 - time range: `el-date-picker` (`daterange`)
 
-Actions:
+Typical actions:
 
 - query
 - reset
@@ -25,122 +38,121 @@ Use `el-row` + `el-col` + `el-card` for KPI cards.
 Each card should include:
 
 - title
-- primary metric value
+- primary metric
 - secondary info (trend/range/update time)
 
 ### 1.3 Main content row
-Use `el-card` blocks for charts and tables.
+Use separate `el-card` blocks for charts and tables.
 
-- each block must have its own loading/error/retry state
-- empty data should use `el-empty`
+- each block keeps independent loading/error/retry state
+- empty blocks show `el-empty`
 
 ### 1.4 Actions row
-Place secondary operations such as refresh/export/batch ops.
+Place secondary operations (refresh/export/batch) in one predictable region.
 
 ## 2. Visual Quality Baseline (Mandatory)
-Use these visual rules to avoid "plain form + bare table" output.
+Avoid flat or template-like outputs. Keep clear hierarchy and scanning quality.
 
 ### 2.1 Page hierarchy
-
-- split page into clear blocks: toolbar, KPI/summary, primary data block, secondary blocks
-- avoid placing all controls and table directly in one undifferentiated card
-- every block should have a clear title and optional subtitle
+- split into toolbar, KPI summary, primary data region, secondary regions
+- do not place all controls and table inside one undifferentiated card
+- each block should have a title (subtitle when helpful)
 
 ### 2.2 Spacing and density
-
-- card-to-card vertical spacing: `16px`
-- card internal spacing: `16px` (compact mode can be `12px`)
-- toolbar controls use `el-space` to keep stable spacing
-- avoid oversized empty white areas and single-line content inside large cards
+- vertical spacing between cards: `16px`
+- card internal spacing: `16px` (`12px` in compact contexts)
+- toolbar controls should use `el-space` or equivalent wrapping layout
+- avoid oversized blank areas
 
 ### 2.3 Table readability
-
-- use `border` + `stripe` for management tables by default
-- set meaningful `min-width` and avoid narrow squeezed columns
-- align numeric columns to the right; IDs and short enums centered/left as appropriate
-- use `show-overflow-tooltip` for long text columns
-- operation buttons should be grouped and visually prioritized (primary action first, danger action last)
+- default to `border` + `stripe`
+- set practical `min-width` values
+- align numeric columns to the right
+- use `show-overflow-tooltip` for long text
+- group operation buttons with clear priority
 
 ### 2.4 Status semantics
-
-- represent status/type with `el-tag` instead of plain text where possible
+- prefer `el-tag` for status/type values
 - use semantic colors consistently: success/info/warning/danger
-- do not use custom hardcoded colors that conflict with existing theme
+- avoid custom hardcoded colors that fight theme tokens
 
 ### 2.5 State visuals
-
-- loading: use `v-loading` and skeleton for first screen
-- empty: use `el-empty` with concise guidance text
-- error: use `el-alert` with retry action in place (not only toast)
+- loading: `v-loading` or skeleton for first render
+- empty: `el-empty` with concise guidance text
+- error: inline `el-alert` with retry action (not toast-only)
 
 ### 2.6 Responsive behavior
-
-- desktop first, then degrade on smaller screens
-- toolbar should wrap gracefully; avoid control overlap
-- KPI cards should collapse from multi-column to single-column on narrow viewports
+- desktop-first structure with graceful small-screen wrap
+- toolbar controls should wrap without overlap
+- KPI grid should collapse to fewer columns on narrower viewports
 
 ### 2.7 Theme compatibility
-
-- follow pure-admin-thin/Element Plus theme tokens and component defaults
-- avoid custom global style overrides
-- avoid fixed background/text color pairs that break dark mode or theme switching
+- follow pure-admin-thin/Element Plus tokens and defaults
+- avoid global style overrides for generated pages
+- avoid fixed background/text color pairs that break theme switching
 
 ## 3. Unified Error and Retry Contract
-Apply the same recovery model for every async data region.
-
-State shape per region:
+Each async region should expose:
 
 - `loading: boolean`
 - `errorMessage: string`
-- `data: ...`
+- region data payload
 
-Behavior:
+Behavior sequence:
 
 1. before request: clear `errorMessage`, set `loading=true`
-2. on success: set data, `loading=false`
-3. on failure: set `errorMessage`, `loading=false`, keep previous filters and paging
-4. retry action: rerun the same request function with current state
+2. on success: set data, set `loading=false`
+3. on failure: set `errorMessage`, set `loading=false`, keep current query/paging state
+4. retry: rerun the same request function with current state
 
 UI elements:
 
 - loading: `v-loading` or `el-skeleton`
-- error display: `el-alert`
-- retry trigger: `el-button`
-- global toast: `ElMessage.error` for immediate feedback
+- error surface: `el-alert`
+- retry action: `el-button`
+- optional immediate toast: `ElMessage.error`
 
 ## 4. VueUse Integration Rule
-If `@vueuse/core` is available in project dependencies, AI may use VueUse composables (for example `useAsyncState`, `useDebounceFn`, `useIntervalFn`) to organize request orchestration.
+VueUse is optional.
 
-Recommended usage:
+If `@vueuse/core` exists, composables may be used to simplify orchestration:
 
-- list fetch: trigger unified request executor from query/pagination events
-- detail fetch: guard by valid id to avoid empty-id requests
-- action requests: run mutation then refresh list in success branch
-- dashboard auto-refresh (only when needed): use interval composables and pause when hidden
+- list fetch orchestration with query/pagination triggers
+- guarded detail fetch by valid id
+- refresh-after-mutation for actions
+- optional dashboard auto-refresh that pauses when hidden
 
 Fallback:
 
-- if dependency is not installed, keep classic `ref/reactive` request flow
-- do not add new dependency automatically
+- if dependency is missing, keep classic `ref/reactive` state flow
+- do not add new dependencies automatically
 
 Decision rule:
 
 - do not force VueUse on every dashboard
-- use it when it clearly simplifies multi-source loading/error/retry orchestration
+- use only when it reduces complexity meaningfully
 
 ## 5. Non-negotiable Compatibility Rules
-Even with dashboard mode and VueUse composables:
+Even in dashboard mode:
 
-- keep 0-based backend page index and 1-based UI page
-- keep `route.params.id ?? route.query.id` id extraction
-- keep `ElMessageBox.confirm` for delete and risky actions
-- keep generated output structure contract from `output-contract.md`
-- keep visual quality baseline in this file
+- keep backend 0-based page index and UI 1-based page display
+- keep id extraction `route.params.id ?? route.query.id`
+- keep `ElMessageBox.confirm` for risky/destructive actions
+- keep output format aligned with `output-contract.md`
+- keep runtime-safe rendering for uncertain API field shapes
 
 ## 6. Visual Anti-patterns (Do Not Generate)
+- one oversized blank card with almost no content
+- scattered actions without grouping
+- unreadable table columns due to missing width strategy
+- unstructured mixing of filter controls and action buttons
+- plain status text where tags or badges are more scannable
 
-- one huge blank card with only one button or one sentence
-- action area scattered across random positions with no grouping
-- table columns without width strategy causing unreadable truncation
-- filter controls and actions mixed into an unstructured block
-- plain status text when tag/badge can improve scanning
+## 7. Final Dashboard Self-check
+Before returning generated dashboard code, verify:
+
+1. layout has clear hierarchy (toolbar/metrics/main/action)
+2. each async block has independent loading/error/retry state
+3. table readability rules are applied
+4. responsive wrap behavior is present
+5. generated dashboard remains compatible with project theme and route/page conventions

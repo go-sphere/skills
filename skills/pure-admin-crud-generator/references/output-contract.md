@@ -1,9 +1,16 @@
 # Output Contract
 
 ## Required Response Shape
-When generating a module, always return exactly four top-level sections in order.
+When generating a module, always return exactly four top-level sections in this order.
 
-## 1) Recognized API methods
+1. `Recognized APIs`
+2. `Files`
+3. `File Contents`
+4. `Route Registration`
+
+Do not add extra top-level sections.
+
+## 1) Recognized APIs
 List all recognized methods for the selected module.
 
 For each method include:
@@ -13,59 +20,52 @@ For each method include:
 - key params (query/body/path id)
 - response structure judgment (`res.data.<itemsKey>`, total key, detail key)
 
-Also include missing CRUD items explicitly.
+Also list missing CRUD capabilities explicitly.
 
-## 2) Files to add or modify
-List full file paths that will be created or changed.
+## 2) Files
+List full file paths that will be created or modified.
 
-At minimum include:
+Minimum set:
 
-- `src/views/<module>/index.vue` (or `src/views/<module>/dashboard.vue` in dashboard-first mode)
+- `src/views/<module>/index.vue` (or `src/views/<module>/dashboard.vue` when dashboard-first)
 - `src/views/<module>/edit.vue` when create/update flow exists
 - optional `src/views/<module>/detail.vue`
 - `src/router/modules/<module>.ts`
 
-If any existing file must change, mark it as modified.
+If existing files are changed, mark them as modified.
 
-## 3) Complete content of every file
-Provide complete file content for each listed file.
+## 3) File Contents
+Provide full content for every listed file.
 
 Rules:
 
-- do not provide partial snippets for generated files
-- include imports and full template/script/style blocks for Vue files
-- keep code directly copy-pastable and runnable
+- no partial snippets for generated files
+- include complete imports and full Vue blocks (`template/script/style` where used)
+- keep output directly runnable
 
-## 4) Route registration changes
-Report route registration result.
+## 4) Route Registration
+Report route registration result:
 
-- if only adding module route file and auto-import handles registration, state that clearly
+- if auto-import discovers the module route file, state it clearly
 - if manual registration is needed in another project shape, include full before/after diff or full updated file content
 
 ## Formatting Rules
-Use this section heading order exactly:
-
-1. `Recognized APIs`
-2. `Files`
-3. `File Contents`
-4. `Route Registration`
-
-Use concise explanations; keep decision logs focused on implementation-relevant facts.
+Keep explanations concise and implementation-focused.
 
 ## Quality Gates Before Responding
-Verify all of the following:
+Verify all checks:
 
-1. pagination mapping is 0-based internal and 1-based UI
-2. edit/detail uses `route.params.id ?? route.query.id` and auto-fetch
-3. list includes required Element Plus controls and feedback
+1. pagination mapping is 0-based internally and 1-based in UI
+2. edit/detail uses `route.params.id ?? route.query.id` with auto-fetch
+3. list page includes required Element Plus controls and feedback
 4. delete/action confirms use `ElMessageBox.confirm`
 5. output includes missing endpoint degradations when applicable
-6. route module contains root `redirect` to `/index` child and hidden edit/detail routes use `showLink: false` (with `activePath` when applicable)
-7. when dashboard is requested, output includes dashboard skeleton blocks (filter, metrics, main content) and per-block retry behavior
-8. request abstraction choice is explicit: VueUse composables are optional (never mandatory), only considered when dependency exists and complexity justifies it
-9. list filter items are backed by actual API query fields; pagination-only APIs do not fake query semantics
-10. server-paged lists keep server total semantics and avoid client-side current-page total overrides
-11. invalid route id handling is explicit (error + safe navigation), never silent fallback to create mode
+6. route module has root redirect to `/index`; hidden edit/detail routes use `showLink: false` and `activePath` when applicable
+7. dashboard outputs include filter + metrics + main content blocks and per-block retry behavior
+8. VueUse usage is optional and explicit (never mandatory)
+9. list filters map to real API query fields (no fabricated backend filters)
+10. server-paged lists preserve server total semantics
+11. invalid route id handling is explicit (error + safe navigation)
 12. detail page includes explicit empty state when payload is empty
-13. response states at least 3 concrete UI polish points applied (layout hierarchy, spacing density, table readability, status tags, responsive wrap)
-14. template rendering is runtime-safe: uncertain API fields are guarded/normalized before `join/map/filter` and cannot crash page render
+13. response documents concrete UI polish decisions (at least three)
+14. templates are runtime-safe for uncertain API field shapes (`Array.isArray` or equivalent guards)

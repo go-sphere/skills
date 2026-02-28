@@ -1,27 +1,53 @@
 # Service Implementation Best Practices
 
+This reference contains implementation details and templates for `proto-service-generator`.
+Keep `SKILL.md` as the high-level workflow and load only the sections needed for the current task.
+
+## Section Loading Guide
+
+1. Always load: `1) Interface Assertion and File Mapping`, `4) Append-Only Update Procedure`, `7) Import and Naming Checklist`.
+2. Load `3) Simple CRUD (Direct Ent) Template` when implementing standard CRUD methods.
+3. Load `2) Stub Template for Unknown Logic` when behavior cannot be inferred safely.
+4. Load `5) Complex Logic Split to Usecase` and `6) Wire Injection Pattern` when flows are complex or DI signatures change.
+5. Load `8) Sphere Feature Reuse Pattern` before introducing new helpers or custom infrastructure code.
+
 ## Table of Contents
 
-1. Interface Assertion Template
+1. Interface Assertion and File Mapping
 2. Stub Template for Unknown Logic
 3. Simple CRUD (Direct Ent) Template
-4. Append-Only Update Pattern
+4. Append-Only Update Procedure
 5. Complex Logic Split to Usecase
 6. Wire Injection Pattern
 7. Import and Naming Checklist
 8. Sphere Feature Reuse Pattern
 
-## 1) Interface Assertion Template
+## 1) Interface Assertion and File Mapping
 
-Each service file must include an interface assertion to enforce compile-time completeness checks.
+Use generated `type XxxServiceHTTPServer interface` definitions from
+`api/<module>/v1/*.sphere.pb.go` as the only method-signature source of truth.
+
+Mapping rule:
+
+- `XxxService` -> `internal/service/<module>/xxx.go`
+
+Assertion template (required in each service file):
 
 ```go
 var _ dashv1.AdminSessionServiceHTTPServer = (*Service)(nil)
 ```
 
+Useful discovery commands:
+
+```bash
+rg -n "type .*ServiceHTTPServer interface" api
+rg -n "var _ .*ServiceHTTPServer = \(\*Service\)\(nil\)" internal/service
+rg -n "func \(s \*Service\) [A-Z]" internal/service
+```
+
 ## 2) Stub Template for Unknown Logic
 
-When business logic cannot be safely inferred, generate a compilable stub first instead of guessing.
+When business logic cannot be inferred safely, generate a compilable stub first.
 
 ```go
 package dash
@@ -40,7 +66,7 @@ func (s *Service) RefreshSomething(ctx context.Context, req *dashv1.RefreshSomet
 
 ## 3) Simple CRUD (Direct Ent) Template
 
-For simple CRUD, call Ent directly in Service and do not add an extra DAO business layer.
+For simple CRUD, call Ent directly inside Service and avoid adding an extra DAO business layer.
 
 ```go
 package dash
@@ -120,20 +146,40 @@ func (s *Service) DeleteKeyValueStore(ctx context.Context, req *dashv1.DeleteKey
 }
 ```
 
-## 4) Append-Only Update Pattern
+Simple CRUD classification:
+
+1. Method name is `Create*`, `Get*`, `List*`, `Update*`, or `Delete*`.
+2. It operates on one entity.
+3. It does not require complex cross-domain orchestration or complex transactions.
+
+## 4) Append-Only Update Procedure
 
 Do not rewrite existing files. Append only missing pieces.
 
 Execution order:
-1. Read all method signatures from `type XxxServiceHTTPServer interface`.
-2. Scan existing methods in target `internal/service/<module>/<service>.go`.
+
+1. Read all signatures from `type XxxServiceHTTPServer interface`.
+2. Inspect existing methods in `internal/service/<module>/<service>.go`.
 3. Append only missing methods.
 4. Append assertion if missing.
-5. Add only required imports; do not change existing logic.
+5. Add only required imports.
+6. Keep existing implementations untouched.
+
+Quick check commands:
+
+```bash
+rg -n "type .*ServiceHTTPServer interface|^\}" api/<module>/v1/*.sphere.pb.go
+rg -n "func \(s \*Service\)" internal/service/<module>/<service>.go
+rg -n "var _ .*ServiceHTTPServer = \(\*Service\)\(nil\)" internal/service/<module>/<service>.go
+```
 
 ## 5) Complex Logic Split to Usecase
 
-When method flow is clearly complex (cross-entity transactions, reusable orchestration, long flows), split into `internal/usecase/<module>/<service>/`.
+When flow is clearly complex (cross-entity transactions, reusable orchestration, long flows), split logic into:
+
+```text
+internal/usecase/<module>/<service>/
+```
 
 Example structure:
 
@@ -147,9 +193,7 @@ internal/usecase/dash/admin_session/
 ```go
 package adminsession
 
-import (
-	"context"
-)
+import "context"
 
 type Usecase struct{}
 
@@ -181,7 +225,7 @@ func (s *Service) SomeComplexMethod(ctx context.Context, req *dashv1.SomeComplex
 
 ## 6) Wire Injection Pattern
 
-After adding a usecase, ensure providers can inject into service.
+When usecase dependencies are added, keep provider sets and constructors compilable.
 
 `internal/usecase/dash/admin_session/wire.go` (optional):
 
@@ -230,30 +274,35 @@ func NewService(
 
 1. File naming: `XxxService -> xxx.go` (snake_case).
 2. Receiver: always `func (s *Service)`.
-3. Import `context`, `errors`, `sql`, `conv`, `entbind` as needed.
-4. Do not import unused packages; do not modify generated files under `api/*`.
-5. After changes, run at least:
-`go test ./internal/service/...`, `go test ./cmd/app/...`.
+3. Keep method signatures exactly aligned to generated interfaces.
+4. Add imports only when required (`context`, `errors`, `sql`, `conv`, `entbind`, and generated API package).
+5. Do not import unused packages.
+6. Do not edit generated files under `api/*`.
+7. Validate with at least:
+- `go test ./internal/service/...`
+- `go test ./cmd/app/...`
 
 ## 8) Sphere Feature Reuse Pattern
 
-Use existing Sphere/repository capabilities before writing custom code.
+Reuse existing Sphere and repository capabilities before adding new code.
 
 Reuse checks:
-1. Search sibling services for existing patterns.
-2. Search for existing middleware/auth/error handling flow in server setup.
-3. Search for existing bind/render helpers before adding mapping code.
-4. Search provider sets before adding duplicate constructors.
+
+1. Search sibling services for matching implementation patterns.
+2. Search existing middleware/auth/error flows in current server setup.
+3. Search existing bind/render helpers before adding mapping code.
+4. Search provider sets and constructors before adding duplicate dependencies.
 
 Suggested lookup commands:
 
 ```bash
-rg -n "Register.*ServiceHTTPServer|NewAuthMiddleware|WithJson|sphere\\.errors|ProviderSet" internal api
-rg -n "entbind\\.|entmap\\.|conv\\.Page|DeleteOneID|UpdateOneID|IDIn\\(" internal
-rg -n "type Service struct|func NewService\\(" internal/service
+rg -n "Register.*ServiceHTTPServer|NewAuthMiddleware|WithJson|sphere\.errors|ProviderSet" internal api
+rg -n "entbind\.|entmap\.|conv\.Page|DeleteOneID|UpdateOneID|IDIn\(" internal
+rg -n "type Service struct|func NewService\(" internal/service
 ```
 
-If `sphere-feature-workflow` is available, use it together with this skill:
-1. Let it guide end-to-end Sphere feature integration.
-2. Keep this skill focused on service file coverage and method implementation shape.
-3. Prefer framework-native flow over custom duplicated code.
+If `sphere-feature-workflow` is available, combine both skills:
+
+1. Let `sphere-feature-workflow` guide end-to-end feature integration.
+2. Keep `proto-service-generator` focused on interface coverage and method implementation shape.
+3. Prefer framework-native behavior over duplicated custom code.

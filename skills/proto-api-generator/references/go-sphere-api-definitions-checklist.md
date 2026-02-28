@@ -15,6 +15,16 @@ Use this checklist with:
 - [protocol-and-codegen-reference.md](protocol-and-codegen-reference.md)
 - [proto-packages-and-runtime-reference.md](proto-packages-and-runtime-reference.md)
 
+## When To Load
+
+Load this reference at final validation time after drafting contracts. Use it as the release gate, not as an initial brainstorming checklist.
+
+## Table of Contents
+
+- [Required Checks](#required-checks)
+- [Pass/Fail Semantics](#passfail-semantics)
+- [Mandatory Confirmation](#mandatory-confirmation)
+
 ## Required Checks
 
 ### A. Scaffold Fit (Required)

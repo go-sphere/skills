@@ -16,9 +16,23 @@ Provide a full local copy of go-sphere protocol-first and code generation guidan
 2. Ensure proto output can pass through the intended plugin chain without manual patching.
 3. Keep generated code as a product of proto definitions, not handwritten drift.
 
+## When To Load
+
+Load this reference when validating protocol-first boundaries, plugin-chain assumptions, and generated-vs-manual ownership decisions.
+
 ## Skill Override Note
 
 If a generic example in the upstream copy conflicts with this skill's scaffold conventions or hard gates, follow the skill's rules and keep this reference as background material.
+
+## Table of Contents
+
+- [Core Philosophy](#core-philosophy)
+- [Protocol as Contract](#protocol-as-contract)
+- [Code Generation Pipeline](#code-generation-pipeline)
+- [Benefits of This Approach](#benefits-of-this-approach)
+- [Protocol Organization](#protocol-organization)
+- [Best Practices](#best-practices)
+- [Related Guides](#related-guides)
 
 ## Official Document (Full Local Copy)
 

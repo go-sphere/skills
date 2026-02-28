@@ -1,16 +1,30 @@
 # SQL Output Pattern
 
-## File Skeleton
+Use this file as the final assembly pattern after model extraction and ID planning.
+
+## Header Contract
+
+Every seed artifact should start with concise metadata comments:
+
+- source inputs used
+- SQL dialect (and whether inferred/assumed)
+- execution strategy (`one-shot`, `idempotent`, or `upsert`)
+- non-trivial assumptions
+
+## Canonical Skeleton
 
 ```sql
 -- seed.sql
 -- Source inputs: prompt + product_doc.md + demo.go
 -- Dialect: sqlite (assumed)
+-- Strategy: idempotent
 -- Assumptions:
 -- - users.email is unique
 -- - projects belongs to organizations
 
 BEGIN TRANSACTION;
+
+-- optional cleanup section (strategy-dependent)
 
 -- 1) organizations
 INSERT INTO organizations (id, name, slug, created_at)
@@ -33,28 +47,33 @@ VALUES
 COMMIT;
 ```
 
-## Insert Strategy
+## Strategy Snippets
 
-- Always include explicit column list.
-- Group inserts by table and dependency order.
-- Prefer batched multi-row `INSERT` for readability and speed.
+Choose one strategy and keep it consistent in the file:
 
-## Conflict Strategy
+- `one-shot`: plain inserts, no cleanup/conflict control
+- `idempotent`: cleanup or conflict-safe inserts for reruns
+- `upsert`: update existing records where required by scenario
 
-Only add conflict handling when requested or clearly needed:
+Dialect examples:
 
-- PostgreSQL: `ON CONFLICT (...) DO NOTHING/UPDATE`
-- SQLite: `INSERT OR IGNORE` (or modern upsert syntax)
+- PostgreSQL: `ON CONFLICT (...) DO NOTHING/DO UPDATE`
+- SQLite: `INSERT OR IGNORE` or `ON CONFLICT (...) DO UPDATE`
 - MySQL: `INSERT IGNORE` or `ON DUPLICATE KEY UPDATE`
 
-## Verification Snippets
+## Authoring Rules
 
-Optionally append lightweight checks:
+- Always include explicit column lists.
+- Keep table blocks in dependency order.
+- Prefer multi-row `VALUES` blocks when readable.
+- Keep comments concise and audit-friendly.
+
+## Optional Verification Queries
+
+Append verification queries only when requested:
 
 ```sql
 SELECT COUNT(*) AS org_count FROM organizations;
 SELECT COUNT(*) AS user_count FROM users;
 SELECT COUNT(*) AS project_count FROM projects;
 ```
-
-Use verification queries only when user asks for post-insert checks.

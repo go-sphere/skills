@@ -2,63 +2,65 @@
 
 ## Deterministic ID Policy
 
-Generate IDs that are stable across runs and meaningful in domain context.
+Seed IDs must be stable across reruns and meaningful to reviewers.
 
-### Integer IDs
+### Integer PKs
 
-Reserve fixed ranges per table:
+- Reserve non-overlapping ranges per table or domain group.
+- Use monotonic increments inside each range.
+- Keep room for future rows; do not pack values too tightly.
 
-- `users`: 1001-1999
-- `organizations`: 2001-2999
-- `projects`: 3001-3999
+Example range strategy:
 
-Use sequential increments within range. Never randomize.
+- `users`: `1000-1999`
+- `organizations`: `2000-2999`
+- `projects`: `3000-3999`
 
-### String IDs
+### String PKs
 
-Use semantic keys:
+- Use semantic IDs derived from stable business keys.
+- Keep one format per table (for example `usr_*`, `org_*`, `proj_*`).
+- Avoid opaque random suffixes.
+
+Examples:
 
 - `usr_admin`
 - `org_acme`
 - `proj_mobile_app`
 
-Keep format consistent within table.
+### UUID PKs
 
-### UUID IDs
+- Prefer deterministic UUID generation from stable key tuple.
+- Recommended tuple: `namespace + table + business_key`.
+- Avoid UUID4 randomness unless the user explicitly requests random behavior.
 
-Use deterministic UUID (v5-style) from stable key tuple:
+## Relationship Integrity Rules
 
-- namespace constant + table name + business key
+- Insert parent tables before dependent child tables.
+- For join tables, insert both endpoints first, then join rows.
+- Reuse exact FK values from source rows; never remap IDs mid-file.
+- Preserve logical dependency order even if dialect supports deferred constraints.
 
-Do not use random UUID4 in seed data unless user explicitly asks for randomness.
+## Multi-Tenant Constraints
 
-## Foreign Key Integrity Rules
+When tenant/account scope exists:
 
-- Insert parent rows before child rows.
-- For join tables, insert both sides first, then join rows.
-- Reuse exact IDs from source rows; do not remap mid-file.
-- If dialect allows deferred constraints, still preserve logical order for readability.
+- Seed tenant/account rows first.
+- Ensure every scoped table row has valid tenant/account FK.
+- Do not create cross-tenant references unless isolation testing is the goal.
 
-## Multi-Tenant Convention
+## Business Coherence Rules
 
-When tenant/account scopes exist:
+- Timestamps must be plausible (create <= update).
+- Lifecycle/state values must be realistic (`draft -> active -> archived` style progression).
+- Ownership chains must resolve to existing principals.
 
-- Create 2-3 tenants/accounts first.
-- Ensure scoped tables include valid tenant/account FK.
-- Keep cross-tenant leakage out of sample data unless explicitly testing isolation bugs.
+## Consistency Ledger (Required Internal Check)
 
-## Business Meaning Rules
+Keep an internal mapping ledger while drafting:
 
-- Keep timestamps coherent (creation before update; parent before child).
-- Keep status transitions plausible (e.g., `draft` before `published`).
-- Keep ownership chains valid (`project.owner_id` must match an existing user).
+- logical record key -> concrete ID
+- unique columns already consumed
+- FK references and existence checks
 
-## Consistency Ledger
-
-Before final SQL, maintain an internal mapping ledger:
-
-- Entity logical name -> concrete ID
-- Unique field values already used
-- FK target existence
-
-Use this ledger to prevent collisions and broken links.
+Use this ledger to prevent collisions, orphan rows, and accidental duplicate uniques.

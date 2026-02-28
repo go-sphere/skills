@@ -1,56 +1,70 @@
 # Model Extraction Guide
 
-## Input Priority
+Use this guide to convert mixed inputs into a concrete seed plan before writing SQL.
 
-Use this precedence when sources conflict:
+## Source Priority
 
-1. Explicit user requirement in current prompt
-2. Ent schema and migration definitions
-3. Demo program behavior and hardcoded examples
-4. Product documentation narrative
-5. Conservative inference (must be stated as assumption)
+When sources conflict, apply this precedence:
 
-## Entity Extraction Checklist
+1. Explicit requirement in current prompt
+2. Ent schema + migration/DDL definitions
+3. Existing seed/demo behavior
+4. Product docs narrative
+5. Conservative inference (must be documented)
 
-For each entity/table, capture:
+## Step 1: Entity Inventory
+
+For each table/entity, capture:
 
 - Table name
-- Primary key type and generation style
-- Required fields vs nullable fields
-- Unique fields/composite unique constraints
-- Status/state fields and allowed values
-- Audit fields (`created_at`, `updated_at`, etc.)
+- PK type and generation style
+- Required vs nullable fields
+- Unique constraints (single/composite)
+- Enum/state fields and allowed values
+- Audit fields (`created_at`, `updated_at`, `deleted_at`)
 
-For Ent-based inputs, inspect:
+For Ent projects, inspect:
 
-- `field.*` definitions (`Optional`, `Default`, `Unique`, `Sensitive`)
-- `edge.To` and `edge.From` plus `Required`/`Unique`
-- enum-like validation constraints
+- `field.*` options (`Optional`, `Nillable`, `Unique`, `Default`, `Immutable`, `Sensitive`)
+- `edge.To`/`edge.From` and `Required`/`Unique`
+- enum/value validation constraints
 
-## Relationship Extraction Checklist
+## Step 2: Relationship Graph
 
-Capture relationship graph with cardinality:
+Capture cardinality and FK ownership:
 
-- 1-N: parent id in child table
-- 1-1: unique foreign key or shared key strategy
-- N-N: explicit join table and uniqueness pair
+- 1-N: parent FK in child
+- 1-1: unique FK or shared PK strategy
+- N-N: explicit join table plus unique pair policy
 
-Create a dependency graph and topological insert order before writing SQL.
+Output a dependency order for inserts (topological order).
 
-## Data Size Heuristic
+## Step 3: Candidate Seed Shape
 
-Unless user gives a target size:
+Unless user specifies size:
 
-- Core entities: 3-10 rows each
-- Reference dictionaries: complete minimal set
-- Join rows: enough to demonstrate real linkage, not full cross product
+- Core business tables: 3-10 rows each
+- Dictionary/reference tables: minimal complete set
+- Join tables: only meaningful links, avoid cartesian expansion
 
-## Assumption Discipline
+Prioritize rows that demonstrate realistic product flow over raw volume.
 
-If a required field meaning is unclear, infer from:
+## Step 4: Assumptions
 
-- Field name (`status`, `owner_id`, `tenant_id`)
-- Related records in demo code
-- Product terminology in docs
+If semantics are unclear, infer cautiously from:
 
-Always record assumptions in SQL header comments with concise bullets.
+- Field names (`status`, `owner_id`, `tenant_id`)
+- Demo behavior and fixture values
+- Domain terms in docs
+
+Record each non-trivial inference in SQL header comments.
+
+## Extraction Output (Internal Working Format)
+
+Use a compact internal model before final SQL:
+
+- `entities`: table -> columns/constraints
+- `relations`: source_table -> target_table + cardinality + FK column
+- `insert_order`: ordered table list
+- `seed_size`: per-table row targets
+- `assumptions`: explicit bullet list

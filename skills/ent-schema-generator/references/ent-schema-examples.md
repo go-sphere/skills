@@ -1,17 +1,26 @@
 # Ent Schema Best-Practice Examples (sphere-layout)
 
-Use these examples as templates. They focus on:
-- business comments on schema/fields
+Use these examples as templates. They emphasize:
+- business comments on schema and key fields
 - explicit optional/constraint decisions
 - weak relation IDs (`xxx_id`)
 - query-driven indexes
 - default policy: do not define `id` manually in schema
-- enum fields use Ent native enum
-- prefer array fields by default; avoid JSON unless no typed alternative works
+- enum fields with Ent native `field.Enum`
+- typed fields first (including arrays when dialect support is confirmed)
+
+## Table of Contents
+
+1. Example 1: Order (generator-managed ID)
+2. Example 2: OrderItem (weak relation IDs + array candidates)
+3. Example 3: CouponGrant (enum + soft-delete)
+4. When to Define `id` Manually
+5. Array Field Support Decision Flow
+6. Post-Change Reminder
 
 ---
 
-## Example 1: Order (default ID managed by ent codegen)
+## 1. Example 1: Order (generator-managed ID)
 
 ```go
 package schema
@@ -32,41 +41,41 @@ type Order struct {
 func (Order) Fields() []ent.Field {
     return []ent.Field{
         field.Int64("user_id").
-            Comment("下单用户ID（弱关联，不强制外键）"),
+            Comment("Order owner user ID (weak relation, no hard foreign key)"),
 
         field.String("order_no").
             NotEmpty().
             Unique().
-            Comment("订单号，全局唯一"),
+            Comment("Global unique order number"),
 
         field.Enum("status").
             Values("pending", "paid", "canceled", "done").
             Default("pending").
-            Comment("订单状态"),
+            Comment("Order lifecycle status"),
 
         field.Int64("paid_at").
             Optional().
             Nillable().
-            Comment("支付时间，未支付时为空"),
+            Comment("Payment timestamp; nil when unpaid"),
 
         field.String("user_name_snapshot").
             Default("").
-            Comment("用户名称快照，避免历史展示受用户改名影响"),
+            Comment("User name snapshot for historical consistency"),
 
         field.Strings("tags").
             Optional().
             Default([]string{}).
-            Comment("订单标签（数据库支持数组类型时使用）"),
+            Comment("Order tags (use only when target DB supports arrays)"),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("创建时间（秒）"),
+            Comment("Creation time in Unix seconds"),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("更新时间（秒）"),
+            Comment("Last update time in Unix seconds"),
     }
 }
 
@@ -78,15 +87,15 @@ func (Order) Indexes() []ent.Index {
 }
 ```
 
-### 与本仓库生成链路的关系
+### Repository integration notes
 
-- `id` 默认不手写，优先复用 `cmd/tools/ent/main.go` 的统一 `IDType` 配置。
-- 若新增 `Order` 实体，必须在 `cmd/tools/bind/main.go#createFilesConf` 注册 `conf.NewEntity(...)`。
-- 生成后必须检查 `entpb/proto/bind/map` 变化是否被 render/service 消费。
+- Keep `id` generator-managed by default through centralized ent tool config (`cmd/tools/ent/main.go`).
+- If `Order` is introduced, register it in `cmd/tools/bind/main.go#createFilesConf`.
+- After generation, ensure `entpb/proto/bind/map` changes are consumed by render and service code.
 
 ---
 
-## Example 2: OrderItem (weak relation IDs + array candidates)
+## 2. Example 2: OrderItem (weak relation IDs + array candidates)
 
 ```go
 package schema
@@ -106,36 +115,36 @@ type OrderItem struct {
 
 func (OrderItem) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("order_id").Comment("订单ID"),
-        field.Int64("product_id").Comment("商品ID"),
+        field.Int64("order_id").Comment("Order ID"),
+        field.Int64("product_id").Comment("Product ID"),
 
         field.String("product_title_snapshot").
             NotEmpty().
-            Comment("商品标题快照"),
+            Comment("Product title snapshot"),
 
         field.Int64("price_snapshot").
             NonNegative().
-            Comment("下单时商品价格快照（分）"),
+            Comment("Unit price snapshot at order time in cents"),
 
         field.Int32("quantity").
             Positive().
             Default(1).
-            Comment("购买数量"),
+            Comment("Purchased quantity"),
 
         field.Strings("coupon_codes").
             Optional().
             Default([]string{}).
-            Comment("命中的优惠券编码列表（数据库支持数组类型时使用）"),
+            Comment("Applied coupon codes (only when array is dialect-safe)"),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("创建时间（秒）"),
+            Comment("Creation time in Unix seconds"),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("更新时间（秒）"),
+            Comment("Last update time in Unix seconds"),
     }
 }
 
@@ -147,15 +156,15 @@ func (OrderItem) Indexes() []ent.Index {
 }
 ```
 
-### 与本仓库生成链路的关系
+### Repository integration notes
 
-- 优先弱关联 ID 字段，不强制 edge/join。
-- 新实体接入后，必须补 DAO 批量查询 helper 与 service 映射消费点。
-- 如 `coupon_codes` 走数组，需在目标 DB 方言与迁移链路下确认可用性。
+- Prefer weak relation IDs; do not force edge/join modeling by default.
+- If a new entity is introduced, add DAO batch helpers and service mapping consumption points.
+- If arrays are used (`coupon_codes`), confirm target dialect and migration support first.
 
 ---
 
-## Example 3: CouponGrant (enum + soft-delete)
+## 3. Example 3: CouponGrant (enum + soft-delete)
 
 ```go
 package schema
@@ -168,40 +177,40 @@ import (
     "entgo.io/ent/schema/index"
 )
 
-// CouponGrant represents a coupon assignment to user.
+// CouponGrant represents a coupon assignment to a user.
 type CouponGrant struct {
     ent.Schema
 }
 
 func (CouponGrant) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("coupon_id").Comment("优惠券ID"),
-        field.Int64("user_id").Comment("用户ID"),
+        field.Int64("coupon_id").Comment("Coupon ID"),
+        field.Int64("user_id").Comment("User ID"),
 
         field.Enum("status").
             Values("unused", "used", "expired").
             Default("unused").
-            Comment("状态"),
+            Comment("Grant status"),
 
         field.Int64("used_at").
             Optional().
             Nillable().
-            Comment("使用时间，未使用时为空"),
+            Comment("Usage timestamp; nil when unused"),
 
         field.Int64("deleted_at").
             Optional().
             Nillable().
-            Comment("软删时间，为空表示未删除"),
+            Comment("Soft-delete timestamp; nil when active"),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("创建时间（秒）"),
+            Comment("Creation time in Unix seconds"),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("更新时间（秒）"),
+            Comment("Last update time in Unix seconds"),
     }
 }
 
@@ -213,38 +222,42 @@ func (CouponGrant) Indexes() []ent.Index {
 }
 ```
 
-### 与本仓库生成链路的关系
+### Repository integration notes
 
-- 状态字段必须使用 `field.Enum`，避免散落 magic number。
-- 若涉及敏感字段，需在 bind/render 层补 `WithIgnoreFields` 与脱敏处理说明。
-- 生成后必须验证 bind/map 变更已被 API/Dash 服务消费。
+- Use `field.Enum` for status fields to avoid scattered magic values.
+- For sensitive fields, include `WithIgnoreFields` and masking notes in bind/render planning.
+- Verify generated bind/map changes are consumed by API and dashboard service code.
 
 ---
 
-## 何时必须手写 `id`
+## 4. When to Define `id` Manually
 
-默认不手写 `id`。仅在业务明确要求非默认主键策略时手写，并额外说明：
-- 为什么 generator-managed ID 不满足需求。
-- 对 bind/proto 类型与调用方兼容性的影响。
+Default behavior is generator-managed `id`. Define `id` manually only when business
+requirements explicitly require a non-default primary key strategy.
+
+Always explain:
+- why generator-managed ID is insufficient
+- compatibility impact on bind/proto and call sites
 
 ```go
 field.String("id").
     Unique().
     Immutable().
-    Comment("业务侧自定义主键（例如外部系统自然键）")
+    Comment("Business-defined primary key, for example external natural key")
 ```
 
 ---
 
-## 数组字段可用性判定流程
+## 5. Array Field Support Decision Flow
 
-1. DB 方言与迁移链路确认支持数组字段：使用 `field.Strings/field.Ints/field.Int64s`。
-2. 若不支持或跨库不可移植：优先 relation-entity 或 join table。
-3. 若结构仍无法 typed 表达：最后才允许 JSON，并在方案中写明理由。
+1. Confirm array support in target DB dialect and migration chain.
+2. If supported, use typed arrays (`field.Strings/field.Ints/field.Int64s`) where appropriate.
+3. If unsupported or non-portable, prefer relation-entity or join table.
+4. Use JSON only as the final fallback, and document why typed models are not viable.
 
 ---
 
-## Post-Change Reminder
+## 6. Post-Change Reminder
 
 After schema changes, run:
 

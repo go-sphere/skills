@@ -1,10 +1,14 @@
 # Output Template: Requirement -> DB Schema Brief
 
+Use this template as the final response shape.  
+Keep section order unchanged and do not omit required fields.
+
 ## 1) Input Summary
 
 - Source type: prompt / markdown / runnable demo / repository code
 - Business scope:
 - Assumptions:
+- Evidence priority or conflict resolution notes (if any):
 
 ## 2) Core Entities and Lifecycle
 
@@ -20,7 +24,7 @@
 - Enum policy (prefer Ent `field.Enum`)/default:
 - Unique/immutable/default constraints:
 - Soft-delete policy:
-- Array candidates (required first choice):
+- Array candidates (typed-first when dialect-safe):
 - JSON exceptions (must justify why typed fields and arrays are insufficient):
 
 ## 4) ID Strategy
@@ -82,3 +86,9 @@
 - bind/map generated changes consumed by render/service:
 - new entity registered in bind config:
 - ignore-field rules reviewed (`created_at/updated_at`, sensitive fields):
+
+## Output Constraints
+
+- Keep all 11 sections, even when a section has "N/A".
+- If assumptions are used, label them explicitly as assumptions.
+- If any required validation is missing, add a `Blocking Notes` line under the affected section.

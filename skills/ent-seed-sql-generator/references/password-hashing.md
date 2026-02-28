@@ -1,32 +1,34 @@
 # Password Hashing Notes
 
-Use this reference only when seed data includes credential fields.
+Use this reference only when seed rows include credential fields.
 
-## Rule
+## Algorithm Detection First
 
-Infer algorithm from existing code/docs first. Do not guess blindly.
+Determine hashing format from project evidence before generating anything:
 
-Common patterns:
+- auth code paths
+- existing fixtures/seeds
+- docs/config conventions
 
-- bcrypt (`$2a$`, `$2b$`, `$2y$` prefix)
-- argon2id (`$argon2id$` prefix)
-- pbkdf2 (project-specific format)
+Common signatures:
 
-## Determinism Model
+- bcrypt: `$2a$`, `$2b$`, `$2y$`
+- argon2id: `$argon2id$`
+- pbkdf2: project-specific tagged format
 
-Salted password hash algorithms (bcrypt/argon2id) produce different outputs on each new hash generation by design.
+Do not guess the algorithm.
 
-For deterministic seed SQL, determinism should be applied to the SQL literal value:
+## Determinism Rule
 
-- Generate or obtain a valid hash once.
-- Pin that hash string in seed SQL.
-- Reuse the same pinned hash literal across reruns.
+Salted algorithms generate different outputs each run. Seed determinism should be enforced by pinning a literal hash value:
 
-Prefer existing fixture/doc hash samples when available.
+1. generate or obtain one valid hash
+2. store that exact hash string in SQL
+3. reuse the same literal on reruns
 
-## Minimal Hash Generation
+Prefer existing fixture/documented hash literals when available.
 
-If bcrypt is required and Python dependency is available, you can generate a hash once:
+## One-Time Hash Generation Example (bcrypt)
 
 ```bash
 python3 - <<'PY'
@@ -36,14 +38,15 @@ print(bcrypt.hashpw(password, bcrypt.gensalt(rounds=12)).decode())
 PY
 ```
 
-Treat the command output as a one-time value to pin in SQL. Do not expect repeated runs of this command to return the same string.
+Treat output as a one-time value to pin, not a reproducible command result.
 
-If no hash tool is available:
+## If Tooling Is Missing
 
-- Prefer reusing known valid hash samples from project fixtures/docs.
-- Otherwise stop and request a hash sample from the user rather than outputting invalid plaintext.
+- Reuse known valid hash samples from repository fixtures/docs.
+- If no valid sample exists, request a hash sample instead of writing plaintext into `password_hash`.
 
-## Safety
+## Safety Notes
 
-- Treat all seed credentials as dev/test only.
-- Never claim production-grade credential management from seed SQL.
+- Seed credentials are dev/test only.
+- Do not claim production credential security from seed SQL.
+- Only expose test plaintext password when explicitly acceptable for the task context.
