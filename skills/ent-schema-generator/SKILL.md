@@ -117,9 +117,31 @@ All schemas MUST include entproto annotations for gRPC/proto generation:
        )
    ```
 
-4. **Import requirement**: Add `"entgo.io/contrib/entproto"` to imports.
+4. **Avoid Optional/Nillable for entproto fields**:
+    - EntProto’s `optional` type handling is cumbersome; try to avoid using `Optional()` or `Nillable()` whenever possible.
+    - Instead, use zero-value defaults or `DefaultFunc` to generate default values:
+     ```go
+     // Bad: Optional with entproto
+     field.Int64("deleted_at").
+         Optional().
+         Nillable().
+         Annotations(entproto.Field(10))
 
-5. **Output must include**: In the Ent Implementation Plan section, show complete schema code with all `entproto.Field(n)` annotations.
+     // Good: Zero-value default
+     field.Int64("deleted_at").
+         Default(0).
+         Annotations(entproto.Field(10))
+
+     // Good: DefaultFunc for dynamic zero value
+     field.Int64("created_at").
+         Immutable().
+         DefaultFunc(func() int64 { return time.Now().Unix() }).
+         Annotations(entproto.Field(7))
+     ```
+
+5. **Import requirement**: Add `"entgo.io/contrib/entproto"` to imports.
+
+6. **Output must include**: In the Ent Implementation Plan section, show complete schema code with all `entproto.Field(n)` annotations, using zero-value defaults instead of Optional.
 
 ## Failure Conditions
 

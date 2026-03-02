@@ -316,8 +316,7 @@ func (User) Fields() []ent.Field {
             ),
 
         field.Int64("role_id").
-            Optional().
-            Nillable().
+            Default(0).
             Annotations(entproto.Field(5)),
 
         field.Strings("tags").

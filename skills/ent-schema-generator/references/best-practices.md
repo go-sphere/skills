@@ -61,6 +61,7 @@ Always report conflicts and resolution choices explicitly.
 - Default: do not manually define `id` field in each schema.
 - Prefer centralized ent generator ID configuration when available.
 - Define custom `id` manually only for explicit business needs, and describe bind/proto impact.
+- **Avoid Optional for entproto fields**: Use zero-value defaults instead of `Optional()/Nillable()`.
 
 ## 5. Decide Relation Strategy
 
@@ -187,6 +188,39 @@ field.Enum("status").
             "done":        2,
         }),
     )
+```
+
+### Avoid Optional/Nillable for EntProto Fields
+
+Proto’s `optional` type handling is cumbersome. **All fields annotated with entproto should avoid using `Optional()` or `Nillable()`**:
+
+```go
+// Bad: Optional with entproto
+field.Int64("deleted_at").
+    Optional().
+    Nillable().
+    Annotations(entproto.Field(10))
+
+// Good: Zero-value default
+field.Int64("deleted_at").
+    Default(0).
+    Annotations(entproto.Field(10))
+
+// Good: DefaultFunc for dynamic zero value
+field.Int64("created_at").
+    Immutable().
+    DefaultFunc(func() int64 { return time.Now().Unix() }).
+    Annotations(entproto.Field(7))
+
+// Good: Empty string default
+field.String("name").
+    Default("").
+    Annotations(entproto.Field(2))
+
+// Good: Empty slice default
+field.Strings("tags").
+    Default([]string{}).
+    Annotations(entproto.Field(6))
 ```
 
 ### Import Requirement
