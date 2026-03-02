@@ -15,7 +15,8 @@ For response shape and section order, use `references/output-template.md`.
 8. Query with Batch `WHERE IN`
 9. Integrate with Bind/Render/Service Layers
 10. Improve Evolvability and Consistency
-11. Post-Change Commands and Validation
+11. EntProto Annotation Requirements
+12. Post-Change Commands and Validation
 
 ## 1. Evidence Priority
 
@@ -56,6 +57,7 @@ Always report conflicts and resolution choices explicitly.
 
 ## 4. Decide ID Strategy
 
+- **REQUIRED for entproto**: Always explicitly define the primary key field with `entproto.Field(1)`.
 - Default: do not manually define `id` field in each schema.
 - Prefer centralized ent generator ID configuration when available.
 - Define custom `id` manually only for explicit business needs, and describe bind/proto impact.
@@ -129,7 +131,73 @@ When ID list is large:
   - write-path existence validation (sync or async)
   - periodic dangling-reference checks
 
-## 11. Post-Change Commands and Validation
+## 11. EntProto Annotation Requirements
+
+All schemas MUST be entproto-ready for gRPC/proto generation:
+
+### Schema-level Annotation
+
+Every schema MUST include `entproto.Message()`:
+
+```go
+import "entgo.io/contrib/entproto"
+
+func (EntityName) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entproto.Message(),
+    }
+}
+```
+
+### Field-level Annotation
+
+Every field MUST have `entproto.Field(n)`:
+
+- Field number 1 is reserved for the primary key
+- Assign sequential numbers (2, 3, 4...) for other fields
+
+```go
+func (User) Fields() []ent.Field {
+    return []ent.Field{
+        field.Int64("id").
+            Annotations(entproto.Field(1)),  // Primary key = 1
+
+        field.String("name").
+            Annotations(entproto.Field(2)),
+
+        field.String("email").
+            Unique().
+            Annotations(entproto.Field(3)),
+    }
+}
+```
+
+### Enum Field Annotation
+
+Enum fields MUST include both `entproto.Field(n)` and `entproto.Enum(map[string]int32{...})`:
+
+```go
+field.Enum("status").
+    Values("pending", "in_progress", "done").
+    Annotations(
+        entproto.Field(4),
+        entproto.Enum(map[string]int32{
+            "pending":     0,
+            "in_progress": 1,
+            "done":        2,
+        }),
+    )
+```
+
+### Import Requirement
+
+Always add the entproto import:
+
+```go
+import "entgo.io/contrib/entproto"
+```
+
+## 12. Post-Change Commands and Validation
 
 Minimum commands after schema-affecting decisions:
 
@@ -144,3 +212,4 @@ Validation expectations:
 2. bind/map generated changes are consumed in render/service code.
 3. New entities are registered in `createFilesConf`.
 4. `WithIgnoreFields` rules are reviewed for system-managed and sensitive fields.
+5. All fields have `entproto.Field(n)` annotations.

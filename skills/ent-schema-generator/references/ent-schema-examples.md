@@ -5,9 +5,11 @@ Use these examples as templates. They emphasize:
 - explicit optional/constraint decisions
 - weak relation IDs (`xxx_id`)
 - query-driven indexes
-- default policy: do not define `id` manually in schema
-- enum fields with Ent native `field.Enum`
+- **entproto annotations** for all schemas and fields (REQUIRED)
+- enum fields with Ent native `field.Enum` + entproto.Enum mapping
 - typed fields first (including arrays when dialect support is confirmed)
+
+> **IMPORTANT**: All schemas MUST include entproto annotations. See Section 7 for entproto requirements.
 
 ## Table of Contents
 
@@ -16,7 +18,8 @@ Use these examples as templates. They emphasize:
 3. Example 3: CouponGrant (enum + soft-delete)
 4. When to Define `id` Manually
 5. Array Field Support Decision Flow
-6. Post-Change Reminder
+6. EntProto Full Example (User with all annotation patterns)
+7. Post-Change Reminder
 
 ---
 
@@ -257,7 +260,126 @@ field.String("id").
 
 ---
 
-## 6. Post-Change Reminder
+## 6. EntProto Full Example (User with all annotation patterns)
+
+This example demonstrates all entproto annotation patterns:
+
+```go
+package schema
+
+import (
+    "time"
+
+    "entgo.io/contrib/entproto"
+    "entgo.io/ent"
+    "entgo.io/ent/schema/field"
+    "entgo.io/ent/schema/index"
+)
+
+// User represents a system user entity.
+type User struct {
+    ent.Schema
+}
+
+func (User) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entproto.Message(),
+    }
+}
+
+func (User) Fields() []ent.Field {
+    return []ent.Field{
+        // Primary key MUST use field number 1
+        field.Int64("id").
+            Annotations(entproto.Field(1)),
+
+        field.String("name").
+            NotEmpty().
+            Annotations(entproto.Field(2)),
+
+        field.String("email").
+            Unique().
+            NotEmpty().
+            Annotations(entproto.Field(3)),
+
+        // Enum field with entproto.Enum mapping
+        field.Enum("status").
+            Values("active", "inactive", "suspended").
+            Default("active").
+            Annotations(
+                entproto.Field(4),
+                entproto.Enum(map[string]int32{
+                    "active":    0,
+                    "inactive":  1,
+                    "suspended": 2,
+                }),
+            ),
+
+        field.Int64("role_id").
+            Optional().
+            Nillable().
+            Annotations(entproto.Field(5)),
+
+        field.Strings("tags").
+            Optional().
+            Default([]string{}).
+            Annotations(entproto.Field(6)),
+
+        field.Int64("created_at").
+            Immutable().
+            DefaultFunc(func() int64 { return time.Now().Unix() }).
+            Annotations(entproto.Field(7)),
+
+        field.Int64("updated_at").
+            DefaultFunc(func() int64 { return time.Now().Unix() }).
+            UpdateDefault(func() int64 { return time.Now().Unix() }).
+            Annotations(entproto.Field(8)),
+    }
+}
+
+func (User) Indexes() []ent.Index {
+    return []ent.Index{
+        index.Fields("email").Unique(),
+        index.Fields("status", "created_at"),
+    }
+}
+```
+
+### Key entproto Patterns
+
+| Pattern | Example |
+|---------|---------|
+| Schema annotation | `entproto.Message()` in `Annotations()` |
+| Primary key | `entproto.Field(1)` |
+| Regular field | `entproto.Field(2)`, `entproto.Field(3)` |
+| Enum field | `entproto.Field(n)` + `entproto.Enum(map[string]int32{...})` |
+| Import | `"entgo.io/contrib/entproto"` |
+
+### Enum Value Mapping Rules
+
+- Always start enum mapping from 0
+- Use meaningful numeric values that can be extended later
+- Document the mapping in schema comments
+
+```go
+// Good: starts from 0, extensible
+entproto.Enum(map[string]int32{
+    "pending":  0,
+    "active":   1,
+    "done":     2,
+})
+
+// Avoid: gap in numbering
+entproto.Enum(map[string]int32{
+    "pending":  0,
+    "active":   2,  // Bad: gap
+    "done":     3,
+})
+```
+
+---
+
+## 7. Post-Change Reminder
 
 After schema changes, run:
 
@@ -266,4 +388,8 @@ make gen/proto
 go test ./...
 ```
 
-Then verify generated diff is fully consumed.
+Then verify:
+1. All fields have `entproto.Field(n)` annotations
+2. Primary key uses field number 1
+3. Enum fields have `entproto.Enum` mapping
+4. Schema has `entproto.Message()` annotation

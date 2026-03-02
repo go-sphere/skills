@@ -48,8 +48,8 @@ Load conditionally when needed:
    - enum defaults
    - timestamp and soft-delete strategy
 4. Decide ID strategy:
-   - generator-managed by default
-   - custom `id` only with explicit business need and compatibility note
+   - **REQUIRED**: explicitly define primary key field with `entproto.Field(1)` for proto mapping
+   - custom `id` with explicit business need and compatibility note
 5. Decide relation strategy with fixed priority:
    - relation-entity > array (if dialect-safe) > join table > JSON fallback
 6. Build query-driven index plan from real list/filter/sort paths.
@@ -57,14 +57,19 @@ Load conditionally when needed:
    - weak relation IDs first
    - batch `IDIn(...)` retrieval and map backfill
    - chunk strategy for large ID sets
-8. Map repository integration impact:
+8. **Add entproto annotations** (REQUIRED for all schemas):
+   - Schema-level: add `entproto.Message()` in `Annotations()` method
+   - Field-level: add `entproto.Field(n)` annotation to each field
+   - Enum fields: use `entproto.Enum(map[string]int32{...})` for value mapping
+   - Field numbers: ID=1, then assign sequentially (2, 3, 4...)
+9. Map repository integration impact:
    - `cmd/tools/ent/main.go`
    - `cmd/tools/bind/main.go#createFilesConf`
    - render/dao/service touchpoints
-9. Add consistency controls:
-   - snapshot fields where history consistency matters
-   - dangling-reference checks when using weak relations
-10. Produce final brief with the required template.
+10. Add consistency controls:
+    - snapshot fields where history consistency matters
+    - dangling-reference checks when using weak relations
+11. Produce final brief with the required template.
 
 ## Hard Rules
 
@@ -76,6 +81,45 @@ for system-managed or sensitive fields.
    - `make gen/proto`
    - `go test ./...` (or explicit alternative)
 5. Always include a generation diff checklist for `entpb/proto/bind/map`.
+
+## EntProto Hard Rules (REQUIRED)
+
+All schemas MUST include entproto annotations for gRPC/proto generation:
+
+1. **Schema-level annotation**: Every schema MUST define `Annotations()` method returning `entproto.Message()`:
+   ```go
+   func (EntityName) Annotations() []schema.Annotation {
+       return []schema.Annotation{
+           entproto.Message(),
+       }
+   }
+   ```
+
+2. **Field-level annotation**: Every field MUST have `entproto.Field(n)` where n is the proto field number:
+   - Primary key field MUST use `entproto.Field(1)`
+   - Other fields use sequential numbers (2, 3, 4...)
+   ```go
+   field.String("name").
+       Annotations(entproto.Field(2))
+   ```
+
+3. **Enum field annotation**: Enum fields MUST include both `entproto.Field(n)` and `entproto.Enum(map[string]int32{...})`:
+   ```go
+   field.Enum("status").
+       Values("pending", "in_progress", "done").
+       Annotations(
+           entproto.Field(3),
+           entproto.Enum(map[string]int32{
+               "pending":     0,
+               "in_progress": 1,
+               "done":        2,
+           }),
+       )
+   ```
+
+4. **Import requirement**: Add `"entgo.io/contrib/entproto"` to imports.
+
+5. **Output must include**: In the Ent Implementation Plan section, show complete schema code with all `entproto.Field(n)` annotations.
 
 ## Failure Conditions
 
