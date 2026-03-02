@@ -104,15 +104,16 @@ All schemas MUST include entproto annotations for gRPC/proto generation:
    ```
 
 3. **Enum field annotation**: Enum fields MUST include both `entproto.Field(n)` and `entproto.Enum(map[string]int32{...})`:
+   - **IMPORTANT**: proto enumeration values must start from 1; 0 is reserved for invalid/illegal values.
    ```go
    field.Enum("status").
        Values("pending", "in_progress", "done").
        Annotations(
            entproto.Field(3),
            entproto.Enum(map[string]int32{
-               "pending":     0,
-               "in_progress": 1,
-               "done":        2,
+               "pending":     1,
+               "in_progress": 2,
+               "done":        3,
            }),
        )
    ```

@@ -303,15 +303,16 @@ func (User) Fields() []ent.Field {
             Annotations(entproto.Field(3)),
 
         // Enum field with entproto.Enum mapping
+        // NOTE: Proto enum values must start from 1, as 0 is reserved for invalid/unknown
         field.Enum("status").
             Values("active", "inactive", "suspended").
             Default("active").
             Annotations(
                 entproto.Field(4),
                 entproto.Enum(map[string]int32{
-                    "active":    0,
-                    "inactive":  1,
-                    "suspended": 2,
+                    "active":    1,
+                    "inactive":  2,
+                    "suspended": 3,
                 }),
             ),
 
@@ -356,23 +357,32 @@ func (User) Indexes() []ent.Index {
 
 ### Enum Value Mapping Rules
 
-- Always start enum mapping from 0
-- Use meaningful numeric values that can be extended later
+> **IMPORTANT**: proto enumeration values must start from 1; 0 is reserved for invalid/illegal values.
+
+- Always start enum mapping from 1 (not 0!)
+- Use sequential values that can be extended later
 - Document the mapping in schema comments
 
 ```go
-// Good: starts from 0, extensible
+// Good: starts from 1, extensible
 entproto.Enum(map[string]int32{
-    "pending":  0,
+    "pending":  1,
+    "active":   2,
+    "done":     3,
+})
+
+// Bad: starts from 0 (0 is reserved for invalid/unknown)
+entproto.Enum(map[string]int32{
+    "pending":  0,  // Bad!
     "active":   1,
     "done":     2,
 })
 
-// Avoid: gap in numbering
+// Bad: gap in numbering
 entproto.Enum(map[string]int32{
-    "pending":  0,
-    "active":   2,  // Bad: gap
-    "done":     3,
+    "pending":  1,
+    "active":   3,  // Bad: gap
+    "done":    4,
 })
 ```
 

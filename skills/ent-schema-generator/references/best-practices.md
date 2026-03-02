@@ -177,15 +177,17 @@ func (User) Fields() []ent.Field {
 
 Enum fields MUST include both `entproto.Field(n)` and `entproto.Enum(map[string]int32{...})`:
 
+> **IMPORTANT**: proto enumeration values must start from 1; 0 is reserved for invalid/illegal values.
+
 ```go
 field.Enum("status").
     Values("pending", "in_progress", "done").
     Annotations(
         entproto.Field(4),
         entproto.Enum(map[string]int32{
-            "pending":     0,
-            "in_progress": 1,
-            "done":        2,
+            "pending":     1,
+            "in_progress": 2,
+            "done":        3,
         }),
     )
 ```
