@@ -82,6 +82,59 @@ for system-managed or sensitive fields.
    - `go test ./...` (or explicit alternative)
 5. Always include a generation diff checklist for `entpb/proto/bind/map`.
 
+## EntProto Field Type Mapping Rules (REQUIRED)
+
+EntProto maps Ent field types to protobuf types. Follow these rules for optimal proto generation:
+
+### Recommended Field Types (proto3 mapping)
+
+| Ent Field Type | Proto Type | Notes |
+|----------------|------------|-------|
+| `field.Bool` | `bool` | |
+| `field.String` | `string` | |
+| `field.Bytes` | `bytes` | |
+| `field.UUID` | `bytes` | Requires app-level validation |
+| `field.Int/Int8/Int16/Int32` | `int32` | |
+| `field.Int64` | `int64` | |
+| `field.Uint/Uint8/Uint16/Uint32` | `uint32` | |
+| `field.Uint64` | `uint64` | |
+| `field.Float32` | `float` | |
+| `field.Float64` | `double` | |
+| `field.Time` | `google.protobuf.Timestamp` | Requires import |
+| `field.Enum` | `enum` | Requires `entproto.Enum` mapping |
+| `field.Strings` | `repeated string` | Recommended for string arrays |
+| `field.Ints` | `repeated int32` | ✅ Recommended for int arrays |
+| `field.Int64s` | `repeated int64` | ✅ Recommended for int64 arrays |
+| `field.Floats` | `repeated float` | ✅ Recommended for float arrays |
+| `field.Bools` | `repeated bool` | ✅ Recommended for bool arrays |
+
+### JSON Field Strategy (IMPORTANT)
+
+**Avoid `field.JSON` when possible** - it has limited proto mapping support:
+
+1. **First Choice**: Use typed arrays (`field.Strings`, `field.Ints`, etc.) for basic type collections
+2. **Second Choice**: Use relation/edge modeling for complex objects
+3. **Third Choice (fallback)**: Store JSON as string in `field.Text` if truly necessary
+
+```go
+// ✅ Good: Typed array for simple string collections
+field.Strings("tags").
+    Optional().
+    Default([]string{}).
+    Annotations(entproto.Field(6))
+
+// ✅ Good: JSON serialized to string for complex structures
+field.Text("metadata").
+    Optional().
+    Annotations(entproto.Field(7))
+// Application code: json.Marshal() / json.Unmarshal()
+
+// ❌ Avoid: JSON field with entproto (limited support)
+field.JSON("metadata", map[string]interface{}).
+    Optional().
+    Annotations(entproto.Field(7))
+```
+
 ## EntProto Hard Rules (REQUIRED)
 
 All schemas MUST include entproto annotations for gRPC/proto generation:

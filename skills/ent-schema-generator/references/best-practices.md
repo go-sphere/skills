@@ -128,6 +128,15 @@ When ID list is large:
 - Add denormalized snapshots for historical read consistency.
 - Prefer typed/array fields for proto-friendly contract evolution.
 - Use JSON only when requirement shape is truly open-ended and typed options fail.
+- When JSON is necessary, prefer `field.Text` with JSON string serialization over `field.JSON` for better entproto compatibility:
+  ```go
+  // Better: JSON as string
+  field.Text("metadata").Optional()
+  // App: json.Marshal() before save
+
+  // Avoid: field.JSON has limited entproto mapping
+  field.JSON("metadata", map[string]interface{}).Optional()
+  ```
 - When skipping foreign key constraints, add:
   - write-path existence validation (sync or async)
   - periodic dangling-reference checks

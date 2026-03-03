@@ -253,10 +253,21 @@ field.String("id").
 
 ## 5. Array Field Support Decision Flow
 
-1. Confirm array support in target DB dialect and migration chain.
-2. If supported, use typed arrays (`field.Strings/field.Ints/field.Int64s`) where appropriate.
-3. If unsupported or non-portable, prefer relation-entity or join table.
-4. Use JSON only as the final fallback, and document why typed models are not viable.
+1. **Confirm DB dialect support**: Check if target DB (PostgreSQL/MySQL) supports array types.
+2. **Prefer typed arrays**: Use `field.Strings/field.Ints/field.Int64s/field.Floats/field.Bools` for basic type collections.
+   - Maps cleanly to proto3 `repeated` fields
+   - Better query performance and type safety
+3. **Relation/Edge fallback**: If array is complex objects, use relation-entity or join table.
+4. **JSON string fallback** (last resort): If schema is truly open-ended, store as `field.Text` with JSON serialization:
+   ```go
+   // Store JSON as string when typed arrays aren't viable
+   field.Text("extra_data").
+       Optional().
+       Annotations(entproto.Field(10))
+   // App: json.Marshal(extraData) before save
+   ```
+
+> **Note**: Avoid `field.JSON(...)` with entproto - it has limited proto mapping support.
 
 ---
 
