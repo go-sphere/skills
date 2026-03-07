@@ -1,94 +1,118 @@
-# Output Template: Requirement -> DB Schema Brief
+# Output Template: Requirement → Schema Brief
 
-Use this template as the final response shape.  
-Keep section order unchanged and do not omit required fields.
+Use this exact template for all schema outputs. Keep section order unchanged.
+
+---
 
 ## 1) Input Summary
 
-- Source type: prompt / markdown / runnable demo / repository code
-- Business scope:
-- Assumptions:
-- Evidence priority or conflict resolution notes (if any):
+- **Source type**: prompt / markdown / proto / repository / runnable demo
+- **Business scope**:
+- **Assumptions** (if any):
+- **Evidence conflicts & resolution** (if any):
 
-## 2) Core Entities and Lifecycle
+---
 
-| Entity | Lifecycle Status | Key Timestamps | Constraints |
-|---|---|---|---|
+## 2) Core Entities
+
+| Entity | Lifecycle Field | Key Timestamps | Constraints |
+|--------|----------------|----------------|-------------|
 | | | | |
 
-## 3) Field Design Notes
+---
 
-- Schema comments:
-- Field comments:
-- Nullability policy (`Optional/Nillable` decisions):
-- Enum policy (prefer Ent `field.Enum`)/default:
-- Unique/immutable/default constraints:
-- Soft-delete policy:
-- Array candidates (typed-first when dialect-safe):
-- JSON exceptions (must justify why typed fields and arrays are insufficient):
+## 3) Field Design
+
+| Field | Type | Policy | Entproto # | Notes |
+|-------|------|--------|------------|-------|
+| | | | | |
+
+**Policy**: Required / Optional / Unique / Immutable / Default(value)
+
+**Nullability decisions**:
+**Enum definitions**:
+**Soft-delete policy** (if any):
+
+---
 
 ## 4) ID Strategy
 
-- ID source: generator-managed / custom field
-- If generator-managed, config location (e.g. ent tool config):
-- If custom, business reason and compatibility impact:
+- **Strategy**: generator-managed / custom field
+- **If generator-managed**: Default behavior, no config needed
+- **If custom**: Business reason + compatibility impact
 
-## 5) Relation Strategy
+---
 
-- One-to-many decisions:
-- Many-to-many decisions and rationale (relation-entity > array > join > JSON fallback):
-- Array field support check (dialect/cross-db constraints):
-- Weak relation ID naming convention:
+## 5) Relations
 
-## 6) Query-Driven Index Plan
+**One-to-many decisions**:
+**Many-to-many decisions** (relation-entity / array / join / JSON):
 
-| Query Pattern | Recommended Index | Reason |
-|---|---|---|
+---
+
+## 6) Index Plan
+
+| Query Pattern | Index | Justification |
+|--------------|-------|---------------|
 | | | |
 
-## 7) Ent Implementation Plan
+---
 
-- Optional edges only where clearly useful
-- Enum definitions centralized in schema code
-- Required comments/constraints checklist:
+## 7) Ent Implementation
 
-## 8) Go Batch Retrieval Plan (`WHERE IN`)
+- Schema annotations: `entproto.Message()` ✓
+- Fields with `entproto.Field(n)` ✓
+- Enum mapping with values from 1 ✓
+- Comments on key fields ✓
 
-- Source query:
-- ID collect + dedupe:
-- Chunk size:
-- Backfill map strategy:
-- Cross-service alternative (`BatchGet*` RPC):
+---
 
-## 9) Project Integration (sphere-layout)
+## 8) Batch Query Plan
 
-- ent tool config impact (`IDType` / features / autoproto):
-- bind registration impact (`cmd/tools/bind/main.go#createFilesConf`):
-- render/dao/service touchpoints:
-- `WithIgnoreFields` impact (timestamps/sensitive fields):
+- **Source query**:
+- **ID collection + dedupe**:
+- **Chunk size**:
+- **Backfill strategy**:
+
+---
+
+## 9) Integration Impact
+
+- **Bind registration**: New entity → `createFilesConf`
+- **WithIgnoreFields**: `created_at`, `updated_at`, sensitive fields
+- **Render/Service touchpoints**:
+- **Generation diff checklist**:
+  - [ ] entpb/proto generated
+  - [ ] bind/map changes consumed
+  - [ ] New entity registered
+
+---
 
 ## 10) Post-Change Commands
 
-- Schema/code generation commands (minimum):
-  - `make gen/proto`
-- Validation/lint commands (minimum):
-  - `go test ./...` (or explicit alternative)
+```bash
+make gen/proto
+go test ./...
+```
 
-## 11) Consistency and Risk Control
+---
 
-- Dangling reference checks:
-- Snapshot fields:
-- Migration/deferred decisions:
+## 11) Risk & Consistency
 
-## Generation Diff Checklist
+- **Dangling reference checks**:
+- **Snapshot fields**:
+- **Deferred decisions**:
 
-- entpb/proto definitions changed and consumed:
-- bind/map generated changes consumed by render/service:
-- new entity registered in bind config:
-- ignore-field rules reviewed (`created_at/updated_at`, sensitive fields):
+---
+
+## Blocking Notes
+
+(Add any incomplete items here with required action)
+
+---
 
 ## Output Constraints
 
-- Keep all 11 sections, even when a section has "N/A".
-- If assumptions are used, label them explicitly as assumptions.
-- If any required validation is missing, add a `Blocking Notes` line under the affected section.
+- Keep all 11 sections in order
+- Mark assumptions as `Assumption:` prefix
+- If section not applicable, write "N/A" explicitly

@@ -1,2 +1,4 @@
 /proto-api-generator-workspace
 **/evals/**
+.conductor
+.claude/settings.json

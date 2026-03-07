@@ -1,20 +1,20 @@
 # Go + Ent Service Patterns (sphere-layout)
 
+DAO/Service integration patterns for sphere-layout projects.
+
 ## Table of Contents
 
 1. ID De-duplication Helper
-2. DAO Batch Query Pattern
-3. DAO Chunked Batch Query Pattern
-4. Service List Pagination Pattern
-5. Render Post-Processing Pattern
-6. Bind Registration Pattern (`createFilesConf`)
-7. Sensitive Field Handling Pattern
-8. Post-Schema Generation Pattern
-9. New Entity Integration Checklist
+2. DAO Batch Query
+3. Chunked Batch Query
+4. Service Pagination
+5. Render Post-Processing
+6. Bind Registration
+7. Sensitive Field Handling
 
-## 1. ID De-duplication Helper
+---
 
-Use a helper before `IDIn(...)` to remove zero values, de-duplicate, and produce stable order.
+## 1. ID De-duplication
 
 ```go
 func UniqueSortedNonZero[T cmp.Ordered](origin []T) []T {
@@ -22,12 +22,8 @@ func UniqueSortedNonZero[T cmp.Ordered](origin []T) []T {
     seen := make(map[T]struct{}, len(origin))
     result := make([]T, 0, len(origin))
     for _, v := range origin {
-        if v == zero {
-            continue
-        }
-        if _, ok := seen[v]; ok {
-            continue
-        }
+        if v == zero { continue }
+        if _, ok := seen[v]; ok { continue }
         seen[v] = struct{}{}
         result = append(result, v)
     }
@@ -36,7 +32,9 @@ func UniqueSortedNonZero[T cmp.Ordered](origin []T) []T {
 }
 ```
 
-## 2. DAO Batch Query Pattern
+---
+
+## 2. DAO Batch Query
 
 ```go
 func (d *Dao) GetUsers(ctx context.Context, ids []int64) (map[int64]*ent.User, error) {
@@ -58,9 +56,11 @@ func (d *Dao) GetUsers(ctx context.Context, ids []int64) (map[int64]*ent.User, e
 }
 ```
 
-## 3. DAO Chunked Batch Query Pattern
+---
 
-Use chunking when ID sets can exceed practical SQL placeholder limits.
+## 3. Chunked Batch Query
+
+For large ID sets (>500):
 
 ```go
 func (d *Dao) GetUsersChunked(ctx context.Context, ids []int64) (map[int64]*ent.User, error) {
@@ -89,7 +89,9 @@ func (d *Dao) GetUsersChunked(ctx context.Context, ids []int64) (map[int64]*ent.
 }
 ```
 
-## 4. Service List Pagination Pattern
+---
+
+## 4. Service Pagination
 
 ```go
 query := s.db.Admin.Query()
@@ -101,23 +103,18 @@ if err != nil {
 totalPage, pageSize := conv.Page(count, int(req.PageSize))
 offset := pageSize * int(req.Page)
 if req.Page > 0 {
-    // Use this branch when request page is 1-based.
     offset = pageSize * int(req.Page-1)
 }
 
 rows, err := query.Clone().
-    Limit(pageSize).
-    Offset(offset).
+    Limit(pageSize).Offset(offset).
     Order(admin.ByID(sql.OrderDesc())).
     All(ctx)
-if err != nil {
-    return nil, err
-}
 ```
 
-## 5. Render Post-Processing Pattern
+---
 
-Use generated `entmap` as baseline and perform repository-specific post-processing in hook callback.
+## 5. Render Post-Processing
 
 ```go
 val, _ := entmap.ToProtoUser(value, func(source *ent.User, target *sharedv1.User) error {
@@ -126,53 +123,46 @@ val, _ := entmap.ToProtoUser(value, func(source *ent.User, target *sharedv1.User
 })
 ```
 
-## 6. Bind Registration Pattern (`createFilesConf`)
+---
 
-New entities must be registered in `cmd/tools/bind/main.go#createFilesConf`.
+## 6. Bind Registration
+
+Register in `cmd/tools/bind/main.go#createFilesConf`:
 
 ```go
 conf.NewEntity(
     ent.Example{},
     entpb.Example{},
     []any{ent.ExampleCreate{}, ent.ExampleUpdateOne{}},
-    conf.CheckOptions(bindMode, conf.WithIgnoreFields(example.FieldCreatedAt, example.FieldUpdatedAt)),
+    conf.CheckOptions(bindMode,
+        conf.WithIgnoreFields(example.FieldCreatedAt, example.FieldUpdatedAt)),
 )
 ```
 
-If entity is missing here, schema-only changes are incomplete.
+---
 
-## 7. Sensitive Field Handling Pattern
+## 7. Sensitive Field Handling
 
-Sensitive fields must be explicitly constrained in bind/render flows.
-
-- In bind mode, ignore system-managed fields such as `created_at/updated_at`.
-- In non-bind mapping/rendering, mask or clear sensitive fields (for example `password`, secrets).
-
-Pattern examples:
-- `conf.WithIgnoreFields(admin.FieldCreatedAt, admin.FieldUpdatedAt)`
-- `conf.WithIgnoreFields(admin.FieldPassword)`
-- Render stage explicit clear: `target.Password = ""`
-
-## 8. Post-Schema Generation Pattern
-
-After schema updates, run repository-native generation commands before testing.
-
-```bash
-make gen/proto
-go test ./...
+Bind mode — ignore system fields:
+```go
+conf.WithIgnoreFields(admin.FieldCreatedAt, admin.FieldUpdatedAt)
 ```
 
-This ensures Ent code, proto artifacts, and bind/map generated code are synchronized.
+Non-bind mode — mask sensitive fields:
+```go
+conf.WithIgnoreFields(admin.FieldPassword)
+// Or in render:
+target.Password = ""
+```
 
-## 9. New Entity Integration Checklist
+---
 
-1. Add Ent schema fields/indexes and comments.
-2. Confirm ID strategy (generator-managed by default).
-3. Add DTO/proto fields and service contracts.
-4. Register entity in `cmd/tools/bind/main.go#createFilesConf`.
-5. Add `WithIgnoreFields` review for timestamps/sensitive fields.
-6. Add render mapper and mutation binder consumption points.
-7. Add DAO batch helpers using `IDIn(...)` + dedupe helper.
-8. Verify array field portability in target DB; if unsupported, prefer relation tables.
-9. Run `make gen/proto`.
-10. Validate generated diff is fully consumed in render/service code.
+## New Entity Checklist
+
+1. Add Ent schema fields/indexes
+2. Register in `createFilesConf`
+3. Add `WithIgnoreFields` for timestamps/sensitive fields
+4. Add DAO batch helpers using `IDIn(...)`
+5. Verify render mapper consumes generated bind
+6. Run `make gen/proto`
+7. Validate generated diff consumed
