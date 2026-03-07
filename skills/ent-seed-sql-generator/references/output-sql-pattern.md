@@ -55,11 +55,44 @@ Choose one strategy and keep it consistent in the file:
 - `idempotent`: cleanup or conflict-safe inserts for reruns
 - `upsert`: update existing records where required by scenario
 
-Dialect examples:
+### Dialect-Specific Patterns
 
-- PostgreSQL: `ON CONFLICT (...) DO NOTHING/DO UPDATE`
-- SQLite: `INSERT OR IGNORE` or `ON CONFLICT (...) DO UPDATE`
-- MySQL: `INSERT IGNORE` or `ON DUPLICATE KEY UPDATE`
+**PostgreSQL:**
+```sql
+-- Idempotent: ON CONFLICT DO NOTHING
+INSERT INTO organizations (id, name, slug)
+VALUES (2001, 'Acme', 'acme')
+ON CONFLICT (id) DO NOTHING;
+
+-- Upsert: ON CONFLICT DO UPDATE
+INSERT INTO users (id, email, status)
+VALUES (1001, 'admin@acme.dev', 'active')
+ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
+```
+
+**MySQL:**
+```sql
+-- Idempotent: INSERT IGNORE
+INSERT IGNORE INTO organizations (id, name, slug)
+VALUES (2001, 'Acme', 'acme');
+
+-- Upsert: ON DUPLICATE KEY UPDATE
+INSERT INTO users (id, email, status)
+VALUES (1001, 'admin@acme.dev', 'active')
+ON DUPLICATE KEY UPDATE status = VALUES(status);
+```
+
+**SQLite:**
+```sql
+-- Idempotent: INSERT OR IGNORE
+INSERT OR IGNORE INTO organizations (id, name, slug)
+VALUES (2001, 'Acme', 'acme');
+
+-- Upsert: ON CONFLICT DO UPDATE
+INSERT INTO users (id, email, status)
+VALUES (1001, 'admin@acme.dev', 'active')
+ON CONFLICT(id) DO UPDATE SET status = excluded.status;
+```
 
 ## Authoring Rules
 
@@ -67,6 +100,7 @@ Dialect examples:
 - Keep table blocks in dependency order.
 - Prefer multi-row `VALUES` blocks when readable.
 - Keep comments concise and audit-friendly.
+- Use consistent timestamp format for the dialect.
 
 ## Optional Verification Queries
 
@@ -77,3 +111,15 @@ SELECT COUNT(*) AS org_count FROM organizations;
 SELECT COUNT(*) AS user_count FROM users;
 SELECT COUNT(*) AS project_count FROM projects;
 ```
+
+## ID Range Convention (Recommended)
+
+Use consistent ranges across your seed files:
+
+| Table Prefix | ID Range   | Example |
+|-------------|------------|---------|
+| users       | 1000-1999  | 1001, 1002 |
+| organizations | 2000-2999 | 2001, 2002 |
+| projects    | 3000-3999  | 3001, 3002 |
+| roles       | 4000-4999  | 4001, 4002 |
+| items       | 5000-5999  | 5001, 5002 |

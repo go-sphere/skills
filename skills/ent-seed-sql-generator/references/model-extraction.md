@@ -23,11 +23,32 @@ For each table/entity, capture:
 - Enum/state fields and allowed values
 - Audit fields (`created_at`, `updated_at`, `deleted_at`)
 
-For Ent projects, inspect:
+### Ent-Specific Field Annotations
 
-- `field.*` options (`Optional`, `Nillable`, `Unique`, `Default`, `Immutable`, `Sensitive`)
-- `edge.To`/`edge.From` and `Required`/`Unique`
-- enum/value validation constraints
+When extracting from Ent schemas, recognize these patterns:
+
+**Field Types to SQL Mapping:**
+| Ent Field Type | SQL Column Type | Notes |
+|----------------|-----------------|-------|
+| `field.Int` | INT/BIGINT | Check for `uint` variant |
+| `field.String` | VARCHAR/TEXT | Note `Size()` if present |
+| `field.Bool` | TINYINT/BOOLEAN | |
+| `field.Time` | DATETIME/TIMESTAMP | Note timezone settings |
+| `field.JSON` | JSON/TEXT | |
+| `field.Enum` | ENUM/VARCHAR | Extract values from constraint |
+
+**Important Ent Options:**
+- `Unique()`: Single-column unique constraint
+- `Required()`: NOT NULL constraint
+- `Default(value)`: Default value expression
+- `Immutable()`: Cannot be updated after creation
+- `Sensitive()`: Marked as sensitive data
+- `Nillable()`: Allows NULL values (but avoid for entproto)
+
+**Entproto Annotations:**
+If `entproto` package is used, check for:
+- `entproto.Field(n)`: Field number in protobuf
+- `entproto.MapField()`: Custom mapping
 
 ## Step 2: Relationship Graph
 
@@ -36,6 +57,18 @@ Capture cardinality and FK ownership:
 - 1-N: parent FK in child
 - 1-1: unique FK or shared PK strategy
 - N-N: explicit join table plus unique pair policy
+
+**Ent Edge Patterns:**
+```go
+// 1-N: Organization has many Users
+edge.From("users", User.Type).Ref("organization").Required()
+
+// N-N: User has many Roles through user_roles
+edge.From("roles", Role.Type).Ref("users").Through("user_roles", UserRole.Type)
+
+// 1-1: User has one Profile (unique)
+edge.From("profile", Profile.Type).Ref("user").Unique()
+```
 
 Output a dependency order for inserts (topological order).
 
