@@ -1,68 +1,85 @@
 # Change Checklist (sphere-layout)
 
-## Table of Contents
+## Quick Checklist
 
-1. Pre-Change Checklist
-2. In-Change Checklist
-3. Workflow-Specific Checklist
-4. Post-Change Checklist
-5. Common Blocking Issues
+### Before Starting
+- [ ] Workflow classified (Contract/Schema/Service/Cross)
+- [ ] Service namespace + route ownership confirmed
+- [ ] Proto + schema impact confirmed
+- [ ] Backward compatibility identified
+- [ ] Existing packages checked for reuse
+
+### During Change
+- [ ] Source-of-truth edited first
+- [ ] Business errors stay in owning proto
+- [ ] `createFilesConf` updated if schema changed
+- [ ] `WithIgnoreFields` covers timestamps/soft-delete/secrets
+- [ ] DAO query shape avoids N+1
+- [ ] NO edits to `entbind/**` or `entmap/**`
+
+### After Change
+- [ ] Generation commands run
+- [ ] Tests pass
+- [ ] No generated files manually edited
+- [ ] Reuse decision documented
+- [ ] Compatibility impact reported
+
+---
 
 ## 1. Pre-Change Checklist
 
-- [ ] Classify workflow (`Contract-first`, `Schema-first`, `Service-only`, or `Cross-layer`).
-- [ ] Confirm impacted service namespace and route prefix ownership.
-- [ ] Confirm whether both `proto` and `schema` layers are affected.
-- [ ] Identify backward compatibility constraints.
-- [ ] Check whether existing Sphere packages already provide the capability.
+- [ ] Classify workflow (Contract/Schema/Service/Cross)
+- [ ] Confirm service namespace and route prefix ownership
+- [ ] Confirm proto + schema layer impact
+- [ ] Identify backward compatibility constraints
+- [ ] Check existing Sphere packages first
 
 ## 2. In-Change Checklist
 
-- [ ] Modify source-of-truth files first.
-- [ ] Keep service-local business errors in the owning `.proto` unless sharing is required.
-- [ ] If schema evolves, review `cmd/tools/bind/main.go#createFilesConf` coverage.
-- [ ] Review ignore-field strategy for timestamps, soft-delete fields, and secrets.
-- [ ] Align DAO query shape with response shape to avoid N+1 paths.
-- [ ] Reuse existing Sphere packages before introducing new abstractions.
-- [ ] Do not edit generated render files (`internal/pkg/render/entbind/**`, `internal/pkg/render/entmap/**`).
+- [ ] Modify source-of-truth files first
+- [ ] Keep business errors in owning proto unless sharing required
+- [ ] Update `cmd/tools/bind/main.go#createFilesConf` if schema changes
+- [ ] Review `WithIgnoreFields` for timestamps, soft-delete, secrets
+- [ ] Align DAO query shape with response (avoid N+1)
+- [ ] Reuse existing Sphere packages before new abstractions
+- [ ] DO NOT edit `entbind/**` or `entmap/**`
 
 ## 3. Workflow-Specific Checklist
 
 ### Contract-first
-
-- [ ] `proto/**` contract changes are complete and internally consistent.
-- [ ] `make gen/proto` has been run after contract changes.
-- [ ] Service/DAO/render code consumes generated contract changes.
-- [ ] `make gen/docs` ran if HTTP/OpenAPI output changed.
+- [ ] `proto/**` complete and consistent
+- [ ] `make gen/proto` ran
+- [ ] Service/DAO/render consumes generated changes
+- [ ] `make gen/docs` if HTTP changed
 
 ### Schema-first
-
-- [ ] Ent schema field/relation/index policy is complete.
-- [ ] Bind/map registration impact is handled in `createFilesConf`.
-- [ ] `WithIgnoreFields` policy covers sensitive/system-managed fields.
-- [ ] `make gen/proto` has been run and downstream code is aligned.
+- [ ] Schema field/relation/index complete
+- [ ] `createFilesConf` updated
+- [ ] `WithIgnoreFields` covers sensitive fields
+- [ ] `make gen/proto` ran, downstream aligned
 
 ### Service-only
-
-- [ ] No unintended contract/schema changes were introduced.
-- [ ] Business behavior changes are implemented in non-generated files only.
-- [ ] Permission, transaction, and idempotency paths are validated where applicable.
+- [ ] No proto/schema changes introduced
+- [ ] Changes in non-generated files only
+- [ ] Permission/transaction/idempotency validated
 
 ## 4. Post-Change Checklist
 
-- [ ] Required generation commands were run (`gen/proto`, `gen/docs`, `gen/wire` as applicable).
-- [ ] Tests were run (`go test ./...` or scoped suites).
-- [ ] No manual edits exist in generated files.
-- [ ] Reuse decision is documented (selected Sphere packages and rationale).
-- [ ] Compatibility impact and residual risks are reported.
+- [ ] Generation commands run (gen/proto, gen/docs, gen/wire)
+- [ ] Tests pass (`go test ./...`)
+- [ ] NO manual edits in generated files
+- [ ] Reuse decision documented
+- [ ] Compatibility + risks reported
 
 ## 5. Common Blocking Issues
 
-1. Workflow type is not classified, causing partial updates.
-2. Schema changed, but bind/map registration was not updated.
-3. Proto changed, but generation commands were not executed.
-4. Generated diffs exist, but service/dao/render logic was not aligned.
-5. Sensitive fields are exposed due to missing ignore-field policy.
-6. Route wildcard/prefix drift introduces runtime conflicts.
+| Issue | Fix |
+|-------|-----|
+| Workflow not classified | Classify before proceeding |
+| Schema changed, bind/map not | Update `createFilesConf` |
+| Proto changed, no gen | Run `make gen/proto` |
+| Generated diffs not consumed | Update service/dao/render |
+| Sensitive fields exposed | Add to `WithIgnoreFields` |
+| Route conflicts | Check route prefixes |
 
-When any blocking issue appears, stop and return `Blocking Issues` with a fix plan before claiming completion.
+**When blocking → output `Blocking Issues` + fix plan**

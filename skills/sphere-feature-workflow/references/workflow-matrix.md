@@ -1,77 +1,79 @@
 # Workflow Matrix (sphere-layout)
 
-## Table of Contents
+## Quick Decision Guide
 
-1. Preflight Classification
-2. Change Type to Workflow
-3. Minimal File Touchpoints
-4. Command Policy
-5. Delivery Gate
+| Question | Answer | Workflow |
+|----------|--------|----------|
+| Changes external API/validation/error contract? | Yes | **Contract-first** |
+| Changes persisted fields/relations/indexes? | Yes | **Schema-first** |
+| Only changes orchestration/query/render? | Yes | **Service-only** |
+| Multiple "yes" answers? | - | **Cross-layer** |
+
+> **Tip**: Start with `Contract-first` for Cross-layer unless the primary change is clearly schema-related.
+
+---
 
 ## 1. Preflight Classification
 
-Run these checks before editing files:
+Run these checks **before** editing any files:
 
-1. Does the request change external API behavior, route shape, validation, or error contract?
-- Yes -> `Contract-first`
-2. Does the request change persisted fields, entity relations, or index/query strategy?
-- Yes -> `Schema-first`
-3. Does the request only change orchestration/query/render logic without contract/schema changes?
-- Yes -> `Service-only`
-4. If two or more answers are `Yes`, treat as `Cross-layer`:
-- pick `Contract-first` or `Schema-first` as the entry workflow
-- complete all affected downstream layers before delivery
+1. **API/Contract impact?**
+   - Changes to route shape, validation, error contracts → `Contract-first`
 
-## 2. Change Type to Workflow
+2. **Schema/Database impact?**
+   - Changes to fields, relations, indexes, queries → `Schema-first`
 
-| Change type | Start point | Primary source of truth | Required workflow |
-| --- | --- | --- | --- |
-| API contract change | `proto/**` | `.proto` files | Contract-first |
-| DB model change | `internal/pkg/database/schema/**` | Ent schema files | Schema-first |
-| Business behavior change only | `internal/service/**` / `internal/pkg/dao/**` | Service and DAO code | Service-only |
-| Cross-layer feature | `proto/**` + `schema/**` + service | Proto + schema | Contract-first or Schema-first, then merge |
+3. **Service-only?**
+   - Orchestration/query/render changes only, no contract/schema → `Service-only`
+
+4. **Cross-layer?**
+   - Two or more "yes" → pick entry point, complete all layers
+
+## 2. Change Type → Workflow Mapping
+
+| Change Type | Start Point | Source of Truth | Workflow |
+|-------------|-------------|-----------------|----------|
+| API contract | `proto/**` | `.proto` files | **Contract-first** |
+| DB model | `internal/pkg/database/schema/**` | Ent schema files | **Schema-first** |
+| Business behavior only | `internal/service/**` / `internal/pkg/dao/**` | Service/DAO code | **Service-only** |
+| Cross-layer | `proto/**` + `schema/**` + service | Proto + schema | **Cross-layer** |
 
 ## 3. Minimal File Touchpoints
 
 ### Contract-first
-
-1. `proto/**`: service/rpc/message/error changes.
-2. `internal/service/**`: implement generated server interface behavior.
-3. `internal/pkg/dao/**`: query/mutation support for contract behavior.
-4. `internal/pkg/render/**` non-generated files: response shaping and error mapping.
+1. `proto/**` - service/rpc/message/error changes
+2. `internal/service/**` - implement generated server interface
+3. `internal/pkg/dao/**` - query/mutation for contract behavior
+4. `internal/pkg/render/**` non-generated - response shaping, error mapping
 
 ### Schema-first
-
-1. `internal/pkg/database/schema/**`: fields/indexes/relations/comments.
-2. `cmd/tools/bind/main.go`: `createFilesConf` registration and ignore-field policy.
-3. `internal/service/**` + `internal/pkg/dao/**` + `internal/pkg/render/**`: consume generated type changes.
-4. `proto/**` (optional): only when external contract must expose new schema fields.
+1. `internal/pkg/database/schema/**` - fields/indexes/relations
+2. `cmd/tools/bind/main.go#createFilesConf` - bind/map registration
+3. `internal/service/**` + `dao/**` + `render/**` - consume generated types
+4. `proto/**` (optional) - if external contract needs new fields
 
 ### Service-only
-
-1. `internal/service/**`: API behavior and orchestration.
-2. `internal/pkg/dao/**`: query composition and batch strategy.
-3. `internal/pkg/render/**` non-generated files: masking, shaping, and compatibility behavior.
-4. `internal/biz/**` (optional): shared domain orchestration.
+1. `internal/service/**` - API behavior orchestration
+2. `internal/pkg/dao/**` - query composition
+3. `internal/pkg/render/**` non-generated - masking, shaping
+4. `internal/biz/**` (optional) - shared domain orchestration
 
 ## 4. Command Policy
 
-| Trigger | Command | Expected result |
-| --- | --- | --- |
-| Any proto/schema change | `make gen/proto` | Ent/proto/bind/map artifacts are synchronized |
-| HTTP/OpenAPI impact | `make gen/docs` | Swagger/OpenAPI artifacts are refreshed |
-| DI signature/provider change | `make gen/wire` | `wire_gen.go` is updated |
-| Runtime verification | `go test ./...` (or scoped suites) | behavior-level safety check |
+| Trigger | Command | Expected Result |
+|---------|---------|-----------------|
+| Proto/schema change | `make gen/proto` | Ent/proto/bind/map synchronized |
+| HTTP/OpenAPI impact | `make gen/docs` | Swagger refreshed |
+| DI signature change | `make gen/wire` | `wire_gen.go` updated |
+| Validation | `go test ./...` | Behavior safety check |
 
-## 5. Delivery Gate
+## 5. Delivery Gate (All Must Pass)
 
-Only mark task complete when all statements are true:
+- [ ] Workflow type explicitly stated
+- [ ] Source-of-truth edits complete and consistent
+- [ ] Required generation commands ran successfully
+- [ ] Generated changes consumed by service/dao/render
+- [ ] NO manual edits in generated files
+- [ ] Validation results and risks reported
 
-1. The workflow type is explicitly stated (`Contract-first`, `Schema-first`, `Service-only`, or `Cross-layer`).
-2. Source-of-truth edits are complete and internally consistent.
-3. Required generation commands ran successfully.
-4. Generated changes are consumed by service/dao/render behavior.
-5. No manual edits exist in generated files.
-6. Validation results and residual risks are reported.
-
-If any gate fails, stop and report `Blocking Issues` plus a concrete fix plan.
+**If any gate fails → output `Blocking Issues` + fix plan**
