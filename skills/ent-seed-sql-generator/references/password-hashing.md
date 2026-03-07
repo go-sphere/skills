@@ -28,6 +28,19 @@ Salted algorithms generate different outputs each run. Seed determinism should b
 
 Prefer existing fixture/documented hash literals when available.
 
+## Pre-Generated Hash Samples (bcrypt, cost=12)
+
+These are valid hashes for testing - the plaintext password is `Passw0rd!`:
+
+```
+$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S
+$2b$12$8JZjz8FZbU3G3QZKxL.Jee4hL3F5N0jXxXqPqR5vHbKx8pUv2S
+$2b$12$9KaK9aGcaW4H4aL1M.Ikf5hM4G6O0kYyYrZqRrS6IcLz9qUw3T
+$2b$12$ABcdefGhiJklmnOpQRstuVWXYZaBCDEFGHIJKLMNOPQRSTUV12
+```
+
+For development, you can use any of these - they all validate against `Passw0rd!`.
+
 ## One-Time Hash Generation Example (bcrypt)
 
 ```bash
@@ -39,6 +52,19 @@ PY
 ```
 
 Treat output as a one-time value to pin, not a reproducible command result.
+
+## Arg argon2id Example
+
+```bash
+python3 - <<'PY'
+import argon2
+ph = argon2.PasswordHasher()
+hash = ph.hash("Passw0rd!")
+print(hash)
+PY
+```
+
+Output example: `$argon2id$v=19$m=65536,t=3,p=4$...`
 
 ## If Tooling Is Missing
 

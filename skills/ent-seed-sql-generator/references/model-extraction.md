@@ -36,6 +36,18 @@ When extracting from Ent schemas, recognize these patterns:
 | `field.Time` | DATETIME/TIMESTAMP | Note timezone settings |
 | `field.JSON` | JSON/TEXT | |
 | `field.Enum` | ENUM/VARCHAR | Extract values from constraint |
+| `field.Bytes` | BLOB/VARBINARY | Binary data |
+| `field.Float` | FLOAT/DOUBLE | Decimal numbers |
+| `field.UUID` | UUID/VARCHAR | Check generation strategy |
+
+**Complex Field Types:**
+| Ent Field Type | SQL Column Type | Seed Format |
+|----------------|-----------------|-------------|
+| `field.JSON` | JSON/JSONB | `'{"key": "value"}'` |
+| `field.JSON` (MySQL) | JSON | `'{"key": "value"}'` |
+| `field.JSON` (PostgreSQL) | JSONB | `'{"key": "value"}'::jsonb` |
+| Array field (PostgreSQL) | TEXT[] | `ARRAY['a', 'b']::text[]` |
+| `field.Bytes` | BLOB | `X'48656C6C6F'` (hex) |
 
 **Important Ent Options:**
 - `Unique()`: Single-column unique constraint

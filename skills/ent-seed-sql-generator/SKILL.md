@@ -1,13 +1,13 @@
 ---
 name: ent-seed-sql-generator
-description: Generate deterministic INSERT SQL seed data from Go Ent schemas and mixed inputs. This skill is REQUIRED whenever you need to create seed SQL for development or testing - it handles entity inference, relationship integrity, stable IDs, and dialect-specific SQL generation. Use this skill for any task involving seed data, test fixtures, demo initialization, or database population from Ent schema definitions, even if the user doesn't explicitly mention "seed" or "SQL".
+description: Generate deterministic INSERT SQL seed data from Go Ent schemas and mixed inputs. This skill is REQUIRED whenever you need to create seed SQL for development or testing - it handles entity inference, relationship integrity, stable IDs, and dialect-specific SQL generation including JSON, arrays, and complex types. Use this skill for any task involving seed data, test fixtures, demo initialization, or database population from Ent schema definitions, even if the user doesn't explicitly mention "seed" or "SQL".
 ---
 
 # Ent Seed SQL Generator
 
 ## Goal
 
-Produce one executable seed SQL artifact from Ent schemas and mixed evidence, with deterministic IDs, valid relationships, and realistic domain data.
+Produce one executable seed SQL artifact from Ent schemas and mixed evidence, with deterministic IDs, valid relationships, and realistic production-like domain data with proper data coherence.
 
 ## Trigger / Non-Trigger
 
@@ -147,6 +147,23 @@ If entities have `deleted_at` or similar soft-delete columns:
 - For `DEFAULT CURRENT_TIMESTAMP` columns, you may omit from INSERT (let DB handle it)
 - If explicit, ensure timezone consistency
 
+### JSON/JSONB Fields
+- For PostgreSQL: use `'{"key": "value"}'::jsonb` or `'{"key": "value"}'::json`
+- For MySQL: use `'{"key": "value"}'` (native JSON type)
+- For SQLite: use `'{"key": "value"}'` (TEXT storage)
+- Generate realistic nested structures matching production patterns
+- Include varied values to demonstrate data shape diversity
+
+### Array Fields (PostgreSQL)
+- Use `ARRAY['value1', 'value2']` syntax
+- Ensure elements match the column's element type
+- Empty arrays: `ARRAY[]::text[]` with explicit cast
+
+### Boolean Fields
+- PostgreSQL/MySQL: `TRUE`/`FALSE` or `1`/`0`
+- SQLite: `1`/`0` preferred
+- Mix `TRUE` and `FALSE` values realistically
+
 ### Enum Fields
 - Check Ent schema for enum values via `field.Enum` or validation rules
 - Use only valid enum values in seed data
@@ -164,6 +181,14 @@ If entities have `deleted_at` or similar soft-delete columns:
 ### Complex Unique Constraints
 - For composite unique constraints, ensure all columns together are unique
 - Document any composite unique assumptions in header
+
+### Realistic Data Coherence
+- **User data**: Use real email patterns (`firstname.lastname@company.dev`)
+- **Organization slugs**: Lowercase, hyphenated, meaningful
+- **Timestamps**: Spread across reasonable time ranges, not all identical
+- **Status distributions**: Mix of active/inactive/draft based on business logic
+- **Numeric values**: Realistic ranges (not all 0 or max values)
+- **Text content**: Meaningful short/medium strings, not Lorem Ipsum
 
 ## Output Contract
 
@@ -184,6 +209,8 @@ Return exactly one seed SQL artifact (inline or file, per user request) with:
 - **Never expose production credentials**: Use test-only credentials. Never claim production security from seed data.
 - **Never mix dialects in one file**: Use consistent syntax for the detected dialect.
 - **Never omit required fields**: Check schema for Required() fields - they must be in every INSERT.
+- **Never use invalid JSON syntax**: Ensure JSON columns have valid JSON strings.
+- **Never use out-of-range enum values**: Validate against Ent schema enum definitions.
 
 ## Notes
 

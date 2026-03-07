@@ -29,20 +29,23 @@ BEGIN TRANSACTION;
 -- 1) organizations
 INSERT INTO organizations (id, name, slug, created_at)
 VALUES
-  (2001, 'Acme', 'acme', '2026-01-01 09:00:00'),
-  (2002, 'Nimbus', 'nimbus', '2026-01-01 09:05:00');
+  (2001, 'Acme Corp', 'acme-corp', '2026-01-15 08:30:00'),
+  (2002, 'TechStart Inc', 'techstart-inc', '2026-01-20 10:15:00');
 
 -- 2) users
 INSERT INTO users (id, org_id, email, display_name, password_hash, created_at)
 VALUES
-  (1001, 2001, 'admin@acme.dev', 'Acme Admin', '$2b$12$...', '2026-01-01 09:10:00'),
-  (1002, 2002, 'owner@nimbus.dev', 'Nimbus Owner', '$2b$12$...', '2026-01-01 09:11:00');
+  (1001, 2001, 'john.doe@acme-corp.dev', 'John Doe', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-15 09:00:00'),
+  (1002, 2001, 'jane.smith@acme-corp.dev', 'Jane Smith', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-16 14:30:00'),
+  (1003, 2002, 'alex@techstart-inc.dev', 'Alex Chen', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-20 11:00:00');
 
 -- 3) projects
 INSERT INTO projects (id, org_id, owner_id, name, status, created_at)
 VALUES
-  (3001, 2001, 1001, 'Mobile App', 'active', '2026-01-01 09:20:00'),
-  (3002, 2002, 1002, 'Growth Site', 'active', '2026-01-01 09:21:00');
+  (3001, 2001, 1001, 'Mobile App v2', 'active', '2026-01-17 10:00:00'),
+  (3002, 2001, 1002, 'Admin Dashboard', 'active', '2026-01-18 15:00:00'),
+  (3003, 2002, 1003, 'API Gateway', 'active', '2026-01-21 09:00:00'),
+  (3004, 2002, 1003, 'Legacy Migration', 'draft', '2026-02-01 11:30:00');
 
 COMMIT;
 ```
@@ -68,6 +71,14 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO users (id, email, status)
 VALUES (1001, 'admin@acme.dev', 'active')
 ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status;
+
+-- JSONB field
+INSERT INTO configs (id, settings)
+VALUES (5001, '{"theme": "dark", "notifications": true}'::jsonb);
+
+-- Array field
+INSERT INTO tags (id, labels)
+VALUES (6001, ARRAY['important', 'urgent']::text[]);
 ```
 
 **MySQL:**
@@ -80,6 +91,14 @@ VALUES (2001, 'Acme', 'acme');
 INSERT INTO users (id, email, status)
 VALUES (1001, 'admin@acme.dev', 'active')
 ON DUPLICATE KEY UPDATE status = VALUES(status);
+
+-- JSON field
+INSERT INTO configs (id, settings)
+VALUES (5001, '{"theme": "dark", "notifications": true}');
+
+-- Boolean with explicit values
+INSERT INTO features (id, enabled, locked)
+VALUES (7001, TRUE, FALSE);
 ```
 
 **SQLite:**
@@ -92,6 +111,10 @@ VALUES (2001, 'Acme', 'acme');
 INSERT INTO users (id, email, status)
 VALUES (1001, 'admin@acme.dev', 'active')
 ON CONFLICT(id) DO UPDATE SET status = excluded.status;
+
+-- JSON field (stored as TEXT)
+INSERT INTO configs (id, settings)
+VALUES (5001, '{"theme": "dark", "notifications": true}');
 ```
 
 ## Authoring Rules

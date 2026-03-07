@@ -1,4 +1,5 @@
 /proto-api-generator-workspace
+/ent-seed-sql-generator-workspace
 **/evals/**
 .conductor
 .claude/settings.json
