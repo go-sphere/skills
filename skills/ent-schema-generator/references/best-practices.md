@@ -1,6 +1,6 @@
 # Best Practices for DB Schema Summary (sphere-layout)
 
-Use this reference for schema decision-making rules.  
+Use this reference for schema decision-making rules.
 For response shape and section order, use `references/output-template.md`.
 
 ## Table of Contents
@@ -15,8 +15,8 @@ For response shape and section order, use `references/output-template.md`.
 8. Query with Batch `WHERE IN`
 9. Integrate with Bind/Render/Service Layers
 10. Improve Evolvability and Consistency
-11. EntProto Annotation Requirements
-12. Post-Change Commands and Validation
+11. EntProto Annotation Summary
+12. Post-Change Commands
 
 ## 1. Evidence Priority
 
@@ -57,11 +57,9 @@ Always report conflicts and resolution choices explicitly.
 
 ## 4. Decide ID Strategy
 
-- **REQUIRED for entproto**: Always explicitly define the primary key field with `entproto.Field(1)`.
-- Default: do not manually define `id` field in each schema.
-- Prefer centralized ent generator ID configuration when available.
-- Define custom `id` manually only for explicit business needs, and describe bind/proto impact.
-- **Avoid Optional for entproto fields**: Use zero-value defaults instead of `Optional()/Nillable()`.
+- Default: generator-managed ID (no manual `id` field needed).
+- Define custom `id` manually only for explicit business needs.
+- For entproto: explicitly define primary key field with `entproto.Field(1)`.
 
 ## 5. Decide Relation Strategy
 
@@ -128,121 +126,23 @@ When ID list is large:
 - Add denormalized snapshots for historical read consistency.
 - Prefer typed/array fields for proto-friendly contract evolution.
 - Use JSON only when requirement shape is truly open-ended and typed options fail.
-- When JSON is necessary, prefer `field.Text` with JSON string serialization over `field.JSON` for better entproto compatibility:
-  ```go
-  // Better: JSON as string
-  field.Text("metadata").Optional()
-  // App: json.Marshal() before save
-
-  // Avoid: field.JSON has limited entproto mapping
-  field.JSON("metadata", map[string]interface{}).Optional()
-  ```
-- When skipping foreign key constraints, add:
+- When JSON is necessary, prefer `field.Text` with JSON string serialization over `field.JSON` for better entproto compatibility.
+- When skipping foreign keys, add:
   - write-path existence validation (sync or async)
   - periodic dangling-reference checks
 
-## 11. EntProto Annotation Requirements
+## 11. EntProto Annotation Summary
 
-All schemas MUST be entproto-ready for gRPC/proto generation:
+All schemas MUST be entproto-ready. See [ent-schema-examples.md](ent-schema-examples.md) for full code patterns.
 
-### Schema-level Annotation
+**Key rules:**
+- Schema: `entproto.Message()` in `Annotations()` method
+- Fields: `entproto.Field(n)` where n=1 for primary key, then sequential
+- Enums: Add `entproto.Enum(map[string]int32{...})` - values MUST start from 1
+- Import: `"entgo.io/contrib/entproto"`
+- **Avoid Optional/Nillable** - use zero-value defaults instead
 
-Every schema MUST include `entproto.Message()`:
-
-```go
-import "entgo.io/contrib/entproto"
-
-func (EntityName) Annotations() []schema.Annotation {
-    return []schema.Annotation{
-        entproto.Message(),
-    }
-}
-```
-
-### Field-level Annotation
-
-Every field MUST have `entproto.Field(n)`:
-
-- Field number 1 is reserved for the primary key
-- Assign sequential numbers (2, 3, 4...) for other fields
-
-```go
-func (User) Fields() []ent.Field {
-    return []ent.Field{
-        field.Int64("id").
-            Annotations(entproto.Field(1)),  // Primary key = 1
-
-        field.String("name").
-            Annotations(entproto.Field(2)),
-
-        field.String("email").
-            Unique().
-            Annotations(entproto.Field(3)),
-    }
-}
-```
-
-### Enum Field Annotation
-
-Enum fields MUST include both `entproto.Field(n)` and `entproto.Enum(map[string]int32{...})`:
-
-> **IMPORTANT**: proto enumeration values must start from 1; 0 is reserved for invalid/illegal values.
-
-```go
-field.Enum("status").
-    Values("pending", "in_progress", "done").
-    Annotations(
-        entproto.Field(4),
-        entproto.Enum(map[string]int32{
-            "pending":     1,
-            "in_progress": 2,
-            "done":        3,
-        }),
-    )
-```
-
-### Avoid Optional/Nillable for EntProto Fields
-
-Proto’s `optional` type handling is cumbersome. **All fields annotated with entproto should avoid using `Optional()` or `Nillable()`**:
-
-```go
-// Bad: Optional with entproto
-field.Int64("deleted_at").
-    Optional().
-    Nillable().
-    Annotations(entproto.Field(10))
-
-// Good: Zero-value default
-field.Int64("deleted_at").
-    Default(0).
-    Annotations(entproto.Field(10))
-
-// Good: DefaultFunc for dynamic zero value
-field.Int64("created_at").
-    Immutable().
-    DefaultFunc(func() int64 { return time.Now().Unix() }).
-    Annotations(entproto.Field(7))
-
-// Good: Empty string default
-field.String("name").
-    Default("").
-    Annotations(entproto.Field(2))
-
-// Good: Empty slice default
-field.Strings("tags").
-    Default([]string{}).
-    Annotations(entproto.Field(6))
-```
-
-### Import Requirement
-
-Always add the entproto import:
-
-```go
-import "entgo.io/contrib/entproto"
-```
-
-## 12. Post-Change Commands and Validation
+## 12. Post-Change Commands
 
 Minimum commands after schema-affecting decisions:
 

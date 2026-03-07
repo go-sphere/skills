@@ -9,7 +9,7 @@ Use these examples as templates. They emphasize:
 - enum fields with Ent native `field.Enum` + entproto.Enum mapping
 - typed fields first (including arrays when dialect support is confirmed)
 
-> **IMPORTANT**: All schemas MUST include entproto annotations. See Section 7 for entproto requirements.
+> **IMPORTANT**: All schemas MUST include entproto annotations. All examples below include the required annotations.
 
 ## Table of Contents
 
@@ -31,6 +31,7 @@ package schema
 import (
     "time"
 
+    "entgo.io/contrib/entproto"
     "entgo.io/ent"
     "entgo.io/ent/schema/field"
     "entgo.io/ent/schema/index"
@@ -41,44 +42,69 @@ type Order struct {
     ent.Schema
 }
 
+func (Order) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entproto.Message(),
+    }
+}
+
 func (Order) Fields() []ent.Field {
     return []ent.Field{
+        // ID = 1 (primary key uses field number 1)
+        field.Int64("id").
+            Annotations(entproto.Field(1)),
+
         field.Int64("user_id").
-            Comment("Order owner user ID (weak relation, no hard foreign key)"),
+            Comment("Order owner user ID (weak relation, no hard foreign key)").
+            Annotations(entproto.Field(2)),
 
         field.String("order_no").
             NotEmpty().
             Unique().
-            Comment("Global unique order number"),
+            Comment("Global unique order number").
+            Annotations(entproto.Field(3)),
 
         field.Enum("status").
             Values("pending", "paid", "canceled", "done").
             Default("pending").
-            Comment("Order lifecycle status"),
+            Comment("Order lifecycle status").
+            Annotations(
+                entproto.Field(4),
+                entproto.Enum(map[string]int32{
+                    "pending":  1,
+                    "paid":     2,
+                    "canceled": 3,
+                    "done":     4,
+                }),
+            ),
 
         field.Int64("paid_at").
-            Optional().
-            Nillable().
-            Comment("Payment timestamp; nil when unpaid"),
+            Default(0).
+            Comment("Payment timestamp; 0 when unpaid").
+            Annotations(entproto.Field(5)),
 
         field.String("user_name_snapshot").
             Default("").
-            Comment("User name snapshot for historical consistency"),
+            Comment("User name snapshot for historical consistency").
+            Annotations(entproto.Field(6)),
 
         field.Strings("tags").
             Optional().
             Default([]string{}).
-            Comment("Order tags (use only when target DB supports arrays)"),
+            Comment("Order tags (use only when target DB supports arrays)").
+            Annotations(entproto.Field(7)),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("Creation time in Unix seconds"),
+            Comment("Creation time in Unix seconds").
+            Annotations(entproto.Field(8)),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("Last update time in Unix seconds"),
+            Comment("Last update time in Unix seconds").
+            Annotations(entproto.Field(9)),
     }
 }
 
@@ -106,6 +132,7 @@ package schema
 import (
     "time"
 
+    "entgo.io/contrib/entproto"
     "entgo.io/ent"
     "entgo.io/ent/schema/field"
     "entgo.io/ent/schema/index"
@@ -116,38 +143,58 @@ type OrderItem struct {
     ent.Schema
 }
 
+func (OrderItem) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entproto.Message(),
+    }
+}
+
 func (OrderItem) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("order_id").Comment("Order ID"),
-        field.Int64("product_id").Comment("Product ID"),
+        field.Int64("id").
+            Annotations(entproto.Field(1)),
+
+        field.Int64("order_id").
+            Comment("Order ID").
+            Annotations(entproto.Field(2)),
+
+        field.Int64("product_id").
+            Comment("Product ID").
+            Annotations(entproto.Field(3)),
 
         field.String("product_title_snapshot").
             NotEmpty().
-            Comment("Product title snapshot"),
+            Comment("Product title snapshot").
+            Annotations(entproto.Field(4)),
 
         field.Int64("price_snapshot").
             NonNegative().
-            Comment("Unit price snapshot at order time in cents"),
+            Comment("Unit price snapshot at order time in cents").
+            Annotations(entproto.Field(5)),
 
         field.Int32("quantity").
             Positive().
             Default(1).
-            Comment("Purchased quantity"),
+            Comment("Purchased quantity").
+            Annotations(entproto.Field(6)),
 
         field.Strings("coupon_codes").
             Optional().
             Default([]string{}).
-            Comment("Applied coupon codes (only when array is dialect-safe)"),
+            Comment("Applied coupon codes (only when array is dialect-safe)").
+            Annotations(entproto.Field(7)),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("Creation time in Unix seconds"),
+            Comment("Creation time in Unix seconds").
+            Annotations(entproto.Field(8)),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("Last update time in Unix seconds"),
+            Comment("Last update time in Unix seconds").
+            Annotations(entproto.Field(9)),
     }
 }
 
@@ -175,6 +222,7 @@ package schema
 import (
     "time"
 
+    "entgo.io/contrib/entproto"
     "entgo.io/ent"
     "entgo.io/ent/schema/field"
     "entgo.io/ent/schema/index"
@@ -185,35 +233,59 @@ type CouponGrant struct {
     ent.Schema
 }
 
+func (CouponGrant) Annotations() []schema.Annotation {
+    return []schema.Annotation{
+        entproto.Message(),
+    }
+}
+
 func (CouponGrant) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("coupon_id").Comment("Coupon ID"),
-        field.Int64("user_id").Comment("User ID"),
+        field.Int64("id").
+            Annotations(entproto.Field(1)),
+
+        field.Int64("coupon_id").
+            Comment("Coupon ID").
+            Annotations(entproto.Field(2)),
+
+        field.Int64("user_id").
+            Comment("User ID").
+            Annotations(entproto.Field(3)),
 
         field.Enum("status").
             Values("unused", "used", "expired").
             Default("unused").
-            Comment("Grant status"),
+            Comment("Grant status").
+            Annotations(
+                entproto.Field(4),
+                entproto.Enum(map[string]int32{
+                    "unused":  1,
+                    "used":    2,
+                    "expired": 3,
+                }),
+            ),
 
         field.Int64("used_at").
-            Optional().
-            Nillable().
-            Comment("Usage timestamp; nil when unused"),
+            Default(0).
+            Comment("Usage timestamp; 0 when unused").
+            Annotations(entproto.Field(5)),
 
         field.Int64("deleted_at").
-            Optional().
-            Nillable().
-            Comment("Soft-delete timestamp; nil when active"),
+            Default(0).
+            Comment("Soft-delete timestamp; 0 when active").
+            Annotations(entproto.Field(6)),
 
         field.Int64("created_at").
             Immutable().
             DefaultFunc(func() int64 { return time.Now().Unix() }).
-            Comment("Creation time in Unix seconds"),
+            Comment("Creation time in Unix seconds").
+            Annotations(entproto.Field(7)),
 
         field.Int64("updated_at").
             DefaultFunc(func() int64 { return time.Now().Unix() }).
             UpdateDefault(func() int64 { return time.Now().Unix() }).
-            Comment("Last update time in Unix seconds"),
+            Comment("Last update time in Unix seconds").
+            Annotations(entproto.Field(8)),
     }
 }
 
@@ -246,6 +318,7 @@ Always explain:
 field.String("id").
     Unique().
     Immutable().
+    Annotations(entproto.Field(1)).
     Comment("Business-defined primary key, for example external natural key")
 ```
 
