@@ -6,8 +6,52 @@ Provide a strict, stable output structure for generated API proposals.
 
 ## Usage
 
-Use this template in final responses with the same section order.
-Do not skip required sections.
+Choose the appropriate output format based on task complexity:
+
+- **Full Output**: Complex APIs with custom business logic, multiple services, or non-standard requirements
+- **Condensed Output**: Simple CRUD with clear patterns and obvious reuse decisions
+
+Do not skip required sections for the chosen format.
+
+## Condensed Output (Simple Tasks)
+
+For straightforward CRUD operations with clear reuse decisions, condense to these sections:
+
+### 1) Scaffold Fit Decision
+
+Brief table:
+| Target Package | Route Style | Notes |
+| --- | --- | --- |
+| dash.v1 | action-style | follows scaffold |
+
+### 2) Proto Structure Check
+
+Pass/fail table:
+| Check Item | Result |
+| --- | --- |
+| One service per file | pass |
+| Declaration order | pass |
+
+### 3) Proto3 Contract
+
+The actual proto file content.
+
+### 4) Reuse Decision
+
+Brief table:
+| Object | Choice | Reason |
+| --- | --- | --- |
+| User | entpb.User | existing model |
+
+### 5) Mandatory Confirmation
+
+`All required checks passed.`
+
+---
+
+## Full Output (Complex Tasks)
+
+For complex APIs, use all sections below.
 
 ## When To Load
 
@@ -15,6 +59,9 @@ Load this reference when formatting the final deliverable. Keep drafting notes s
 
 ## Table of Contents
 
+- [Usage](#usage) - Choose format based on task complexity
+- [Condensed Output (Simple Tasks)](#condensed-output-simple-tasks)
+- [Full Output (Complex Tasks)](#full-output-complex-tasks)
 - [1) Scaffold Fit Decision](#1-scaffold-fit-decision)
 - [2) Proto Structure Check](#2-proto-structure-check)
 - [3) Route Conflict Check](#3-route-conflict-check)

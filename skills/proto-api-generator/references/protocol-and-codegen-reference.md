@@ -8,7 +8,7 @@ Provide a full local copy of go-sphere protocol-first and code generation guidan
 
 - URL: https://go-sphere.github.io/docs/concepts/protocol-and-codegen/
 - Upstream markdown: https://raw.githubusercontent.com/go-sphere/go-sphere.github.io/master/content/docs/concepts/protocol-and-codegen.md
-- Last synced by this skill update: 2026-02-25
+- Last synced by this skill update: 2026-03-07
 
 ## How To Use This Reference
 

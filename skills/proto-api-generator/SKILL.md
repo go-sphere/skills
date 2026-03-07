@@ -1,6 +1,6 @@
 ---
 name: proto-api-generator
-description: Design proto3 + HTTP API contracts for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement.
+description: Design proto3 + HTTP API contracts for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch.
 ---
 
 # Proto API Generator
@@ -93,6 +93,16 @@ Use custom DTO/VO only when at least one condition is true:
 
 ## Workflow
 
+### Quick Path (Simple Tasks)
+For simple CRUD operations with clear reuse decisions:
+1. Classify file mode (`service proto` or `message-only proto`).
+2. Choose scaffold-compatible package/style.
+3. Draft proto with standard CRUD pattern.
+4. Skip detailed validation notes if the task is straightforward.
+5. Include core sections only: Proto Structure Check, Route Conflict Check (if service), Proto3 Contract.
+
+### Full Path (Complex Tasks)
+For APIs with custom business logic, multiple services, or complex routing:
 1. Classify file mode (`service proto` or `message-only proto`) per target file.
 2. Extract business use cases (`Create`, `Get`, `List`, `Patch/Update`, `BatchGet`) for `service proto`.
 3. Draft mock JSON for list/detail/error shapes before final proto drafting.
@@ -127,7 +137,8 @@ These are non-optional. If any gate fails, stop and output `Validation Notes -> 
 
 ## Output Contract
 
-Produce output in this exact order:
+### Full Output (Complex Tasks)
+For complex APIs with custom business logic, produce all sections in this order:
 
 1. `Scaffold Fit Decision`
 2. `Proto Structure Check`
@@ -144,9 +155,19 @@ Produce output in this exact order:
 13. `Blocking Issues` (only if any required check fails)
 14. `Mandatory Confirmation`
 
+### Condensed Output (Simple Tasks)
+For straightforward CRUD with clear reuse decisions, condense to:
+1. `Scaffold Fit Decision` (brief table)
+2. `Proto Structure Check` (pass/fail table)
+3. `Proto3 Contract` (the actual proto)
+4. `Reuse Decision` (brief table)
+5. `Mandatory Confirmation`
+
 Use [references/proto-output-template.md](references/proto-output-template.md) as the response shape.
 
 ## Quality Gates
+
+**Note on Output Format:** Choose condensed output for simple CRUD tasks with clear patterns. Use full output for complex APIs with custom business logic, multiple services, or non-standard requirements.
 
 Confirm all of the following before final delivery:
 

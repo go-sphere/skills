@@ -14,7 +14,7 @@ Load this reference whenever the output includes service routes, path templates,
 - HttpRouter README (Gin radix behavior model): https://raw.githubusercontent.com/julienschmidt/httprouter/master/README.md
 - Fiber routing guide: https://raw.githubusercontent.com/gofiber/fiber/v2/docs/guide/routing.md
 - Echo routing guide: https://raw.githubusercontent.com/labstack/echox/master/website/docs/guide/routing.md
-- Last synced by this skill update: 2026-02-25
+- Last synced by this skill update: 2026-03-07
 
 ## Why This Matters
 

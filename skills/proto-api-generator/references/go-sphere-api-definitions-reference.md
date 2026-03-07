@@ -8,7 +8,7 @@ Provide a full local copy of the official go-sphere API definitions guide so the
 
 - URL: https://go-sphere.github.io/docs/guides/api-definitions/
 - Upstream markdown: https://raw.githubusercontent.com/go-sphere/go-sphere.github.io/master/content/docs/guides/api-definitions.md
-- Last synced by this skill update: 2026-02-25
+- Last synced by this skill update: 2026-03-07
 
 ## How To Use This Reference
 
