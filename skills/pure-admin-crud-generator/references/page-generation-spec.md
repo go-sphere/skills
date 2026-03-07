@@ -1,6 +1,7 @@
 # Page Generation Specification
 
 ## Table of Contents
+- [Quick Reference](#quick-reference)
 - [Scope](#scope)
 - [1. Naming and Paths](#1-naming-and-paths)
 - [2. File Planning Rules](#2-file-planning-rules)
@@ -11,24 +12,34 @@
 - [7. Route Module Specification](#7-route-module-specification)
 - [8. API Call Usage and Runtime Safety](#8-api-call-usage-and-runtime-safety)
 - [9. Dashboard Variant](#9-dashboard-variant)
-- [10. Unified Async Status and Retry](#10-unified-async-status-and-retry)
-- [11. Optional VueUse Policy](#11-optional-vueuse-policy)
-- [12. Verification Checklist](#12-verification-checklist)
+- [10. Verification Checklist](#10-verification-checklist)
+
+## Quick Reference
+
+| Field Type | Component |
+|------------|-----------|
+| string | `el-input` |
+| number | `el-input-number` |
+| boolean | `el-switch` |
+| enum | `el-select` |
+| date/datetime | `el-date-picker` |
+| array (enum-like) | `el-select multiple` or `el-checkbox-group` |
+| long text | `el-input type="textarea"` |
+
+| Page | Required Elements |
+|------|-------------------|
+| index.vue | filter form, table, pagination, loading, delete confirm |
+| edit.vue | form with validation, route id parsing, create/edit mode |
+| detail.vue | route id parsing, descriptions card, empty state |
 
 ## Scope
 Generate module pages in:
-
 - `src/views/<module>/index.vue`
 - `src/views/<module>/edit.vue`
 - optional `src/views/<module>/detail.vue`
 - `src/router/modules/<module>.ts`
 
-Dashboard variant:
-
-- `src/views/<module>/dashboard.vue` can replace `index.vue` as main entry when dashboard-first output is requested.
-
 Tech constraints:
-
 - Vue 3 + `script setup` + TypeScript
 - Element Plus UI components
 - no reusable business component library generation
@@ -274,55 +285,12 @@ Dashboard quality baseline:
 
 For dashboard-specific details, also apply `dashboard-best-practices.md`.
 
-## 10. Unified Async Status and Retry
-Each async region should maintain:
+## 10. Verification Checklist
+Before final response, verify:
 
-- `loading`
-- `errorMessage`
-- success data payload
-
-UI behavior:
-
-- loading: `v-loading` or `el-skeleton`
-- error: inline `el-alert` with retry button
-- retry must call the same request function and keep current query state
-
-Do not rely on toast-only error handling.
-
-## 11. Optional VueUse Policy
-VueUse usage is optional.
-
-Example import:
-
-```ts
-import { useAsyncState } from "@vueuse/core";
-```
-
-Policy:
-
-1. first check whether `@vueuse/core` exists
-2. if missing, do not add dependency automatically
-3. if present, use VueUse only when complexity reduction is clear
-4. generated code must remain runnable under repository constraints
-
-Dependency check options:
-
-- inspect `package.json`
-- run `pnpm ls @vueuse/core --depth=0`
-
-When using VueUse, keep required behavior unchanged:
-
-- pagination mapping
-- id extraction logic
-- confirm dialogs and message feedback
-
-## 12. Verification Checklist
-Before final response:
-
-1. page imports compile
-2. route module compiles
-3. run `pnpm typecheck`
-4. no forbidden shared business component is introduced
-5. invalid route id handling is explicit in edit/detail pages
-6. server total semantics are preserved for paged APIs
-7. uncertain response field rendering is runtime-safe
+1. Page imports compile
+2. Route module compiles (`pnpm typecheck`)
+3. No forbidden shared business component introduced
+4. Invalid route id handling is explicit (show error, don't silently fallback)
+5. Server total semantics preserved for paged APIs
+6. Uncertain response fields use runtime-safe guards

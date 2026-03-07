@@ -1,6 +1,6 @@
 ---
 name: pure-admin-crud-generator
-description: Generate CRUD pages and router module files for pure-admin-thin by parsing src/api/swagger/Api.ts and src/api/api.ts in this repository. Use when asked to scaffold backend admin list/edit/detail pages, CRUD actions, and route modules from swagger-ts-api methods without external generators.
+description: Generate CRUD pages and router modules for pure-admin-thin from local swagger API definitions. MUST be used whenever you need to scaffold admin list/edit/detail pages, dashboard views, or route configurations from existing API methods in src/api/swagger/Api.ts. This skill replaces manual Vue page creation - use it for any admin panel development task involving API-driven pages.
 ---
 
 # Pure Admin Thin CRUD Generator
@@ -11,12 +11,20 @@ Generate runnable Vue pages under `src/views/<module>/` and route modules under 
 This is an AI-first generator skill. Do not use external OpenAPI generators and do not add helper codegen scripts.
 
 ## When to Use
-Use this skill when the user asks to scaffold or update pure-admin-thin admin pages from existing swagger methods, including:
+**ALWAYS use this skill** when the user asks to scaffold or update pure-admin-thin admin pages, including:
 
 - CRUD pages (`index.vue`, `edit.vue`, optional `detail.vue`)
 - dashboard-first admin pages
 - route module files under `src/router/modules`
 - action buttons backed by non-CRUD APIs (retry/enable/disable/export etc.)
+- ANY admin management interface in a pure-admin-thin project
+
+**Trigger examples:**
+- "Generate admin pages for user management"
+- "Create CRUD for voice-features module"
+- "Add dashboard view for analytics"
+- "Scaffold edit and detail pages for product management"
+- "Generate route module and views for order management"
 
 ## Hard Constraints
 1. Parse and generate from local `Api.ts` + `api.ts` only.
@@ -40,12 +48,17 @@ Read only when `pageMode=dashboard` or dashboard UI is explicitly requested:
 ## Input Contract
 Required and optional generation inputs:
 
-- `moduleSelector` (required): module tag/entity/path keyword.
+- `moduleSelector` (required): module tag/entity/path keyword (e.g., "user", "voice-features", "order").
 - `selectorMode` (optional, default `auto`): `auto | tag | entity | path`.
 - `forceDetailPage` (optional, default `auto`): `auto | true | false`.
 - `pageMode` (optional, default `crud`): `crud | dashboard | mixed`.
 - `routeBase` (optional, default `/<kebab-module>`).
 - `outputMode` (fixed): full file contents only.
+
+**Examples:**
+- User says: "Generate pages for user management" → `moduleSelector="user"`, infer module from API tags
+- User says: "Create dashboard for voice-generate-text" → `moduleSelector="voice-generate-text"`, `pageMode="dashboard"`
+- User says: "Add edit page for product module" → `moduleSelector="product"`, generate edit.vue + route module
 
 If the user provides only a vague module name, resolve with `selectorMode=auto` and explicitly state matched methods.
 
@@ -61,42 +74,67 @@ Use these local assumptions first:
 ## Workflow
 Follow this sequence every run.
 
-1. Resolve module and classify endpoints.
-Use `references/api-parsing-rules.md` for module resolution, CRUD/action classification, and tie-break rules.
+### Step 1: Parse API Definitions
+1. Read `src/api/swagger/Api.ts` to find methods matching the module
+2. Use `references/api-parsing-rules.md` for module resolution, CRUD/action classification
+3. Identify all matching endpoints: list, detail, create, update, delete, and actions
 
-2. Infer request/response structures.
-Identify query/form/detail fields, pagination keys, items key, and total key from local TypeScript types.
+### Step 2: Infer Data Structures
+1. Parse TypeScript types for request parameters (query, body, path)
+2. Identify response structures: items key (`records`, `list`, `items`), total key, detail payload
+3. Map pagination keys: `page`/`pageIndex` → internal 0-based, UI shows +1
 
-3. Decide file set.
-- `crud | mixed`: `index.vue`, `edit.vue`, route module, and optional `detail.vue`.
-- `dashboard`: `dashboard.vue` (or `index.vue` if appropriate), optional `edit.vue`, route module.
+### Step 3: Plan File Set
+- `crud | mixed`: `index.vue`, `edit.vue`, route module, optional `detail.vue`
+- `dashboard`: `dashboard.vue` (or `index.vue`), optional `edit.vue`, route module
 
-4. Generate pages by spec.
-Apply `references/page-generation-spec.md` and ensure mandatory behaviors:
-- safe route id parsing
-- 0-based backend paging mapped to 1-based UI paging
-- `ElMessageBox.confirm` for destructive operations
-- runtime-safe rendering for uncertain API field shapes
+### Step 4: Generate Pages
+Apply `references/page-generation-spec.md`:
+- safe route id parsing: `const id = computed(() => route.params.id ?? route.query.id)`
+- 0-based backend paging → 1-based UI mapping
+- `ElMessageBox.confirm` for delete/destructive actions
+- runtime-safe rendering: guard uncertain arrays with `Array.isArray()`
 
-5. Apply dashboard spec only when needed.
-For dashboard requests, apply `references/dashboard-best-practices.md` for layout, state regions, and visual quality.
+### Step 5: Apply Dashboard Spec (if needed)
+For dashboard requests, apply `references/dashboard-best-practices.md`:
+- filter row + metrics row + main content + actions
+- independent loading/error/retry per region
 
-6. Generate route module.
-Create `src/router/modules/<kebab-module>.ts` using repository route conventions.
+### Step 6: Generate Route Module
+Create `src/router/modules/<kebab-module>.ts`:
+```ts
+export default {
+  path: "/<module>",
+  redirect: "/<module>/index",
+  children: [
+    { path: "/<module>/index", component: () => import("@/views/<module>/index.vue") },
+    { path: "/<module>/edit/:id?", component: () => import("@/views/<module>/edit.vue") }
+  ]
+} satisfies RouteConfigsTable
+```
 
-7. Verify before final output.
-Run at least `pnpm typecheck`. Fix generated files if checks fail.
+### Step 7: Verify
+Run `pnpm typecheck`. Fix any errors in generated files.
 
-8. Return the result with the fixed contract.
-Use exactly the four output sections defined by `references/output-contract.md`.
+### Step 8: Output
+Return exactly the four sections defined by `references/output-contract.md`:
+1. Recognized APIs
+2. Files
+3. File Contents
+4. Route Registration
 
 ## Degrade Gracefully
 When full CRUD is not available:
 
-- generate only valid pages/operations
-- remove unsupported actions from UI
-- explicitly report missing CRUD endpoints
-- keep code runnable and predictable
+- Generate only valid pages/operations based on available endpoints
+- Remove unsupported actions from UI (e.g., no delete button if no delete endpoint)
+- Explicitly report missing CRUD endpoints in output section 1
+- Keep code runnable even when some operations are unavailable
+
+**Common degradation scenarios:**
+- Only list endpoint → generate list page only, disable create/edit/delete buttons
+- List + create only → generate index + edit (create mode), no edit for existing items
+- No detail endpoint → omit detail page or disable view action
 
 ## Optional VueUse Policy
 VueUse composables are optional. Use them only when complexity justifies it and `@vueuse/core` already exists in the project.
@@ -106,10 +144,15 @@ VueUse composables are optional. Use them only when complexity justifies it and 
 - when available in this session, `vueuse-functions` can be used for composable selection patterns
 
 ## Completion Checklist
-Before returning:
+Before returning, verify ALL of the following:
 
-1. Output section order matches `output-contract.md` exactly.
-2. Generated files compile under project typecheck.
-3. Pagination semantics preserve backend totals and page index mapping.
-4. Invalid route id handling is explicit and safe (no silent fallback to create mode).
-5. List filters reflect real API query fields (no fabricated backend filters).
+1. **Output format**: Section order matches `output-contract.md` exactly (Recognized APIs → Files → File Contents → Route Registration)
+2. **Type safety**: Generated files compile under `pnpm typecheck`
+3. **Pagination**: Internal state is 0-based, UI displays 1-based (`pageIndex + 1`)
+4. **Route id handling**: Invalid id shows error message, does NOT silently fallback to create mode
+5. **Filters**: Only include filters that match real API query parameters
+6. **Delete safety**: All delete/destructive actions use `ElMessageBox.confirm`
+7. **Runtime safety**: Uncertain API fields use `Array.isArray()` guards
+8. **Missing endpoints**: Explicitly report which CRUD operations are unavailable
+9. **Route module**: Root route redirects to `/index`, hidden routes use `showLink: false`
+10. **Dashboard quality** (if dashboard mode): Has filter + metrics + main content + actions, per-region retry

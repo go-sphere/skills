@@ -1,6 +1,7 @@
 # API Parsing Rules
 
 ## Table of Contents
+- [Quick Reference](#quick-reference)
 - [Scope](#scope)
 - [Parsing Output](#parsing-output)
 - [1. Module Resolution](#1-module-resolution)
@@ -10,6 +11,17 @@
 - [5. Conflict Resolution](#5-conflict-resolution)
 - [6. Current-Repo Priority Rules](#6-current-repo-priority-rules)
 - [7. Useful Extraction Commands](#7-useful-extraction-commands)
+
+## Quick Reference
+
+| Type | Path Pattern | Method Name | HTTP Verb |
+|------|-------------|-------------|-----------|
+| List | `/list` | Contains `List` | GET with pagination params |
+| Detail | `/detail/{id}` or `/{id}` | Contains `Detail` | GET |
+| Create | `/create` | Contains `Create` | POST |
+| Update | `/update` or `/{id}` | Contains `Update` | POST/PUT/PATCH |
+| Delete | `/delete` or `/{id}` | Contains `Delete` | DELETE |
+| Action | varies | Contains `retry/enable/disable/export/...` | varies |
 
 ## Scope
 Map swagger-ts-api methods in `src/api/swagger/Api.ts` to module CRUD capabilities for pure-admin-thin generation.
@@ -35,9 +47,9 @@ Prefer tags shaped like `dash.v1.<ServiceName>`.
 
 Examples:
 
-- `dash.v1.AdminService` -> `admin`
-- `dash.v1.UserService` -> `user`
-- `dash.v1.VoiceGenerateTextService` -> `voice-generate-text`
+- `dash.v1.AdminService` → `admin`
+- `dash.v1.UserService` → `user`
+- `dash.v1.VoiceGenerateTextService` → `voice-generate-text`
 
 Conversion rule:
 
@@ -49,8 +61,8 @@ If service tag is missing or generic, fallback to path.
 
 Examples:
 
-- `/api/voice-features/list` -> `voice-features`
-- `/api/voice-generate/list` -> `voice-generate`
+- `/api/voice-features/list` → `voice-features`
+- `/api/voice-generate/list` → `voice-generate`
 
 ## 2. Endpoint Classification
 Classify methods by request metadata and method naming.
@@ -117,40 +129,33 @@ Inference order:
 Internal page state must be 0-based.
 
 ### 4.1 Query keys
-Interpret query keys:
-
-- page-like: `page`, `pageIndex`, `pageNo`, `current`
-- size-like: `size`, `pageSize`, `page_size`, `limit`
+| Type | Common Keys |
+|------|-------------|
+| page-like | `page`, `pageIndex`, `pageNo`, `current` |
+| size-like | `size`, `pageSize`, `page_size`, `limit` |
 
 If multiple keys exist, prefer repository-observed defaults (`page`, `page_size`).
 
 ### 4.2 UI paging mapping
-Use this mapping:
+```ts
+// Internal state (0-based)
+const pageIndex = ref(0);
+const pageSize = ref(10);
 
-- UI page = `pageIndex + 1`
-- backend page = `uiPage - 1`
+// UI display (1-based)
+const uiPage = pageIndex.value + 1;
+
+// On page change
+function handlePageChange(newPage: number) {
+  pageIndex.value = newPage - 1;
+}
+```
 
 ### 4.3 List item key priority
-Preferred list keys under `res.data`:
-
-1. `records`
-2. `list`
-3. `items`
-4. module-shaped arrays (`users`, `admins`, `voice_generate_text`, etc.)
+1. `records` 2. `list` 3. `items` 4. module-shaped arrays
 
 ### 4.4 Total key priority
-Preferred total keys under `res.data`:
-
-1. `total`
-2. `total_size`
-3. `count`
-4. `total_page` (fallback only)
-5. fallback `array.length` (last resort)
-
-If only `total_page` exists:
-
-- use `total = total_page * pageSize` only when semantics are clearly total pages
-- otherwise use conservative fallback and report assumption in recognized API notes
+1. `total` 2. `total_size` 3. `count` 4. `total_page` (fallback only)
 
 ## 5. Conflict Resolution
 When multiple interpretations are possible, resolve with this order:
