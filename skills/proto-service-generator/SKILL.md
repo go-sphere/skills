@@ -1,6 +1,6 @@
 ---
 name: proto-service-generator
-description: Generate or complete `internal/service/<module>/*.go` service implementation skeletons from generated `api/<module>/v1/*.sphere.pb.go` HTTP interfaces in this repository. Use when proto and generated API files already exist and you need per-service files, interface assertion checks, safe append-only updates, simple CRUD direct Ent implementation, and fallback stub methods for unknown business logic.
+description: Generate or complete Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when you need to create `internal/service/<module>/*.go` files, add missing method implementations to existing services, or generate compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, append-only update, interface assertion, CRUD via Ent, stub method generation.
 ---
 
 # Proto Service Generator
@@ -51,26 +51,38 @@ If `sphere-feature-workflow` is unavailable, continue with this skill and enforc
 
 ## Workflow
 
-1. Discover all `type XxxServiceHTTPServer interface` definitions under `api/<module>/v1/*.sphere.pb.go`.
-2. Map each service to `internal/service/<module>/<service>.go`.
-3. Check target file state:
-- If missing, create file with assertion and all methods.
-- If existing, append only missing methods, assertions, and required imports.
-4. Run reuse-first checks before implementing new logic.
-5. Implement method bodies by decision:
-- Simple CRUD: direct Ent fast path.
-- Unknown logic: compilable stub.
-- Complex logic: split to `internal/usecase/<module>/<service>/` and wire dependencies.
-6. Keep signatures exactly aligned with the interface; receiver is always `func (s *Service)`.
-7. Preserve existing behavior; do not rewrite existing method bodies.
-8. Validate with tests and report using the Output Contract.
+### Step 1: Discover Interface
+1. Find all `type XxxServiceHTTPServer interface` in `api/<module>/v1/*.sphere.pb.go`.
+2. List all method signatures from each interface.
+
+### Step 2: Check Existing Files
+1. Check if `internal/service/<module>/xxx.go` exists.
+2. If exists, list implemented methods.
+3. If missing, mark for creation.
+
+### Step 3: Decide Implementation Strategy
+
+| Scenario | Strategy |
+|----------|----------|
+| Method is `Create*`, `Get*`, `List*`, `Update*`, `Delete*` on single entity | Simple CRUD via direct Ent |
+| Logic cannot be inferred | Compilable stub with `errors.New("not implemented")` |
+| Cross-entity transactions or complex orchestration | Split to usecase + wire DI |
+
+### Step 4: Implement (Append-Only)
+1. Create file if missing with assertion + all methods.
+2. If existing, append only missing methods.
+3. Add only required imports.
+4. Keep existing implementations untouched.
+
+### Step 5: Validate
+1. Run `go build ./internal/service/...`
+2. Report using Output Contract.
 
 ## Decision Rules
 
-1. Use simple CRUD fast path when method is `Create*`, `Get*`, `List*`, `Update*`, or `Delete*` on a single entity without complex orchestration.
-2. Use stubs when logic cannot be inferred safely:
-`return nil, errors.New("not implemented: <Method>")`
-3. Split to usecase for clear cross-entity transactions, reusable orchestration, or long flows.
+1. **Simple CRUD**: Method name matches `Create*`, `Get*`, `List*`, `Update*`, `Delete*` + single entity = direct Ent.
+2. **Stub**: Logic unclear = `return nil, errors.New("not implemented: <Method>")`
+3. **Usecase**: Cross-entity, reusable orchestration, or long flows = split to `internal/usecase/`.
 
 ## Hard Rules
 
