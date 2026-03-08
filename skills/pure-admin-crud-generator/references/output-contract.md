@@ -1,15 +1,18 @@
 # Output Contract
 
-## Required Response Shape
-When generating a module, always return exactly **four** top-level sections in this order:
+## Output Format Selection
 
-1. **Recognized APIs** - What endpoints were found
-2. **Files** - What files will be created
-3. **File Contents** - Full file contents
-4. **Route Registration** - How routes are registered
+Choose output format based on task complexity:
 
-## 1) Recognized APIs
-List all recognized methods for the selected module.
+- **Condensed Output**: Simple CRUD with clear API patterns
+- **Full Output**: Dashboard pages, custom actions, complex workflows
+
+## Condensed Output (Simple Tasks)
+
+For straightforward CRUD with clear patterns, use exactly **four** sections:
+
+### 1) Recognized APIs
+Brief list of matched endpoints.
 
 **Format:**
 ```
@@ -29,7 +32,7 @@ List all recognized methods for the selected module.
 Missing: none
 ```
 
-## 2) Files
+### 2) Files
 List full file paths.
 
 **Example:**
@@ -40,14 +43,70 @@ src/views/voice-generate-text/detail.vue
 src/router/modules/voice-generate-text.ts
 ```
 
-## 3) File Contents
+### 3) File Contents
 Provide **complete** file contents - no partial snippets.
 
-## 4) Route Registration
-State how routes are registered. For pure-admin-thin with auto-import:
+### 4) Route Registration
+Brief route module.
+
+**Example:**
 ```
 Auto-discovered via import.meta.glob("./modules/**/*.ts")
 ```
+
+---
+
+## Full Output (Complex Tasks)
+
+For dashboards or complex pages, use all sections below:
+
+### 1) Scaffold Fit Decision
+
+| Module | Page Mode | Route Base | Detail Page | Notes |
+| --- | --- | --- | --- | --- |
+| voice-generate-text | crud | /voice-generate-text | auto | follows scaffold |
+
+### 2) Recognized APIs
+Full endpoint list with classification.
+
+**Format:**
+```
+- `<methodName>`: `<classification>` | `<HTTP method>` `<path>` | `<key params>`
+  - Request: query/body params
+  - Response: res.data keys
+```
+
+### 3) API Capability Matrix
+
+| Operation | Method | Path | Available | Notes |
+| --- | --- | --- | --- | --- |
+| List | GET | /api/xxx/list | yes | pagination |
+| Detail | GET | /api/xxx/detail/{id} | yes | - |
+| Create | POST | /api/xxx/create | yes | - |
+| Update | POST | /api/xxx/update | yes | - |
+| Delete | POST | /api/xxx/delete | no | missing |
+
+### 4) Files
+Full file paths.
+
+### 5) File Contents
+Complete file contents.
+
+### 6) Route Registration
+Full route module with meta.
+
+### 7) Validation Notes
+- Assumptions made
+- Potential risks
+- Open questions
+
+### 8) Blocking Issues
+Only if any required check fails:
+- Issue: `<rule that failed>`
+- Why blocked: `<why output is non-deliverable>`
+- Correction: `<revised proposal>`
+
+---
 
 ## Quality Gates Checklist
 Before responding, verify ALL:
@@ -61,3 +120,4 @@ Before responding, verify ALL:
 - [ ] Filters: only real API query params
 - [ ] Runtime safety: `Array.isArray()` guards for uncertain fields
 - [ ] Empty state: detail page shows `el-empty` when payload empty
+- [ ] Page name: Vue component `name` matches route `name` for keepAlive
