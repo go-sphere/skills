@@ -22,6 +22,7 @@
 | Layer | Path | What Goes Here |
 |-------|------|----------------|
 | API Contract | `proto/**` | Service definitions, RPCs, messages, errors |
+| Proto Imports | `proto/**/sphere/*.proto` | Binding, errors, options packages |
 | DB Schema | `internal/pkg/database/schema/**` | Ent schema definitions |
 | Bind/Map | `cmd/tools/bind/main.go#createFilesConf` | Entity exposure policy |
 | Service | `internal/service/**` | Business API implementation |
@@ -57,6 +58,12 @@ make gen/docs
 
 # 4. Dependency injection
 make gen/wire
+
+# 5. TypeScript types
+make gen/dts
+
+# 6. Run all generators
+make gen/all
 ```
 
 ## 4. Boundary Rules

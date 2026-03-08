@@ -59,11 +59,18 @@ DO NOT duplicate behavior already covered by:
 
 | Category | Available Packages |
 |----------|-------------------|
-| Lifecycle/bootstrapping | `core/boot` |
-| HTTP transport/error flow | `server/httpz` |
+| Lifecycle/bootstrapping | `core/boot`, `core/task`, `server/boot` |
+| HTTP transport | `server/httpz`, `httpx` |
 | Auth/authorization | `server/auth/*`, `server/middleware/auth` |
-| Middleware | `server/middleware/cors`, `ratelimiter`, `selector` |
-| Infrastructure | `cache/*`, `storage/*`, `log/*`, `utils/*`, `infra/*` |
+| Middleware | `server/middleware/*` (cors, ratelimiter, selector, online) |
+| Caching | `cache/*` (Redis, Memory, BadgerDB, etc.) |
+| Storage | `storage/*` (S3, Qiniu, Local) |
+| Logging | `log/*` |
+| Message Queue | `mq/*` (Redis, In-memory) |
+| Search | `search/*` (Meilisearch) |
+| Infrastructure | `infra/*` (Redis client, SQLite) |
+| Utilities | `utils/*`, `test/*` |
+| Core helpers | `core/pool`, `core/safe` |
 
 **Always** document your reuse decision in the final output.
 
@@ -126,10 +133,30 @@ DO NOT duplicate behavior already covered by:
 
 | Command | Purpose |
 |---------|---------|
-| `make gen/proto` | Ent + proto + bind/map generation |
+| `make gen/proto` | Ent + proto + bind/map generation (most common) |
+| `make gen/db` | Ent + autoproto generation |
 | `make gen/docs` | OpenAPI/Swagger refresh |
 | `make gen/wire` | DI wiring refresh |
+| `make gen/dts` | TypeScript type generation |
+| `make gen/all` | Run all generation commands |
 | `go test ./...` | Validation |
+
+## Proto Organization
+
+| Package | Purpose |
+|---------|---------|
+| `sphere/binding` | Request binding annotations (URI, query, header, body) |
+| `sphere/errors` | Error definitions and helpers |
+| `sphere/options` | Common option patterns |
+
+**Code Generation Chain**: `protoc-gen-go` → `protoc-gen-sphere-binding` → `protoc-gen-sphere` → `protoc-gen-sphere-errors` → `protoc-gen-route`
+
+## HTTP Framework (httpx)
+
+The `server/httpz` package uses `httpx` as its foundation - a unified HTTP framework abstraction that supports multiple backends:
+- **ginx** (Gin), **fiberx** (Fiber), **echox** (Echo), **hertzx** (Hertz)
+
+Core interfaces: `Handler`, `Middleware`, `Router`, `Engine`, `Context`. All Sphere HTTP services use these abstractions.
 
 ## Failure Conditions (Block Delivery If)
 
