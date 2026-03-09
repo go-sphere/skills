@@ -148,7 +148,7 @@ npx skills add https://github.com/go-sphere/skills \
   --skill sphere-feature-workflow
 
 # Install all skills
-npx skills add https://github.com/go-sphere/skills --all
+npx skills add https://github.com/go-sphere/skills
 ```
 
 ## Usage
