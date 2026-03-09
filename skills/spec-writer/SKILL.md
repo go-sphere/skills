@@ -1,6 +1,6 @@
 ---
 name: spec-writer
-description: Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs. Use when asked to create a new spec from requirements, rewrite an ambiguous PRD or design doc into an executable SPEC.md, deepen an existing specification that feels too thin or hand-wavy, update a spec after scope changes, or modify a specification without leaving contradictions. Trigger on requests such as write spec, rewrite PRD as spec, improve this SPEC.md, make the spec more complete, modify spec, 修改规范, 写技术规格, 改 SPEC, 补技术细节, or 整理实现方案.
+description: "Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs. Use when asked to create a new spec from requirements, rewrite an ambiguous PRD or design doc into an executable SPEC.md, deepen an existing specification that feels too thin or hand-wavy, update a spec after scope changes, or modify a specification without leaving contradictions. Trigger on requests such as write spec, rewrite PRD as spec, improve this SPEC.md, make the spec more complete, modify spec, 修改规范, 写技术规格, 改 SPEC, 补技术细节, or 整理实现方案."
 ---
 
 # Spec Writer

@@ -1,6 +1,6 @@
 ---
 name: ux-analyst
-description: Transform prototype demos from visual representations into behavioral semantics. Use when users provide Figma designs, HTML demos, screenshots, videos, or any UI mockups and need them converted into structured UX flow documents. Trigger on requests like analyze UX, convert demo to flows, write UX-FLOWS, describe user interactions, map screen behaviors, understand page transitions, ux分析, 写 UX 流程, 页面行为分析, 用户流程语义化, or translate prototype to behavior.
+description: "Transform prototype demos from visual representations into behavioral semantics. Use when users provide Figma designs, HTML demos, screenshots, videos, or any UI mockups and need them converted into structured UX flow documents. Trigger on requests like analyze UX, convert demo to flows, write UX-FLOWS, describe user interactions, map screen behaviors, understand page transitions, ux分析, 写 UX 流程, 页面行为分析, 用户流程语义化, or translate prototype to behavior."
 ---
 
 # UX Analyst

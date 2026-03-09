@@ -1,6 +1,6 @@
 ---
 name: prd
-description: Generate high-quality Product Requirements Documents (PRDs) following go-sphere development workflow. Use when: user wants to create a PRD, document requirements, plan a feature, or translate business ideas into product specs. Required for the PRD solidification phase in AI Agent collaboration development.
+description: "Generate high-quality Product Requirements Documents (PRDs) following go-sphere development workflow. Use when: user wants to create a PRD, document requirements, plan a feature, or translate business ideas into product specs. Required for the PRD solidification phase in AI Agent collaboration development."
 ---
 
 # Product Requirements Document (PRD)
