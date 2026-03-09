@@ -6,6 +6,11 @@ A collection of AI skills designed for the go-sphere ecosystem and related techn
 
 | Skill Name | Description |
 | --- | --- |
+| `project-intake` | Organize scattered project inputs and generate standardized intake documents for new projects. |
+| `prd` | Generate high-quality Product Requirements Documents (PRDs) following go-sphere workflow. |
+| `ux-analyst` | Transform prototype demos from visual representations into behavioral UX flow documents. |
+| `spec-writer` | Write or revise implementation-ready specifications for products, systems, APIs, workflows, and technical designs with Symphony-like depth. |
+| `spec-diff-pipeline` | Analyze spec changes from git diff or version comparison and generate impact maps, API/schema deltas, and task plans. |
 | `ent-schema-generator` | Design implementation-ready Go + Ent database schema plans from requirements and project context. |
 | `ent-seed-sql-generator` | Generate deterministic executable SQL seed data from Ent schemas and related inputs. |
 | `proto-api-generator` | Design scaffold-compatible proto3 + HTTP API contracts for go-sphere projects. |
@@ -14,6 +19,60 @@ A collection of AI skills designed for the go-sphere ecosystem and related techn
 | `pure-admin-crud-generator` | Generate pure-admin-thin CRUD pages and route modules from swagger-ts-api methods. |
 
 ## Skills Overview
+
+### Project Initiation
+
+#### project-intake
+Organize scattered project inputs and generate standardized intake documents, clarifying project boundaries and known/unknown items.
+
+**Use cases:**
+- New project or feature kickoff
+- Organize PRD drafts, prototypes, or requirement descriptions
+- Clarify "what's known vs what's unknown" before detailed design
+- Process Figma links, screenshots, demos, and verbal descriptions
+- Generate initial intake document (`docs/00-intake.md`)
+
+#### prd
+Generate high-quality Product Requirements Documents (PRDs) that bridge business vision and technical execution.
+
+**Use cases:**
+- Create PRDs from business requirements or initial ideas
+- Document user personas and core business processes
+- Define measurable success criteria and KPIs
+- Clarify scope and non-scope boundaries
+- Transition from intake to PRD solidification phase
+
+#### ux-analyst
+Transform prototype demos from visual representations into behavioral semantics that engineers can implement.
+
+**Use cases:**
+- Convert Figma designs, screenshots, or HTML demos to UX flow documents
+- Document screen/page behaviors, entry/exit conditions
+- Define user actions with state changes and failure handling
+- Map screen navigation and user journeys
+- Generate `prd/UX-FLOWS.md` and `prd/SCREEN-INVENTORY.md`
+
+### Specification & Planning
+
+#### spec-writer
+Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs.
+
+**Use cases:**
+- Create new specs from requirements or PRD documents
+- Rewrite ambiguous specs into executable SPEC.md
+- Deepen existing specs that feel too thin or vague
+- Update specs after scope changes
+- Apply Symphony-like structural style for complex systems
+
+#### spec-diff-pipeline
+Analyze spec changes from git diff or two version files and automatically produce downstream planning artifacts.
+
+**Use cases:**
+- Generate impact maps from SPEC.md changes
+- Refresh API/proto planning after spec updates
+- Analyze database/schema impact from specification changes
+- Identify which product surfaces are affected
+- Break implementation into executable task plans
 
 ### Database & Schema
 
@@ -110,6 +169,16 @@ These skills work together to cover the complete development workflow:
 
 ```
 Requirements Input
+  ↓
+project-intake (Organize inputs, clarify boundaries)
+  ↓
+prd (Create product requirements document)
+  ↓
+ux-analyst (Convert designs to behavioral flows)
+  ↓
+spec-writer (Create detailed specification)
+  ↓
+spec-diff-pipeline (Analyze impact)
   ↓
 ent-schema-generator (Design schema)
   ↓
