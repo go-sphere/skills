@@ -17,69 +17,101 @@ The repository URL stays the same: `https://github.com/go-sphere/skills`.
 
 ## Installation
 
+Choose the path that matches your agent. The README keeps the shortest working
+install flow here; platform-specific details stay in the linked docs.
+
 ### Claude Code
 
-This repository now includes the local Claude plugin assets:
+Quick start:
 
-- `.claude-plugin/plugin.json` defines the plugin package
-- `.claude-plugin/marketplace.json` defines a local development marketplace entry
-- `hooks/hooks.json` registers the session-start hook
-- `hooks/session-start` injects the `using-sphere-workflow` bootstrap context
-- `skills/` contains the bundled follow-up skills
+```bash
+git clone https://github.com/go-sphere/skills.git ~/src/sphere-workflow
+```
 
-Clone the repository and use your normal Claude Code local plugin or local
-marketplace flow against the repository root.
+Then register the repository root with your normal Claude Code local plugin or
+local marketplace flow using one of these entrypoints:
+
+- `.claude-plugin/plugin.json`
+- `.claude-plugin/marketplace.json`
+
+Start a fresh Claude Code session after registration.
 
 Detailed docs: [docs/README.claude.md](docs/README.claude.md)
 
 ### Cursor
 
-This repository now includes the local Cursor plugin assets:
+Quick start:
 
-- `.cursor-plugin/plugin.json` defines the Cursor plugin package
-- `hooks/hooks.json` registers the session-start hook
-- `hooks/session-start` injects the `using-sphere-workflow` bootstrap context
-- `skills/` contains the bundled follow-up skills
+```bash
+git clone https://github.com/go-sphere/skills.git ~/src/sphere-workflow
+```
 
-Clone the repository and use your normal Cursor local plugin flow against the
-repository root.
+Then register the repository root with your normal Cursor local plugin flow
+using:
+
+- `.cursor-plugin/plugin.json`
+
+Start a fresh Cursor session after registration.
 
 Detailed docs: [docs/README.cursor.md](docs/README.cursor.md)
 
 ### Codex
 
+Quick install:
+
 Tell Codex:
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.codex/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.codex/INSTALL.md
 ```
 
-Codex uses native skill discovery. The install path is:
+Manual install:
 
 ```bash
 git clone https://github.com/go-sphere/skills.git ~/.codex/sphere-workflow
 mkdir -p ~/.agents/skills
+rm -f ~/.agents/skills/sphere-workflow
 ln -s ~/.codex/sphere-workflow/skills ~/.agents/skills/sphere-workflow
+```
+
+Restart Codex after creating or updating the symlink.
+
+Verify:
+
+```bash
+ls -la ~/.agents/skills/sphere-workflow
 ```
 
 Detailed docs: [docs/README.codex.md](docs/README.codex.md)
 
 ### OpenCode
 
+Quick install:
+
 Tell OpenCode:
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.opencode/INSTALL.md
 ```
 
-OpenCode uses a thin bootstrap plugin plus native skill discovery. The install
-path is:
+Manual install:
 
 ```bash
 git clone https://github.com/go-sphere/skills.git ~/.config/opencode/sphere-workflow
 mkdir -p ~/.config/opencode/plugins ~/.config/opencode/skills
+rm -f ~/.config/opencode/plugins/sphere-workflow.js
+rm -rf ~/.config/opencode/skills/sphere-workflow
 ln -s ~/.config/opencode/sphere-workflow/.opencode/plugins/sphere-workflow.js ~/.config/opencode/plugins/sphere-workflow.js
 ln -s ~/.config/opencode/sphere-workflow/skills ~/.config/opencode/skills/sphere-workflow
+```
+
+Restart OpenCode after creating or updating the symlinks.
+
+Verify:
+
+```bash
+ls -l ~/.config/opencode/plugins/sphere-workflow.js
+ls -l ~/.config/opencode/skills/sphere-workflow
 ```
 
 Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)

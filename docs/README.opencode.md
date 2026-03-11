@@ -7,7 +7,7 @@ Use `sphere-workflow` with OpenCode through a thin bootstrap plugin plus native 
 Tell OpenCode:
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.opencode/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.opencode/INSTALL.md
 ```
 
 ## Manual Install

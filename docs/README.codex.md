@@ -7,7 +7,7 @@ Use `sphere-workflow` with Codex through native skill discovery.
 Tell Codex:
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.codex/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.codex/INSTALL.md
 ```
 
 ## Manual Install
