@@ -1,6 +1,6 @@
 {
-  "name": "sphere-workflow-dev",
-  "description": "Development marketplace for the sphere-workflow Claude Code plugin",
+  "name": "sphere-workflow-marketplace",
+  "description": "Marketplace for the sphere-workflow Claude Code plugin",
   "owner": {
     "name": "tbxark",
     "email": "sphere@tbxark.com"

@@ -22,19 +22,29 @@ install flow here; platform-specific details stay in the linked docs.
 
 ### Claude Code
 
-Quick start:
+Bootstrap Claude Code into the go-sphere workflow instead of manually picking
+between PRD, spec, schema, proto, and service skills. The plugin loads
+`using-sphere-workflow` first, then routes into the smallest relevant next step.
+
+Marketplace install:
+
+```text
+/plugin marketplace add tbxark/skills
+/plugin install sphere-workflow@sphere-workflow-marketplace
+```
+
+Or clone locally:
 
 ```bash
 git clone https://github.com/go-sphere/skills.git ~/src/sphere-workflow
 ```
 
-Then register the repository root with your normal Claude Code local plugin or
-local marketplace flow using one of these entrypoints:
+Then register the repository root in Claude Code using one of these entrypoints:
 
 - `.claude-plugin/plugin.json`
 - `.claude-plugin/marketplace.json`
 
-Start a fresh Claude Code session after registration.
+Start a fresh Claude Code session after install or registration.
 
 Detailed docs: [docs/README.claude.md](docs/README.claude.md)
 

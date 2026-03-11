@@ -1,11 +1,11 @@
 # sphere-workflow for Claude Code
 
-`sphere-workflow` now includes Claude plugin manifests in `.claude-plugin/` in addition to the runtime hook files under `hooks/`.
+`sphere-workflow` includes Claude plugin manifests in `.claude-plugin/` plus the runtime hook files under `hooks/`.
 
 ## Included Assets
 
 - `.claude-plugin/plugin.json` declares the plugin package metadata.
-- `.claude-plugin/marketplace.json` provides a local development marketplace entry for this repository.
+- `.claude-plugin/marketplace.json` provides a hosted marketplace entry for this repository.
 - `hooks/hooks.json` registers the session bootstrap hook.
 - `hooks/session-start` injects the `using-sphere-workflow` bootstrap skill content.
 
@@ -24,16 +24,29 @@ The clone itself is the plugin root. Claude should see:
 - `hooks/`
 - `skills/`
 
-## Local Plugin / Marketplace Usage
+## Marketplace Install
 
-This repository is set up for Claude Code local plugin workflows rather than an official hosted marketplace.
+Install from the repository marketplace:
 
-Use your normal Claude Code local plugin or local marketplace flow against this repository root. The two common entrypoints are:
+```text
+/plugin marketplace add tbxark/skills
+/plugin install sphere-workflow@sphere-workflow-marketplace
+```
+
+After installation, start a fresh Claude Code session and ask for a go-sphere task. The session-start hook should preload `using-sphere-workflow`, then Claude can route into the bundled follow-up skills.
+
+What this gives you:
+
+- A single bootstrap entrypoint instead of manually choosing among many go-sphere skills
+- Routing across PRD, spec, Ent schema, proto API, service, and scaffold implementation stages
+- A cleaner Claude install story that matches `/plugin marketplace add ...` and `/plugin install ...`
+
+## Local Plugin / Local Marketplace Usage
+
+If you want to work from a local clone instead of the hosted GitHub marketplace, clone the repository and register one of these entrypoints:
 
 - the plugin manifest at `.claude-plugin/plugin.json`
-- the local marketplace manifest at `.claude-plugin/marketplace.json`
-
-After registration, start a fresh Claude Code session and ask for a go-sphere task. The session-start hook should preload `using-sphere-workflow`, then Claude can route into the bundled follow-up skills.
+- the marketplace manifest at `.claude-plugin/marketplace.json`
 
 ## Verification
 
@@ -49,6 +62,24 @@ This validates:
 - hook bootstrap output includes `using-sphere-workflow`
 - Codex/OpenCode adapter assets are still consistent
 
+## Release Checklist
+
+Before telling users to install from the marketplace, verify:
+
+1. The GitHub repository is public and the default branch is `master`.
+2. `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` are committed on `master`.
+3. The marketplace name remains `sphere-workflow-marketplace`.
+4. The plugin name remains `sphere-workflow`.
+5. `bash tests/validate-plugin-shell.sh` passes from the repository root.
+6. A fresh Claude Code session can run:
+
+```text
+/plugin marketplace add tbxark/skills
+/plugin install sphere-workflow@sphere-workflow-marketplace
+```
+
+7. The installed session loads `using-sphere-workflow` through the session-start hook.
+
 ## Updating
 
 ```bash
@@ -57,7 +88,7 @@ cd ~/src/sphere-workflow && git pull
 
 ## Uninstalling
 
-Remove the local Claude plugin or marketplace registration that points at this repository clone, then delete the clone if you no longer need it.
+Remove the installed Claude plugin or the local plugin / marketplace registration that points at this repository clone, then delete the clone if you no longer need it.
 
 ## Troubleshooting
 

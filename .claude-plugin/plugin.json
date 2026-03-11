@@ -1,6 +1,6 @@
 {
   "name": "sphere-workflow",
-  "description": "Go-sphere workflow plugin for Claude Code with bootstrap routing, hooks, and bundled skills for requirements, spec, schema, proto, and scaffold implementation work.",
+  "description": "Bootstrap Claude Code into the go-sphere delivery workflow for PRDs, specs, Ent schemas, proto APIs, services, and scaffold-safe implementation.",
   "version": "0.1.0",
   "author": {
     "name": "tbxark",
@@ -11,11 +11,15 @@
   "license": "MIT",
   "keywords": [
     "go-sphere",
-    "skills",
     "workflow",
     "claude-code",
+    "claude-plugin",
+    "skills",
+    "prd",
+    "spec",
     "protobuf",
     "ent",
-    "scaffold"
+    "scaffold",
+    "codegen"
   ]
 }
