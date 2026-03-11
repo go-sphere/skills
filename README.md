@@ -1,152 +1,156 @@
-# Go-Sphere Skills
+# sphere-workflow
 
-A collection of AI skills designed for the go-sphere ecosystem and related technology stacks.
+`sphere-workflow` is a plugin-style workflow bundle for coding agents working in the
+go-sphere ecosystem. It packages the repository's bundled skills behind a single
+bootstrap entrypoint so agents can discover the right go-sphere workflow stage
+first, instead of treating the repo as a loose collection of unrelated skills.
 
-## Skills Quick List
+The repository URL stays the same: `https://github.com/go-sphere/skills`.
 
-| Skill Name | Description |
-| --- | --- |
-| `project-intake` | Organize scattered project inputs and generate standardized intake documents for new projects. |
-| `prd` | Generate high-quality Product Requirements Documents (PRDs) following go-sphere workflow. |
-| `ux-analyst` | Transform prototype demos from visual representations into behavioral UX flow documents. |
-| `spec-writer` | Write or revise implementation-ready specifications for products, systems, APIs, workflows, and technical designs with Symphony-like depth. |
-| `spec-diff-pipeline` | Analyze spec changes from git diff or version comparison and generate impact maps, API/schema deltas, and task plans. |
-| `db-schema-designer` | Design review-ready database schemas before coding, with Ent + proto3 compatibility constraints baked in. |
-| `ent-schema-implementer` | Implement approved database designs as Go Ent schemas with entproto and integration guidance. |
-| `ent-seed-sql-generator` | Generate deterministic executable SQL seed data from Ent schemas and related inputs. |
-| `proto-api-generator` | Design scaffold-compatible proto3 + HTTP API contracts for go-sphere projects. |
-| `proto-service-generator` | Generate or complete service skeletons from generated `*ServiceHTTPServer` interfaces. |
-| `sphere-feature-workflow` | Execute end-to-end feature delivery in sphere-layout with protocol-first generated-code-safe workflow. |
-| `pure-admin-crud-generator` | Generate pure-admin-thin CRUD pages and route modules from swagger-ts-api methods. |
+## What the Plugin Does
 
-## Skills Overview
-
-### Project Initiation
-
-#### project-intake
-Organize scattered project inputs and generate standardized intake documents, clarifying project boundaries and known/unknown items.
-
-**Use cases:**
-- New project or feature kickoff
-- Organize PRD drafts, prototypes, or requirement descriptions
-- Clarify "what's known vs what's unknown" before detailed design
-- Process Figma links, screenshots, demos, and verbal descriptions
-- Generate initial intake document (`docs/00-intake.md`)
-
-#### prd
-Generate high-quality Product Requirements Documents (PRDs) that bridge business vision and technical execution.
-
-**Use cases:**
-- Create PRDs from business requirements or initial ideas
-- Document user personas and core business processes
-- Define measurable success criteria and KPIs
-- Clarify scope and non-scope boundaries
-- Transition from intake to PRD solidification phase
-
-#### ux-analyst
-Transform prototype demos from visual representations into behavioral semantics that engineers can implement.
-
-**Use cases:**
-- Convert Figma designs, screenshots, or HTML demos to UX flow documents
-- Document screen/page behaviors, entry/exit conditions
-- Define user actions with state changes and failure handling
-- Map screen navigation and user journeys
-- Generate `prd/UX-FLOWS.md` and `prd/SCREEN-INVENTORY.md`
-
-### Specification & Planning
-
-#### spec-writer
-Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs.
-
-**Use cases:**
-- Create new specs from requirements or PRD documents
-- Rewrite ambiguous specs into executable SPEC.md
-- Deepen existing specs that feel too thin or vague
-- Update specs after scope changes
-- Apply Symphony-like structural style for complex systems
-
-#### spec-diff-pipeline
-Analyze spec changes from git diff or two version files and automatically produce downstream planning artifacts.
-
-**Use cases:**
-- Generate impact maps from SPEC.md changes
-- Refresh API/proto planning after spec updates
-- Analyze database/schema impact from specification changes
-- Identify which product surfaces are affected
-- Break implementation into executable task plans
-
-### Database & Schema
-
-#### db-schema-designer
-Design review-ready database schemas from requirement documents, prompts, or existing code before entering implementation.
-
-**Use cases:**
-- Extract and design entity models from requirements
-- Review entities, fields, relations, and indexes before coding
-- Enforce Ent + proto3-compatible field type policies during design
-- Produce Markdown review briefs with optional draft DDL appendix
-
-#### ent-schema-implementer
-Implement approved database designs as Go Ent schemas for go-sphere projects.
-
-**Use cases:**
-- Translate approved database reviews into Ent schema files
-- Add entproto annotations and field numbering
-- Plan bind/render/service integration impact
-- Prepare generation and verification follow-up steps
-
-#### ent-seed-sql-generator
-Generate deterministic SQL seed data from Ent schema definitions.
-
-**Use cases:**
-- Initialize data for dev/test environments
-- Create realistic sample data with relationships
-- Output executable SQL seed files
-- Generate datasets with stable (non-random) IDs
-
-### API & Protocol
-
-#### proto-api-generator
-Design proto3 + HTTP API contracts for go-sphere scaffold projects.
-
-**Use cases:**
-- Protocol-first API design
-- Generate protobuf definitions from requirements/Ent schemas
-- Choose between entpb/shared/custom messages
-- HTTP route conflict detection and error handling conventions
-
-#### proto-service-generator
-Generate service implementation skeletons from generated API interfaces.
-
-**Use cases:**
-- Generate service files from `*ServiceHTTPServer` interfaces
-- CRUD service templates with direct Ent integration
-- Interface assertion checks and safe append-only updates
-- Placeholder stubs for unknown business logic
-
-### Full-Stack Workflows
-
-#### sphere-feature-workflow
-Implement end-to-end feature changes in go-sphere scaffold projects.
-
-**Use cases:**
-- Add or modify APIs, proto definitions, and Ent schemas
-- Protocol-first development workflow
-- Multi-layer coordinated changes (proto → schema → service → render)
-- Avoid manual edits to generated files
-
-#### pure-admin-crud-generator
-Generate CRUD pages and route modules for pure-admin-thin admin backends.
-
-**Use cases:**
-- Generate admin pages from swagger-ts-api output
-- Scaffold list/edit/detail pages
-- Auto-configure route modules
-- Vue 3 + Element Plus backend development
+- Boots the agent into the go-sphere workflow through `using-sphere-workflow`
+- Routes requirement shaping, specification, schema, API, and implementation work
+  to the smallest relevant bundled skill
+- Preserves direct skill usage for advanced users and existing installs
+- Adds thin platform adapters for Claude Code, Cursor, Codex, and OpenCode
 
 ## Installation
 
-Install any skill using the `npx skills` command:
+### Claude Code
+
+This repository now includes the local Claude plugin assets:
+
+- `.claude-plugin/plugin.json` defines the plugin package
+- `.claude-plugin/marketplace.json` defines a local development marketplace entry
+- `hooks/hooks.json` registers the session-start hook
+- `hooks/session-start` injects the `using-sphere-workflow` bootstrap context
+- `skills/` contains the bundled follow-up skills
+
+Clone the repository and use your normal Claude Code local plugin or local
+marketplace flow against the repository root.
+
+Detailed docs: [docs/README.claude.md](docs/README.claude.md)
+
+### Cursor
+
+This repository now includes the local Cursor plugin assets:
+
+- `.cursor-plugin/plugin.json` defines the Cursor plugin package
+- `hooks/hooks.json` registers the session-start hook
+- `hooks/session-start` injects the `using-sphere-workflow` bootstrap context
+- `skills/` contains the bundled follow-up skills
+
+Clone the repository and use your normal Cursor local plugin flow against the
+repository root.
+
+Detailed docs: [docs/README.cursor.md](docs/README.cursor.md)
+
+### Codex
+
+Tell Codex:
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.codex/INSTALL.md
+```
+
+Codex uses native skill discovery. The install path is:
+
+```bash
+git clone https://github.com/go-sphere/skills.git ~/.codex/sphere-workflow
+mkdir -p ~/.agents/skills
+ln -s ~/.codex/sphere-workflow/skills ~/.agents/skills/sphere-workflow
+```
+
+Detailed docs: [docs/README.codex.md](docs/README.codex.md)
+
+### OpenCode
+
+Tell OpenCode:
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/main/.opencode/INSTALL.md
+```
+
+OpenCode uses a thin bootstrap plugin plus native skill discovery. The install
+path is:
+
+```bash
+git clone https://github.com/go-sphere/skills.git ~/.config/opencode/sphere-workflow
+mkdir -p ~/.config/opencode/plugins ~/.config/opencode/skills
+ln -s ~/.config/opencode/sphere-workflow/.opencode/plugins/sphere-workflow.js ~/.config/opencode/plugins/sphere-workflow.js
+ln -s ~/.config/opencode/sphere-workflow/skills ~/.config/opencode/skills/sphere-workflow
+```
+
+Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)
+
+## Workflow Map
+
+The plugin is meant to move work through the go-sphere lifecycle in order.
+
+```text
+Scattered inputs / kickoff
+  -> project-intake
+PRD / product framing
+  -> prd
+Prototype behavior / UX semantics
+  -> ux-analyst
+Implementation-ready specification
+  -> spec-writer
+Changed spec impact analysis
+  -> spec-diff-pipeline
+Schema design
+  -> db-schema-designer
+Ent schema implementation
+  -> ent-schema-implementer
+Seed / fixture SQL
+  -> ent-seed-sql-generator
+Proto + HTTP contract design
+  -> proto-api-generator
+Generated service skeletons
+  -> proto-service-generator
+Cross-layer scaffold implementation
+  -> sphere-feature-workflow
+Admin CRUD surface
+  -> pure-admin-crud-generator
+```
+
+The bootstrap rule is simple:
+
+- If the user explicitly names a skill, use it.
+- If the task spans multiple stages, start at the earliest missing artifact.
+- If the task touches proto, schema, service, or generation boundaries, route into
+  `sphere-feature-workflow`.
+
+## Bundled Skills
+
+### Discovery and Requirements
+
+- `project-intake` organizes rough inputs into a structured kickoff document.
+- `prd` turns agreed direction into a high-quality PRD.
+- `ux-analyst` translates demos and mockups into behavioral UX flows.
+
+### Specification and Planning
+
+- `spec-writer` produces implementation-ready specifications.
+- `spec-diff-pipeline` traces downstream impact after spec changes.
+
+### Data and Contract Design
+
+- `db-schema-designer` designs review-ready schemas before coding.
+- `ent-schema-implementer` converts approved designs into Ent schema files.
+- `ent-seed-sql-generator` creates deterministic seed SQL for development and test.
+- `proto-api-generator` designs scaffold-safe proto3 + HTTP contracts.
+- `proto-service-generator` generates or completes service skeletons.
+
+### Implementation and Surfaces
+
+- `sphere-feature-workflow` handles end-to-end scaffold feature delivery.
+- `pure-admin-crud-generator` scaffolds pure-admin-thin CRUD pages and routes.
+
+## Legacy Direct Install
+
+The repository still works as a direct skill source for compatibility:
 
 ```bash
 # Install a single skill
@@ -159,66 +163,115 @@ npx skills add https://github.com/go-sphere/skills \
   --skill proto-api-generator \
   --skill sphere-feature-workflow
 
-# Install all skills
+# Install all bundled skills
 npx skills add https://github.com/go-sphere/skills
 ```
 
-## Usage
+You can also invoke a specific skill directly after installation, for example:
 
-After installation, skills are automatically activated when matching scenarios are detected, or can be explicitly invoked:
-
-```
-# Auto-activation (when task matches skill scenarios)
-User: Help me design and review a database schema for user management
-
-# Explicit invocation
-User: Use the proto-api-generator skill to generate API definitions
+```text
+Use the proto-api-generator skill to generate API definitions
 ```
 
-## Skill Composition
+## Updating
 
-These skills work together to cover the complete development workflow:
+### Codex
 
+```bash
+cd ~/.codex/sphere-workflow && git pull
 ```
-Requirements Input
-  ↓
-project-intake (Organize inputs, clarify boundaries)
-  ↓
-prd (Create product requirements document)
-  ↓
-ux-analyst (Convert designs to behavioral flows)
-  ↓
-spec-writer (Create detailed specification)
-  ↓
-spec-diff-pipeline (Analyze impact)
-  ↓
-db-schema-designer (Design and review schema)
-  ↓
-ent-schema-implementer (Implement approved Ent schema)
-  ↓
-proto-api-generator (Design API)
-  ↓
-sphere-feature-workflow (End-to-end implementation)
-  ├─ proto-service-generator (Generate service skeleton)
-  └─ ent-seed-sql-generator (Generate test data)
-  ↓
-pure-admin-crud-generator (Generate admin backend)
+
+### OpenCode
+
+```bash
+cd ~/.config/opencode/sphere-workflow && git pull
 ```
+
+### Claude Code / Cursor Local Plugin
+
+```bash
+cd /path/to/your/sphere-workflow-clone && git pull
+```
+
+### Direct Skill Install
+
+Re-run your `npx skills add ...` command when you want to refresh the installed
+skills from this repository.
+
+## Uninstalling
+
+### Codex
+
+```bash
+rm ~/.agents/skills/sphere-workflow
+rm -rf ~/.codex/sphere-workflow
+```
+
+### OpenCode
+
+```bash
+rm ~/.config/opencode/plugins/sphere-workflow.js
+rm -rf ~/.config/opencode/skills/sphere-workflow
+rm -rf ~/.config/opencode/sphere-workflow
+```
+
+### Claude Code Local Plugin
+
+Remove the local plugin or local marketplace registration that points at this
+repository clone, then delete the clone if you no longer need it.
+
+### Cursor Local Plugin
+
+Remove the local Cursor plugin registration that points at this repository
+clone, then delete the clone if you no longer need it.
+
+## Troubleshooting
+
+### Codex cannot see the plugin
+
+- Verify `~/.agents/skills/sphere-workflow` exists and points to the cloned `skills/` directory.
+- Restart Codex after creating or updating the symlink.
+- Check that `skills/using-sphere-workflow/SKILL.md` exists in the clone.
+
+### OpenCode plugin does not load
+
+- Verify `~/.config/opencode/plugins/sphere-workflow.js` points to `.opencode/plugins/sphere-workflow.js`.
+- Verify `~/.config/opencode/skills/sphere-workflow` points to the cloned `skills/` directory.
+- Restart OpenCode after creating or updating the symlinks.
+
+### Claude Code does not inject the bootstrap
+
+- Verify `.claude-plugin/plugin.json` exists in the clone.
+- Verify `.claude-plugin/marketplace.json` exists in the clone if you use a local marketplace flow.
+- Verify the repository is registered as a local plugin root.
+- Check that `hooks/hooks.json` and `hooks/session-start` are present in the clone.
+- Confirm the plugin root still points at the same repository checkout.
+
+### Cursor does not inject the bootstrap
+
+- Verify `.cursor-plugin/plugin.json` exists in the clone.
+- Verify the repository is registered as a local Cursor plugin root.
+- Check that `hooks/hooks.json` and `hooks/session-start` are present in the clone.
+- Confirm the plugin root still points at the same repository checkout.
+
+### I still want a single skill directly
+
+Use the compatibility install path with `npx skills add https://github.com/go-sphere/skills`
+and install only the skills you need.
 
 ## Tech Stack
 
-- **Backend Framework**: [go-sphere](https://github.com/go-sphere)
-- **ORM**: [ent](https://entgo.io/)
-- **Protocol**: Protocol Buffers (proto3)
-- **Frontend Framework**: Vue 3 + Element Plus (pure-admin-thin)
-- **Code Generation**: protoc-gen-sphere*, protoc-gen-route
+- Backend framework: [go-sphere](https://github.com/go-sphere)
+- ORM: [ent](https://entgo.io/)
+- Protocol: Protocol Buffers (proto3)
+- Frontend: Vue 3 + Element Plus (pure-admin-thin)
+- Code generation: `protoc-gen-sphere*`, `protoc-gen-route`
+
+## Contributing
+
+Issues and pull requests are welcome. The plugin shell lives beside the bundled
+skills, so changes may affect both platform adapters and the skills themselves.
 
 ## License
 
 MIT
-
-## Contributing
-
-Issues and Pull Requests are welcome to improve these skills.
-
-Detailed documentation for each skill is located in the corresponding `SKILL.md` file.

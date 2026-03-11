@@ -1,0 +1,24 @@
+{
+  "name": "sphere-workflow",
+  "displayName": "sphere-workflow",
+  "description": "Go-sphere workflow plugin for Cursor with bootstrap hooks and bundled skills for requirements, spec, schema, proto, and scaffold implementation work.",
+  "version": "0.1.0",
+  "author": {
+    "name": "tbxark",
+    "email": "sphere@tbxark.com"
+  },
+  "homepage": "https://github.com/go-sphere/skills",
+  "repository": "https://github.com/go-sphere/skills",
+  "license": "MIT",
+  "keywords": [
+    "go-sphere",
+    "cursor",
+    "skills",
+    "workflow",
+    "protobuf",
+    "ent",
+    "scaffold"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}

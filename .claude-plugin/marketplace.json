@@ -1,0 +1,20 @@
+{
+  "name": "sphere-workflow-dev",
+  "description": "Development marketplace for the sphere-workflow Claude Code plugin",
+  "owner": {
+    "name": "tbxark",
+    "email": "sphere@tbxark.com"
+  },
+  "plugins": [
+    {
+      "name": "sphere-workflow",
+      "description": "Go-sphere workflow plugin for Claude Code with bootstrap routing, hooks, and bundled skills for requirements, spec, schema, proto, and scaffold implementation work.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "tbxark",
+        "email": "sphere@tbxark.com"
+      }
+    }
+  ]
+}
