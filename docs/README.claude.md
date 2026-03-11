@@ -29,7 +29,7 @@ The clone itself is the plugin root. Claude should see:
 Install from the repository marketplace:
 
 ```text
-/plugin marketplace add tbxark/skills
+/plugin marketplace add go-sphere/skills
 /plugin install sphere-workflow@sphere-workflow-marketplace
 ```
 
@@ -74,7 +74,7 @@ Before telling users to install from the marketplace, verify:
 6. A fresh Claude Code session can run:
 
 ```text
-/plugin marketplace add tbxark/skills
+/plugin marketplace add go-sphere/skills
 /plugin install sphere-workflow@sphere-workflow-marketplace
 ```
 

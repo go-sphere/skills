@@ -29,7 +29,7 @@ between PRD, spec, schema, proto, and service skills. The plugin loads
 Marketplace install:
 
 ```text
-/plugin marketplace add tbxark/skills
+/plugin marketplace add go-sphere/skills
 /plugin install sphere-workflow@sphere-workflow-marketplace
 ```
 

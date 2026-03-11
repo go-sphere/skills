@@ -53,6 +53,7 @@ assert plugin["name"] == "sphere-workflow"
 assert "go-sphere" in plugin["description"].lower()
 assert "claude-code" in plugin["keywords"]
 assert marketplace["name"] == "sphere-workflow-marketplace"
+assert "metadata" in marketplace and marketplace["metadata"]["description"]
 assert marketplace["plugins"][0]["name"] == "sphere-workflow"
 PY
 pass "Claude plugin manifests are valid JSON and use the public sphere-workflow marketplace name"
@@ -111,7 +112,7 @@ require_contains "$ROOT_DIR/README.md" 'OpenCode'
 require_contains "$ROOT_DIR/README.md" 'Codex'
 require_contains "$ROOT_DIR/README.md" 'Claude'
 require_contains "$ROOT_DIR/README.md" 'Cursor'
-require_contains "$ROOT_DIR/README.md" '/plugin marketplace add tbxark/skills'
+require_contains "$ROOT_DIR/README.md" '/plugin marketplace add go-sphere/skills'
 require_contains "$ROOT_DIR/README.md" '/plugin install sphere-workflow@sphere-workflow-marketplace'
 require_contains "$ROOT_DIR/README.md" '\.claude-plugin/plugin\.json'
 require_contains "$ROOT_DIR/README.md" '\.cursor-plugin/plugin\.json'

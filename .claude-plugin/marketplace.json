@@ -1,6 +1,9 @@
 {
   "name": "sphere-workflow-marketplace",
   "description": "Marketplace for the sphere-workflow Claude Code plugin",
+  "metadata": {
+    "description": "Go-sphere workflow plugins for Claude Code, including bootstrap routing into PRD, spec, schema, proto, and scaffold implementation stages."
+  },
   "owner": {
     "name": "tbxark",
     "email": "sphere@tbxark.com"
