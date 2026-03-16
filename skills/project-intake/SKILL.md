@@ -7,6 +7,21 @@ description: Organize scattered project inputs and generate standardized intake 
 
 Organize scattered project inputs into structured documentation, clarifying project boundaries and known/unknown items.
 
+<HARD-GATE>
+Do not generate `docs/00-intake.md` until you have confirmed the following from the user:
+- At least one concrete input (PRD draft, prototype, description, or repo link)
+- A one-sentence project goal (or enough context to infer one)
+If inputs are too vague to produce a meaningful intake doc, ask first — do not assume.
+</HARD-GATE>
+
+## Workflow
+
+1. Scan whatever the user has provided — extract project goal, available inputs, and visible gaps
+2. If the goal is unclear or no concrete inputs exist, ask one question to unblock (e.g., "What problem is this project solving?")
+3. Ask one follow-up question at a time until you have enough to fill all 8 sections
+4. Write `docs/00-intake.md` to disk (create `docs/` directory if needed)
+5. Report the file path and ask if anything needs adjusting
+
 ## When to Use
 
 Use this skill when:
@@ -106,3 +121,5 @@ If user doesn't specify output location, default to:
 - `docs/00-intake.md`
 
 Follow user's specified location if provided.
+
+**Always write the file to disk. Do not output the intake document only in the conversation.**
