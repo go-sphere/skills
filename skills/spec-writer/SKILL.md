@@ -11,6 +11,16 @@ Use this skill to produce specs that engineers and coding agents can implement f
 
 Use a Symphony-like style when the system has components, configuration, state transitions, background behavior, retries, or operator concerns. Symphony feels strong not only because it has sections, but because each section keeps going until the runtime semantics are unambiguous. Read [references/symphony-style.md](references/symphony-style.md) for the structural model, [references/completeness-rubric.md](references/completeness-rubric.md) for the deepening checklist, and [references/spec-editing.md](references/spec-editing.md) when revising an existing document.
 
+<HARD-GATE>
+Do not write `prd/SPEC.md` or any spec section until the following are confirmed:
+- The problem being specified is clear (not just "write a spec for X" with no further context)
+- For New Spec: problem statement, system boundaries, and at least one key constraint are known
+- For Revision: the existing spec file path is known and the nature of the change is described
+
+If inputs are insufficient, ask one question at a time before proceeding to the Workflow Decision Tree.
+When a specification decision has multiple valid approaches, present options — do not silently pick one.
+</HARD-GATE>
+
 ## Workflow Decision Tree
 
 1. Identify the job type.
@@ -28,6 +38,9 @@ Use a Symphony-like style when the system has components, configuration, state t
    **Exploratory request?** Provide the proposed section map, major assumptions, and what details are still missing.
 
 ## New Spec Workflow
+
+0. **Clarify missing inputs** (if not already resolved by the HARD-GATE step above).
+   Ask one question at a time until you have: problem statement, system boundary, at least one constraint or non-goal. Do not proceed to step 1 until these are clear.
 
 1. Distill the request into the initial contract anchors:
    - problem
@@ -58,6 +71,8 @@ Use a Symphony-like style when the system has components, configuration, state t
 
 7. Finish with conformance clarity.
    Include validation strategy, test expectations, migration or compatibility notes, implementation notes when needed, and explicit open questions.
+
+8. Write the completed spec to `prd/SPEC.md` (create directory if needed). Report the path and ask the user to review before handing off to implementation.
 
 ## Revision Workflow
 
@@ -96,6 +111,8 @@ Use a Symphony-like style when the system has components, configuration, state t
 
 8. Finish with a delta check.
    Confirm the revised spec still tells one coherent story from goals through conformance.
+
+9. Write the updated spec to disk and confirm the path with the user.
 
 ## Deepening Pass
 
