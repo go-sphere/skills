@@ -7,6 +7,12 @@ description: "Generate high-quality Product Requirements Documents (PRDs) follow
 
 Generate comprehensive, production-grade PRDs that bridge the gap between business vision and technical execution.
 
+<HARD-GATE>
+Do not write `prd/PRD.md` until Phase 1 (Discovery) is complete or the user has provided sufficient context to skip it.
+"Sufficient context" means: problem statement, target users, and at least one success criterion are clear.
+If any of these are missing, ask — one question at a time — before drafting.
+</HARD-GATE>
+
 ## When to Use This Skill
 
 **Trigger when:**
@@ -56,7 +62,10 @@ Synthesize understanding:
 
 ### Phase 3: PRD Drafting
 
-Generate document using the standard schema below.
+Generate document using the standard schema below, then:
+1. Write the completed PRD to `prd/PRD.md` (create `prd/` directory if needed)
+2. Report the file path to the user
+3. Ask if any section needs adjustment
 
 ---
 
@@ -207,3 +216,5 @@ Ensure at completion:
 Default to `prd/PRD.md`
 
 Follow user's specified location if provided.
+
+**Always write to disk. Do not output the PRD only in the conversation.**
