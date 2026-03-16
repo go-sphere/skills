@@ -7,11 +7,36 @@ description: Design proto3 + HTTP API contracts for go-sphere scaffold projects 
 
 Design implementation-ready `proto3 + HTTP` contracts for go-sphere scaffold projects.
 
+<HARD-GATE>
+Do not write any `.proto` file or API design document until the following are confirmed through dialogue:
+- Which service module is being designed (e.g., `task`, `user`, `order`)
+- Whether this is a new file or an addition to an existing proto
+- The primary message strategy (entpb / shared / custom) for at least the main entities
+
+If any of these are missing, ask one question at a time before proceeding.
+When a design decision has multiple reasonable options (message type, route strategy, pagination shape), present 2-3 options with your recommendation — do not choose unilaterally.
+</HARD-GATE>
+
 ## Operating Model
 
 1. Follow go-sphere scaffold conventions unless the user explicitly requests deviation.
 2. Treat local references as the working source of truth for scaffold rules, runtime behavior, and output shape.
 3. Keep outputs protocol-first; do not rely on lint plugins, scripts, or manual edits to generated files as substitutes for reasoning checks.
+
+## Checklist (track with TodoWrite)
+
+At task start, call TodoWrite to create a task for each numbered item below. Mark each complete before moving to the next.
+
+1. Confirm module name, file mode (new / add to existing), and message strategy
+2. Ask clarifying questions one at a time for any ambiguous scope or behavior
+3. For non-obvious decisions, propose 2-3 options with recommendation
+4. Present service overview (service name, RPC list) — get approval
+5. Present message designs section by section — get approval for each
+6. Run Final Gate checklist (`references/go-sphere-api-definitions-checklist.md`)
+7. Write the API design doc to disk (`prd/API.md` or `design/<feature>/api.md`)
+8. Ask if the user wants to proceed to proto file generation
+
+**Output path rule:** Use `design/<feature>/api.md` if the user names a specific feature or change-id; default to `prd/API.md` otherwise.
 
 ## Task Intake
 
