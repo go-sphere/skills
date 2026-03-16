@@ -38,6 +38,11 @@ This skill is especially appropriate when the user mentions:
 - 哪些端受影响
 - 哪些模块要跟着改
 
+<HARD-GATE>
+Do not start the pipeline until all required inputs below are confirmed.
+Ask the user for any missing inputs one at a time before proceeding to Stage 1.
+</HARD-GATE>
+
 ## Required Inputs
 
 Before starting, identify these inputs explicitly:
