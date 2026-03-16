@@ -7,6 +7,12 @@ description: "Transform prototype demos from visual representations into behavio
 
 Transform prototype demos from "visual representation" into "behavioral semantics". This skill translates UI mockups into executable behavioral specifications that engineers and other AI agents can use to implement features.
 
+<HARD-GATE>
+Do not write `prd/UX-FLOWS.md` until at least one visual or behavioral input has been provided (Figma, screenshot, video, HTML demo, or wireframe).
+If no visual input exists, ask the user to provide one before proceeding.
+If input exists but the scope (which pages/screens to cover) is unclear, ask one clarifying question first.
+</HARD-GATE>
+
 ## When to Use
 
 Use this skill when:
@@ -15,6 +21,15 @@ Use this skill when:
 - Converting visual designs to implementation requirements
 - Before writing SPEC or technical implementation
 - Any request to analyze or document user interactions and flows
+
+## Workflow
+
+1. Check what visual/behavioral inputs are available (Figma, screenshots, video, HTML, PRD)
+2. If no visual input exists, ask the user to provide one before proceeding
+3. If scope is unclear (too many screens, ambiguous priority), ask one question to narrow it
+4. Analyze inputs — extract page purposes, entry/exit conditions, key actions, states
+5. Write `prd/UX-FLOWS.md` to disk (and `prd/SCREEN-INVENTORY.md` if scope warrants it)
+6. Report file path(s) and ask if any page behavior needs clarification
 
 ## Input
 
@@ -211,3 +226,5 @@ S2 (Detail) → S3 (Edit)
 Default: `prd/UX-FLOWS.md` and `prd/SCREEN-INVENTORY.md`
 
 Follow user's specified location if provided.
+
+**Always write to disk. Do not output UX-FLOWS only in the conversation.**
