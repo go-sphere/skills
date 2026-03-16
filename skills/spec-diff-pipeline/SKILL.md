@@ -39,8 +39,12 @@ This skill is especially appropriate when the user mentions:
 - 哪些模块要跟着改
 
 <HARD-GATE>
-Do not start the pipeline until all required inputs below are confirmed.
-Ask the user for any missing inputs one at a time before proceeding to Stage 1.
+Do not start the pipeline until the mode-specific path inputs are confirmed:
+- **Git Diff Mode**: `repo_root` and `spec_path` must be known.
+- **Version Comparison Mode**: `repo_root`, `version_a_path`, and `version_b_path` must be known.
+
+Ask the user for any missing path inputs one at a time before proceeding to Stage 1.
+Supporting files (PRD, proto folders, schema docs, surface directories) can be provided later or inferred from the repository — record any gaps in `06-open-questions.md`.
 </HARD-GATE>
 
 ## Required Inputs

@@ -227,4 +227,4 @@ Default: `prd/UX-FLOWS.md` and `prd/SCREEN-INVENTORY.md`
 
 Follow user's specified location if provided.
 
-**Always write to disk. Do not output UX-FLOWS only in the conversation.**
+**Always write to disk. Do not output UX files only in the conversation.**

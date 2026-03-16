@@ -27,7 +27,7 @@ When a design decision has multiple reasonable options (message type, route stra
 
 At task start, call TodoWrite to create a task for each numbered item below. Mark each complete before moving to the next.
 
-1. Confirm module name, file mode (new / add to existing), and message strategy
+1. Confirm module name, file mode (new / add to existing), and message strategy — through dialogue with the user, not by inferring from context
 2. Ask clarifying questions one at a time for any ambiguous scope or behavior
 3. For non-obvious decisions, propose 2-3 options with recommendation
 4. Present service overview (service name, RPC list) — get approval

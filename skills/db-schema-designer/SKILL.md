@@ -38,7 +38,7 @@ Read these files before producing any design output:
 
 ## Checklist
 
-Work through these in order. Create a task for each item.
+Work through these in order. Use TodoWrite to create a task for each item.
 
 1. **Explore inputs** — read provided docs, proto files, mockups, existing schemas, service behavior
 2. **Ask clarifying questions** — one at a time, until entities and key behaviors are clear
