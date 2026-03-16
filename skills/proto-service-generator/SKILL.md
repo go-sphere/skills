@@ -7,6 +7,16 @@ description: "Generate or complete Go service implementations from protobuf-gene
 
 Generate or complete compilable service implementations under `internal/service/<module>/` from generated `*ServiceHTTPServer` interfaces in `api/<module>/v1/*.sphere.pb.go`.
 
+<HARD-GATE>
+Do not generate or modify any service file until:
+1. The target module is known (e.g., `task`, `user`, `order`)
+2. The generated `*ServiceHTTPServer` interface exists in `api/<module>/v1/*.sphere.pb.go`
+
+If the module name is not specified, ask: "Which module should I generate service files for?"
+If the proto generation has not been run yet, stop and ask the user to run `make gen/proto` first.
+Do not guess the module from context alone if there are multiple candidates.
+</HARD-GATE>
+
 ## When To Use
 
 1. Proto and generated API files already exist.
