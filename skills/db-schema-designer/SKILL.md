@@ -5,77 +5,159 @@ description: Design review-ready database schemas for go-sphere and similar back
 
 # DB Schema Designer
 
-## Overview
+Turn product and backend requirements into a review-ready database design — collaboratively, through dialogue.
 
-Turn product and backend requirements into review-ready database design briefs.
+This skill works through clarifying questions and incremental design sections rather than generating a complete document in one pass. The goal is a design the user has actively approved, not a document they need to diff against their intent.
 
-This skill stops at the database design stage. Its job is to help humans review and approve the data model before any Ent schema coding, entproto annotations, or project integration work begins.
-
-Because approved designs will later be implemented in Ent and exposed through proto3 messages, this skill must reject or redesign field types that do not map cleanly to the Ent + proto3 constraint set.
+<HARD-GATE>
+Do NOT produce the final review brief, write Ent schema code, or hand off to `ent-schema-implementer` until every design section has been presented AND the user has approved the overall design. If requirements are ambiguous, stop and ask rather than assume.
+</HARD-GATE>
 
 ## Scope Boundary
 
-Do:
+**Do:**
+1. Ask clarifying questions one at a time to resolve ambiguities.
+2. Propose 2-3 design options for non-obvious decisions (deletion strategy, ID type, relation shape, etc.).
+3. Present the design incrementally — entities → fields → relations → indexes — pausing for feedback at each section.
+4. Surface assumptions, trade-offs, and open questions explicitly.
+5. Produce the final review brief once the user approves the full design.
 
-1. Extract entities, fields, relationships, constraints, statuses, and timestamps.
-2. Design table-level structure, key naming, nullability, uniqueness, indexing, and field-type compatibility.
-3. Surface assumptions, trade-offs, and open questions for review.
-4. Produce a review brief using the required output template.
-
-Do not:
-
-1. Write Ent schema code unless the user explicitly asks for a follow-up implementation step.
-2. Add entproto numbering or Go integration instructions.
-3. Mix bind/render/service tasks into the review document.
+**Do not:**
+1. Write Ent schema code unless the user explicitly asks for the follow-up implementation step.
+2. Add entproto numbering, Go integration instructions, or bind/render/service tasks.
+3. Silently pick a contentious default (soft delete, UUID, complex JSON) — surface it as a choice.
 
 If the design is approved and code should be written, hand off to `ent-schema-implementer`.
 
 ## Required Reading
 
-Read these files in order before producing a database design:
+Read these files before producing any design output:
 
-1. [references/modeling-rules.md](references/modeling-rules.md)
-2. [references/review-output-template.md](references/review-output-template.md)
+1. [references/modeling-rules.md](references/modeling-rules.md) — field type policy, relation strategy, index rules
+2. [references/review-output-template.md](references/review-output-template.md) — final output structure
 
-## Workflow
+## Checklist
 
-### Phase 1: Evidence and Extraction
+Work through these in order. Create a task for each item.
 
-1. Gather inputs from prompt, docs, mockups, proto files, existing schemas, and service behavior.
-2. Extract candidate entities, lifecycle states, key timestamps, and business invariants.
-3. Record evidence conflicts and resolve them explicitly.
+1. **Explore inputs** — read provided docs, proto files, mockups, existing schemas, service behavior
+2. **Ask clarifying questions** — one at a time, until entities and key behaviors are clear
+3. **Propose design options** — for any non-trivial decision, offer 2-3 choices with trade-offs
+4. **Present entity overview** — list candidate entities with purpose and lifecycle; get approval
+5. **Present field design** — table by table, with types, nullability, defaults; get approval
+6. **Present relations and constraints** — one-to-many, many-to-many, deletion, uniqueness; get approval
+7. **Present index plan** — tied to real query patterns; get approval
+8. **Produce final review brief** — using [references/review-output-template.md](references/review-output-template.md)
+9. **Write review brief to disk** — default path: `prd/DDL.md`; use `design/<feature>/schema.md` if the request is scoped to a named feature or change-id
+10. **User approves review brief** — ask explicitly before handing off to `ent-schema-implementer`
 
-### Phase 2: Database Design
+## Process Flow
 
-4. Design fields with type, requiredness, default behavior, uniqueness, and mutability.
-5. Apply the field-type policy from [references/modeling-rules.md](references/modeling-rules.md) and redesign unsupported types before approval.
-6. Choose ID strategy and explain why.
-7. Design one-to-many and many-to-many relations.
-8. Build an index plan from list/filter/sort/query patterns.
-9. Decide deletion strategy, snapshot fields, and audit timestamps.
+```dot
+digraph db_schema_designer {
+    "Explore inputs" [shape=box];
+    "Ask clarifying questions\n(one at a time)" [shape=box];
+    "Enough to design?" [shape=diamond];
+    "Propose design options\nfor contentious decisions" [shape=box];
+    "Present entity overview" [shape=box];
+    "Approved?" [shape=diamond];
+    "Present field design\n(table by table)" [shape=box];
+    "Present relations & constraints" [shape=box];
+    "Present index plan" [shape=box];
+    "Produce final review brief" [shape=box];
+    "User approves brief?" [shape=diamond];
+    "Hand off to ent-schema-implementer" [shape=doublecircle];
 
-### Phase 3: Review Packaging
+    "Explore inputs" -> "Ask clarifying questions\n(one at a time)";
+    "Ask clarifying questions\n(one at a time)" -> "Enough to design?";
+    "Enough to design?" -> "Ask clarifying questions\n(one at a time)" [label="no"];
+    "Enough to design?" -> "Propose design options\nfor contentious decisions" [label="yes"];
+    "Propose design options\nfor contentious decisions" -> "Present entity overview";
+    "Present entity overview" -> "Approved?";
+    "Approved?" -> "Present entity overview" [label="revise"];
+    "Approved?" -> "Present field design\n(table by table)" [label="yes"];
+    "Present field design\n(table by table)" -> "Approved?";
+    "Present relations & constraints" -> "Approved?";
+    "Present index plan" -> "Approved?";
+    "Approved?" -> "Present relations & constraints" [label="fields ok"];
+    "Approved?" -> "Present index plan" [label="relations ok"];
+    "Approved?" -> "Produce final review brief" [label="indexes ok"];
+    "Produce final review brief" -> "User approves brief?";
+    "User approves brief?" -> "Produce final review brief" [label="changes"];
+    "User approves brief?" -> "Hand off to ent-schema-implementer" [label="approved"];
+}
+```
 
-10. Mark assumptions explicitly as `Assumption:`.
-11. List unresolved questions and approval blockers clearly.
-12. Produce the final review brief using [references/review-output-template.md](references/review-output-template.md).
+## Phase 1: Explore and Clarify
 
-## Hard Gates
+Before asking anything, check what is already available: prompt text, referenced docs, proto files, existing Ent schemas, API contracts, or mockups. Extract what you can without asking.
 
-1. The output must be understandable without showing Ent code.
-2. Every major table needs a business purpose, key fields, and lifecycle notes.
-3. Every proposed index must be tied to a real query pattern.
-4. Every field type must be checked against downstream Ent + proto3 compatibility before approval.
-5. If a type does not map cleanly, redesign it in the review output instead of deferring the problem to implementation.
-6. If the request is incomplete, stop at design options and blocking questions rather than forcing implementation details.
-7. If DDL is requested, provide it only as an optional appendix after the review brief, not as the primary artifact.
+Then ask clarifying questions **one at a time**:
 
-## Output Requirements
+- Prefer multiple-choice questions when there are clear alternatives.
+- Only one question per message — if you need more, come back after the answer.
+- Focus on: missing entity boundaries, lifecycle states, business invariants, query patterns, and deletion semantics.
+- Stop asking once you can make a reasonable design proposal.
 
-Use the review template exactly:
+**Good question:** "Should deleted records be recoverable, or is deletion permanent? A) Soft-delete (`deleted_at` field, recoverable) B) Hard-delete (row removed) C) Archive to a separate table"
+
+**Bad question:** "Can you tell me more about your requirements?"
+
+## Phase 2: Design Options
+
+For non-trivial decisions, present 2-3 options with trade-offs and your recommendation before proceeding. This is especially important for:
+
+- ID strategy (int64 auto-increment vs. external ID vs. compound key)
+- Deletion strategy (hard / soft / archive)
+- Many-to-many shape (join table vs. relation entity with attributes)
+- Complex field representation (JSON blob vs. explicit columns vs. relation entity)
+- Money or decimal fields
+
+Lead with your recommended option and explain why. The user picks; you proceed.
+
+## Phase 3: Incremental Design Presentation
+
+Present the design in sections. After each section, ask whether it looks right before moving on.
+
+**Entity overview first** — a simple table: entity name, purpose, key lifecycle states. No fields yet. Example:
+
+> "Here are the candidate entities. Does this set look right before we go into fields?"
+
+**Field design section by section** — one entity at a time. Apply [references/modeling-rules.md](references/modeling-rules.md) to every field:
+
+- Check each field against the allowed type shapes.
+- If a requested type doesn't fit (datetime object, UUID primary key, JSON blob, float money), redesign it here and explain the substitution.
+- Note mutable vs. immutable fields explicitly.
+
+**Relations and constraints** — cover one-to-many foreign keys, many-to-many shapes, uniqueness constraints, referential integrity, and deletion cascade rules.
+
+**Index plan** — every index must be tied to a real, named query pattern (e.g., "list orders by user, paginated by created_at"). Never propose an index without a reason.
+
+## Phase 4: Final Review Brief
+
+Once all sections are approved, produce the review brief using [references/review-output-template.md](references/review-output-template.md) exactly:
 
 1. Keep section order unchanged.
 2. Write `N/A` for non-applicable sections.
-3. Include a dedicated field-type compatibility section.
-4. Separate confirmed design decisions from open questions.
-5. Keep the document review-oriented rather than code-oriented.
+3. Include the field-type compatibility section with every type decision explained.
+4. Separate confirmed decisions from open questions clearly.
+5. Keep the document review-oriented, not code-oriented.
+
+After producing the brief, write it to disk:
+- Default: `prd/DDL.md`
+- Feature-scoped: `design/<feature>/schema.md` (use when the user names a specific module or change-id)
+
+Then ask the user to review it:
+
+> "Design brief written to `<path>`. Please look it over — if anything needs adjusting, let me know and I'll update it. Once you're happy, I can hand off to `ent-schema-implementer` to start writing the Ent schemas."
+
+Wait for explicit approval before handing off.
+
+## Key Principles
+
+- **One question at a time** — don't stack questions; wait for the answer
+- **Multiple choice preferred** — easier to respond to than open-ended
+- **Surface choices, don't bury them** — contentious defaults must be presented as options
+- **Explain type redesigns** — when a requested type is replaced, say why clearly
+- **Every index needs a query** — no speculative indexes
+- **Approved design before final document** — the brief captures decisions already made together, not decisions being revealed for the first time
