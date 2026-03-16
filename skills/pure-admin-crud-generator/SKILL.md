@@ -27,6 +27,7 @@ This is an AI-first generator skill. Do not use external OpenAPI generators and 
 - "Generate route module and views for order management"
 
 ## Hard Gates
+
 These are non-optional. If any gate fails, stop and report blocking issues.
 
 1. Parse and generate from local `Api.ts` + `api.ts` only.
@@ -38,6 +39,16 @@ These are non-optional. If any gate fails, stop and report blocking issues.
 7. Page `name` must match route `name` for keepAlive to work.
 8. Route `name` must be unique across the application.
 9. Use `satisfies RouteConfigsTable` for route module type safety.
+
+<HARD-GATE>
+Do NOT generate any Vue page or route module until the following are confirmed:
+- The target module name is known (e.g., "user", "order", "product")
+- Whether the API definition file `src/api/swagger/Api.ts` exists in the project
+- The page mode intent: CRUD pages, dashboard, or mixed
+
+If the module name is too vague (e.g., just "management"), ask for clarification before proceeding.
+If the API definition file doesn't exist, ask if the user wants to generate with generic REST patterns (noting the limitation in output).
+</HARD-GATE>
 
 ## Progressive Reference Loading
 

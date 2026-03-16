@@ -1,8 +1,3 @@
-/proto-api-generator-workspace
-/ent-seed-sql-generator-workspace
-/proto-service-generator-workspace
-/spec-writer-workspace
-/spec-diff-pipeline-workspace
 **/evals/**
-.conductor
+skills-evaluation
 .claude/settings.json
