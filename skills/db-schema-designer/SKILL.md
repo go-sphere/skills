@@ -110,10 +110,20 @@ For non-trivial decisions, present 2-3 options with trade-offs and your recommen
 - ID strategy (int64 auto-increment vs. external ID vs. compound key)
 - Deletion strategy (hard / soft / archive)
 - Many-to-many shape (join table vs. relation entity with attributes)
-- Complex field representation (JSON blob vs. explicit columns vs. relation entity)
+- Complex field representation — see the volatility model below
 - Money or decimal fields
 
 Lead with your recommended option and explain why. The user picks; you proceed.
+
+### Volatility check for entities with "lots of attributes"
+
+When an entity has many attributes, or the user mentions fields likely to change ("marketing flags", "experiment params", "custom fields per tenant", "form fields"), walk through the volatility decision tree from [references/modeling-rules.md](references/modeling-rules.md) section 4 before listing columns.
+
+Surface this as an explicit choice — do not silently put everything as regular columns or silently dump everything into JSON. Recommended framing:
+
+> "This entity has a mix of stable fields (id, status, amount) and what sound like volatile attributes (marketing tag, experiment id, source). I'd suggest: stable + query-hot fields as regular columns; volatile attributes in a typed `extra` JSON field; and if marketing/risk/ops attributes grow further, a separate extension entity. Does that split look right?"
+
+Only escalate to extension tables when there's evidence (module ownership, hot-row concerns, large fields). Only escalate to a dynamic field model (`custom_field_def` + `custom_field_value`) when fields are user/tenant-defined at runtime. Do not propose these patterns speculatively.
 
 ## Phase 3: Incremental Design Presentation
 
@@ -126,8 +136,11 @@ Present the design in sections. After each section, ask whether it looks right b
 **Field design section by section** — one entity at a time. Apply [references/modeling-rules.md](references/modeling-rules.md) to every field:
 
 - Check each field against the allowed type shapes.
-- If a requested type doesn't fit (datetime object, UUID primary key, JSON blob, float money), redesign it here and explain the substitution.
+- If a requested type doesn't fit (datetime object, UUID primary key, float money), redesign it here and explain the substitution.
+- For each field, classify it as **core**, **hot** (needs an index), or **volatile** (JSON / extension / dynamic). Call out the volatile ones explicitly.
+- When a JSON field appears, give it one of the standard names (`extra`, `metadata`, `settings`, `payload`, `attrs`) and write a one-line justification. Flag any sub-keys that are likely to be promoted to real columns later.
 - Note mutable vs. immutable fields explicitly.
+- If any field is being deprecated or replaced, name the multi-stage plan (deprecated → read-only → removed_from_code → dropped) rather than removing it outright.
 
 **Relations and constraints** — cover one-to-many foreign keys, many-to-many shapes, uniqueness constraints, referential integrity, and deletion cascade rules.
 

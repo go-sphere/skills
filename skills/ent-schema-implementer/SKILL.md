@@ -103,7 +103,10 @@ Include:
 - **Affected files** — list each schema file with whether it's new or modified
 - **Entity mapping summary** — one row per entity: entity name → field count, relation count, index count
 - **Entproto field numbering strategy** — confirm field order for ID=1 assignment (especially important for modified schemas where existing numbers must not shift)
+- **JSON field plan** — for every JSON field the brief approved: which canonical name (`extra` / `metadata` / `settings` / `payload` / `attrs`), typed struct or `json.RawMessage`, and which domain package will hold the struct (see [references/implementation-rules.md](references/implementation-rules.md) section 5)
+- **Deprecation plan** — for any field marked deprecated in the brief, which stage to implement now and which proto field number stays reserved
 - **Integration scope** — which bind, render, or service files will need manual follow-up
+- **Migration plan** — versioned migration command to generate after `go generate`, plus whether any large-table change needs online DDL (see [references/implementation-rules.md](references/implementation-rules.md) section 10)
 - **Assumptions** — any design gap you filled with a default choice
 
 Ask explicitly: "Does this plan look right before I start writing?"
@@ -117,8 +120,10 @@ Work through entities one at a time, following [references/implementation-rules.
 For each entity:
 1. Write the schema struct, Fields(), Edges(), and Indexes().
 2. Apply field policies: required, optional, default, unique, immutable.
-3. Implement relations using project conventions.
-4. Add indexes tied to approved query patterns only — no speculative indexes.
+3. For approved JSON fields, define (or reuse) the typed struct in the domain package and reference it from `field.JSON(...)`. See examples 3, 4, 6 in [references/ent-schema-examples.md](references/ent-schema-examples.md).
+4. For approved deprecated fields, keep them in the schema with a `deprecated:` comment until a later migration drops them — see example 5.
+5. Implement relations using project conventions. Extension entities use `edge.To(...).Unique()` plus a back-edge — see example 4.
+6. Add indexes tied to approved query patterns only — no speculative indexes.
 
 Never invent unapproved entities or fields. If you notice something missing that seems clearly needed (e.g., a standard `created_at` timestamp), label it as `// Assumption: added standard audit timestamp` in a comment.
 
@@ -150,8 +155,12 @@ Then list the required generation and verification commands in the order they mu
 # Example order — adapt to actual project setup
 go generate ./ent/...
 buf generate
+# When the change is destined for a real database, generate a versioned migration:
+atlas migrate diff <name> --env local
 go build ./...
 ```
+
+If the project still runs `client.Schema.Create(ctx)` against production in a startup path, flag it in the handoff. New columns should ship as reviewed migrations, not as application-side auto-migrate.
 
 ## Handoff Message
 
