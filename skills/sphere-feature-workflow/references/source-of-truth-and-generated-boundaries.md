@@ -24,7 +24,7 @@
 | API Contract | `proto/**` | Service definitions, RPCs, messages, errors |
 | Proto Imports | `proto/**/sphere/*.proto` | Binding, errors, options packages |
 | DB Schema | `internal/pkg/database/schema/**` | Ent schema definitions |
-| Bind/Map | `cmd/tools/bind/main.go#createFilesConf` | Entity exposure policy |
+| Bind/Map | `cmd/tools/gen/entcrud/main.go` | Entity exposure policy (`conf.NewFilesConf`) |
 | Service | `internal/service/**` | Business API implementation |
 | DAO | `internal/pkg/dao/**` | Query/mutation orchestration |
 | Render | `internal/pkg/render/**` non-generated | Response conversion, masking |
@@ -70,7 +70,7 @@ make gen/all
 
 1. **Protocol-first**: Define contract/schema → regenerate → consume
 2. **Never patch generated**: Fix source-of-truth instead
-3. **Complete bind coverage**: Every exposed entity needs `createFilesConf`
+3. **Complete bind coverage**: Every exposed entity needs a `conf.NewEntity` entry in `cmd/tools/gen/entcrud/main.go`
 4. **Ignore sensitive fields**: Use `WithIgnoreFields` for timestamps, soft-delete, secrets
 5. **Stable ownership**: Keep route/error ownership at service scope
 

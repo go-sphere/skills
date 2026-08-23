@@ -12,7 +12,7 @@
 ### During Change
 - [ ] Source-of-truth edited first
 - [ ] Business errors stay in owning proto
-- [ ] `createFilesConf` updated if schema changed
+- [ ] `cmd/tools/gen/entcrud/main.go` updated if schema changed
 - [ ] `WithIgnoreFields` covers timestamps/soft-delete/secrets
 - [ ] DAO query shape avoids N+1
 - [ ] NO edits to `entbind/**` or `entmap/**`
@@ -38,7 +38,7 @@
 
 - [ ] Modify source-of-truth files first
 - [ ] Keep business errors in owning proto unless sharing required
-- [ ] Update `cmd/tools/bind/main.go#createFilesConf` if schema changes
+- [ ] Update `cmd/tools/gen/entcrud/main.go` if schema changes
 - [ ] Review `WithIgnoreFields` for timestamps, soft-delete, secrets
 - [ ] Align DAO query shape with response (avoid N+1)
 - [ ] Reuse existing Sphere packages before new abstractions
@@ -54,7 +54,7 @@
 
 ### Schema-first
 - [ ] Schema field/relation/index complete
-- [ ] `createFilesConf` updated
+- [ ] `cmd/tools/gen/entcrud/main.go` updated
 - [ ] `WithIgnoreFields` covers sensitive fields
 - [ ] `make gen/proto` ran, downstream aligned
 
@@ -76,7 +76,7 @@
 | Issue | Fix |
 |-------|-----|
 | Workflow not classified | Classify before proceeding |
-| Schema changed, bind/map not | Update `createFilesConf` |
+| Schema changed, bind/map not | Register the entity in `cmd/tools/gen/entcrud/main.go` |
 | Proto changed, no gen | Run `make gen/proto` |
 | Generated diffs not consumed | Update service/dao/render |
 | Sensitive fields exposed | Add to `WithIgnoreFields` |

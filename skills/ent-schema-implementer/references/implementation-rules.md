@@ -155,7 +155,7 @@ Enum values must start from `1`. `0` is reserved.
 
 For each new or changed entity, review:
 
-- `cmd/tools/bind/main.go#createFilesConf`
+- `cmd/tools/gen/entcrud/main.go` (`conf.NewEntity` in `conf.NewFilesConf`)
 - `WithIgnoreFields` for timestamps and sensitive fields
 - render mapping impact
 - DAO batch query helpers

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Prevent generated HTTP paths from causing runtime router conflicts or ambiguous matches across Go router backends used by Sphere (`gin`, `fiber`, `echo`).
+Prevent generated HTTP paths from causing runtime router conflicts or ambiguous matches across Go router backends used by Sphere (`gin`, `fiber`, `echo`, `hertz`). Generated handlers register on `httpx.Router`; the adapter still inherits the backend's radix/order rules.
 
 ## When To Load
 
@@ -14,7 +14,8 @@ Load this reference whenever the output includes service routes, path templates,
 - HttpRouter README (Gin radix behavior model): https://raw.githubusercontent.com/julienschmidt/httprouter/master/README.md
 - Fiber routing guide: https://raw.githubusercontent.com/gofiber/fiber/v2/docs/guide/routing.md
 - Echo routing guide: https://raw.githubusercontent.com/labstack/echox/master/website/docs/guide/routing.md
-- Last synced by this skill update: 2026-03-07
+- Hertz routing (CloudWeGo): https://www.cloudwego.io/docs/hertz/tutorials/basic-feature/route/
+- Last synced by this skill update: 2026-08-23
 
 ## Why This Matters
 
@@ -29,6 +30,7 @@ This skill must pre-check route compatibility before finalizing paths.
 - [Gin / HttpRouter Rules (Strict)](#gin--httprouter-rules-strict)
 - [Fiber Rules (Order-sensitive)](#fiber-rules-order-sensitive)
 - [Echo Rules (Priority-driven)](#echo-rules-priority-driven)
+- [Hertz](#hertz)
 - [Cross-Backend Design Rules (Required)](#cross-backend-design-rules-required)
 - [Pre-Delivery Route Conflict Check](#pre-delivery-route-conflict-check)
 - [Required Fail-Fast Rule](#required-fail-fast-rule)
@@ -64,6 +66,14 @@ This skill must pre-check route compatibility before finalizing paths.
 2. Match-any (`*`) has one effective wildcard behavior in a route.
    - Multiple `*` tokens behave as first-wildcard-to-end semantics.
 3. Although routes can be declared in any order, ambiguous wildcard design should still be avoided.
+
+## Hertz
+
+Hertz uses a radix tree similar to Gin. Treat it as Gin-strict for skill output:
+
+1. Do not mix static and param routes at the same segment under the same method.
+2. Keep wildcard names stable on a given branch.
+3. Catch-all must be terminal.
 
 ## Cross-Backend Design Rules (Required)
 

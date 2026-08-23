@@ -171,7 +171,7 @@ Use these signals to avoid proposing patterns that conflict with actual generati
 
 ## Route Conflict Guardrails for Scaffold
 
-1. Current runtime commonly uses Gin-compatible routing behavior.
+1. Generated handlers use `httpx`. Official templates wrap Gin; keep routes in the Gin-safe subset so Fiber/Echo/Hertz adapters also work.
 2. Keep wildcard names stable for same resource branches (`:id` vs `:task_id` divergence can panic in Gin trees).
 3. Avoid introducing sibling static/param collisions for the same HTTP method scope.
 4. Validate routes with the dedicated router conflict reference before finalizing.

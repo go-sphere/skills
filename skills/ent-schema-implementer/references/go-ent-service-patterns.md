@@ -48,15 +48,14 @@ func (d *Dao) GetUsers(ctx context.Context, ids []int64) (map[int64]*ent.User, e
 
 ## 3. Bind Registration
 
-Register new entities in `cmd/tools/bind/main.go#createFilesConf`:
+Register new entities in `cmd/tools/gen/entcrud/main.go` via `conf.NewFilesConf`:
 
 ```go
 conf.NewEntity(
     ent.Example{},
     entpb.Example{},
     []any{ent.ExampleCreate{}, ent.ExampleUpdateOne{}},
-    conf.CheckOptions(bindMode,
-        conf.WithIgnoreFields(example.FieldCreatedAt, example.FieldUpdatedAt)),
+    conf.WithIgnoreFields(example.FieldCreatedAt, example.FieldUpdatedAt),
 )
 ```
 

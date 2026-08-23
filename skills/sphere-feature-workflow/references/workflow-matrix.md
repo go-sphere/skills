@@ -48,7 +48,7 @@ Run these checks **before** editing any files:
 
 ### Schema-first
 1. `internal/pkg/database/schema/**` - fields/indexes/relations
-2. `cmd/tools/bind/main.go#createFilesConf` - bind/map registration
+2. `cmd/tools/gen/entcrud/main.go` - bind/map registration (`conf.NewFilesConf`)
 3. `internal/service/**` + `dao/**` + `render/**` - consume generated types
 4. `proto/**` (optional) - if external contract needs new fields
 

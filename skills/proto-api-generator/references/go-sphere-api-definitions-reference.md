@@ -8,7 +8,7 @@ Provide a full local copy of the official go-sphere API definitions guide so the
 
 - URL: https://go-sphere.github.io/docs/guides/api-definitions/
 - Upstream markdown: https://raw.githubusercontent.com/go-sphere/go-sphere.github.io/master/content/docs/guides/api-definitions.md
-- Last synced by this skill update: 2026-03-07
+- Last synced by this skill update: 2026-08-23
 
 ## How To Use This Reference
 
@@ -27,7 +27,7 @@ If any generic example here conflicts with scaffold conventions or hard gates in
 
 ## Table of Contents
 
-- [Getting Started: A Basic Example](#getting-started-a-basic-example)
+- [Getting Started: A Basic Example](#getting-started:-a-basic-example)
 - [URL Path Mapping](#url-path-mapping)
 - [HTTP Methods and Body Binding](#http-methods-and-body-binding)
 - [Field Binding Locations](#field-binding-locations)
@@ -98,11 +98,11 @@ Sphere uses these definitions to automatically generate server-side stubs and ro
 
 ## URL Path Mapping
 
-Sphere converts gRPC-Gateway style URL paths from your `.proto` definitions into Gin-compatible routes. This includes support for path parameters, wildcards, and complex segments.
+Sphere converts gRPC-Gateway style URL paths from your `.proto` definitions into `httpx` routes (`:param` and `*wildcard`). Official templates serve those routes through a Gin adapter; Fiber, Echo, and Hertz adapters accept the same patterns.
 
-The following table shows how Protobuf URL paths are translated into Gin routes:
+The following table shows how Protobuf URL paths are translated:
 
-| Protobuf Path Template                           | Generated Gin Route                         |
+| Protobuf Path Template                           | Generated httpx Route                       |
 |--------------------------------------------------|---------------------------------------------|
 | `/users/{user_id}`                               | `/users/:user_id`                           |
 | `/users/{user_id}/posts/{post_id}`               | `/users/:user_id/posts/:post_id`            |
@@ -122,10 +122,11 @@ The following table shows how Protobuf URL paths are translated into Gin routes:
 
 Different HTTP methods have different default binding behaviors:
 
-#### GET and DELETE Requests
+#### GET, HEAD, DELETE, and OPTIONS Requests
 - Path parameters are bound to fields marked with `BINDING_LOCATION_URI`
 - All other fields become query parameters by default
 - No request body is expected
+- If `google.api.http` still declares `body`, `protoc-gen-sphere` warns (or fails with `fail_on_warn`) and generates the handler **without** `BindJSON`
 
 #### POST, PUT, and PATCH Requests
 - Path parameters are bound to fields marked with `BINDING_LOCATION_URI`
@@ -267,7 +268,7 @@ message GetUserNameResponse {
 
 4. **Avoid overly broad wildcards** in paths to prevent ambiguous routing
 5. **Prefer explicit body field** (`body: "fieldName"`) when payloads are nested
-6. **Avoid `oneof`** in exposed HTTP request/response messages due to JSON codec limitations
+6. **Prefer not to use `oneof`** in HTTP-exposed request/response messages. Binding tags now land on the generated wrapper structs, but JSON codecs still handle oneof awkwardly on the wire.
 
 
 ## Integration with buf
@@ -281,7 +282,7 @@ deps:
   - buf.build/go-sphere/binding
 ```
 
-Configure code generation in `buf.gen.yaml`:
+Configure HTTP generation in `buf.gen.yaml`:
 
 ```yaml
 version: v2
@@ -292,8 +293,18 @@ plugins:
     out: api
     opt:
       - paths=source_relative
+```
+
+Run `protoc-gen-sphere-binding` from a second template after `protoc-gen-go` has written the structs. Official templates use `buf.binding.yaml`:
+
+```yaml
+version: v2
+managed:
+  enabled: true
+plugins:
   - local: protoc-gen-sphere-binding
     out: api
     opt:
       - paths=source_relative
+      - out=api
 ```

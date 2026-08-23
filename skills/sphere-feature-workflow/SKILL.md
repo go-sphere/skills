@@ -32,7 +32,7 @@ Read these references **in order** before making edits:
 | Service implementation | Implementing generated interfaces, business logic |
 | Generation commands | Running `make gen/proto`, `make gen/docs`, `make gen/wire` |
 | Cross-layer work | Anything affecting both proto and schema layers |
-| Bind/map registration | Changes to `cmd/tools/bind/main.go#createFilesConf` |
+| Bind/map registration | Changes to `cmd/tools/gen/entcrud/main.go` (`conf.NewFilesConf` / `conf.NewEntity`) |
 
 ## Workflow Selection (Critical - Do Not Skip)
 
@@ -59,7 +59,7 @@ DO NOT duplicate behavior already covered by:
 
 | Category | Available Packages |
 |----------|-------------------|
-| Lifecycle/bootstrapping | `core/boot`, `core/task`, `server/boot` |
+| Lifecycle/bootstrapping | `core/boot`, `core/task` |
 | HTTP transport | `server/httpz`, `httpx` |
 | Auth/authorization | `server/auth/*`, `server/middleware/auth` |
 | Middleware | `server/middleware/*` (cors, ratelimiter, selector, online) |
@@ -94,7 +94,7 @@ DO NOT duplicate behavior already covered by:
 
 ```
 1. Edit internal/pkg/database/schema/** (field, relation, index)
-2. Verify bind/map: cmd/tools/bind/main.go#createFilesConf
+2. Verify bind/map: cmd/tools/gen/entcrud/main.go (`conf.NewFilesConf`)
 3. Review WithIgnoreFields for sensitive/system fields
 4. Run: make gen/proto
 5. Resolve impacts in service/dao/render
@@ -123,7 +123,7 @@ DO NOT duplicate behavior already covered by:
 | 2 | Run `make gen/proto` after ANY proto/schema change | Stale generated code causes compile/behavior issues |
 | 3 | Run `make gen/docs` when HTTP contract changes | API docs out of sync |
 | 4 | Run `make gen/wire` when DI signatures change | Wire errors, runtime panics |
-| 5 | Update `createFilesConf` for new entity exposure | Bind/map missing, runtime errors |
+| 5 | Register new entities in `cmd/tools/gen/entcrud/main.go` | Bind/map missing, runtime errors |
 | 6 | Use `WithIgnoreFields` for timestamps, soft-delete, secrets | Data leakage |
 | 7 | Keep business errors in owning service proto | Error pollution across services |
 | 8 | Block on route conflicts or unconsumed generated changes | Runtime routing/behavior bugs |
@@ -153,10 +153,10 @@ DO NOT duplicate behavior already covered by:
 
 ## HTTP Framework (httpx)
 
-The `server/httpz` package uses `httpx` as its foundation - a unified HTTP framework abstraction that supports multiple backends:
+The `server/httpz` package uses `httpx` as its foundation — a unified HTTP framework abstraction that supports multiple backends:
 - **ginx** (Gin), **fiberx** (Fiber), **echox** (Echo), **hertzx** (Hertz)
 
-Core interfaces: `Handler`, `Middleware`, `Router`, `Engine`, `Context`. All Sphere HTTP services use these abstractions.
+Core interfaces: `Handler`, `Middleware`, `Router`, `Engine`, `Context`. Generated handlers call `ctx.BindJSON` / `BindQuery` / `BindURI` / `BindHeader` / `BindForm` and wrap results with `httpz.WithJson`. Do not generate `*gin.Context` handlers.
 
 ## Failure Conditions (Block Delivery If)
 
