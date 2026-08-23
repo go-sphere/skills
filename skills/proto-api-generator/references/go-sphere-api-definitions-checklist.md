@@ -65,7 +65,7 @@ Load this reference at final validation time after drafting contracts. Use it as
 - [ ] Mark URI fields with `BINDING_LOCATION_URI` when required.
 - [ ] Use query binding for list filters and pagination.
 - [ ] Use explicit `body` rules for write APIs (`"*"` or specific field).
-- [ ] Prefer not to use `oneof` in HTTP-exposed request/response messages (JSON codec limitations; binding tags now apply to wrapper structs).
+- [ ] Prefer not to use `oneof` in HTTP-exposed request/response messages (handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled; JSON codecs also handle oneof poorly).
 
 ### F. API Contract (Required)
 

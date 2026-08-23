@@ -133,7 +133,7 @@ Keep these principles in mind throughout the task. Detailed rule text lives in t
 
 1. Design business capability first; avoid table-mirror public contracts.
 2. List APIs require pagination; batch APIs are preferred over repeated single reads.
-3. Prefer not to use `oneof` in HTTP-exposed request or response messages (JSON codecs still handle it poorly; binding tags now apply to wrapper structs).
+3. Prefer not to use `oneof` in HTTP-exposed request or response messages. Tags land on wrapper structs; generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled. JSON codecs also handle oneof poorly.
 4. Keep error contracts machine-readable and stable.
 5. Do not leak sensitive or storage-only fields into external contracts.
 6. Keep routes conflict-safe; when backend is unknown, design for the Gin-safe subset first. Generated handlers use `httpx`, not `*gin.Context`.
