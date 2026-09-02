@@ -21,6 +21,8 @@ Do not load every bundled skill preemptively.
 
 ### Discovery and Requirement Shaping
 
+- `interview-me`
+  - Use for step-by-step interactive interviews to resolve design decisions before drafting specs or code.
 - `project-intake`
   - Use for new project kickoff, scattered requirements, demos, screenshots, or rough drafts.
 - `prd`

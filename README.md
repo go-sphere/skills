@@ -131,6 +131,8 @@ Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)
 The plugin is meant to move work through the go-sphere lifecycle in order.
 
 ```text
+Interactive requirement interview & alignment
+  -> interview-me
 Scattered inputs / kickoff
   -> project-intake
 PRD / product framing
@@ -168,6 +170,7 @@ The bootstrap rule is simple:
 
 ### Discovery and Requirements
 
+- `interview-me` deeply interviews the user through a decision tree until reaching shared technical and product consensus.
 - `project-intake` organizes rough inputs into a structured kickoff document.
 - `prd` turns agreed direction into a high-quality PRD.
 - `ux-analyst` translates demos and mockups into behavioral UX flows.
