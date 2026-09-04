@@ -57,6 +57,11 @@ Do not load every bundled skill preemptively.
 - `pure-admin-crud-generator`
   - Use to scaffold pure-admin-thin CRUD views and router modules from swagger-generated client methods.
 
+### Quality and Verification
+
+- `go-test-engineering`
+  - Use to audit, repair, or write Go tests, including reusable interface contract suites and justified golden tests.
+
 ## Common Starting Points
 
 - Rough feature idea with mixed notes:
@@ -71,6 +76,8 @@ Do not load every bundled skill preemptively.
   - Start with `proto-api-generator`.
 - Need a merge-ready scaffold feature touching generated boundaries:
   - Start with `sphere-feature-workflow`.
+- Need to audit AI-generated tests or add trustworthy Go tests:
+  - Start with `go-test-engineering`.
 
 ## Operating Constraints
 
@@ -82,4 +89,4 @@ Do not load every bundled skill preemptively.
 ## Plugin Bootstrap Note
 
 When this skill is injected by the `sphere-workflow` plugin, treat it as already loaded bootstrap context.
-Use the native skill mechanism only for follow-up skills such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, or `sphere-feature-workflow`.
+Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, or `go-test-engineering`.

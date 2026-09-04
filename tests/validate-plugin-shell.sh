@@ -34,6 +34,11 @@ require_file "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md"
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" '^name:\s*using-sphere-workflow$'
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'sphere-feature-workflow'
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'proto-api-generator'
+require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'go-test-engineering'
+
+require_file "$ROOT_DIR/skills/go-test-engineering/SKILL.md"
+require_contains "$ROOT_DIR/skills/go-test-engineering/SKILL.md" '^name:\s*go-test-engineering$'
+require_contains "$ROOT_DIR/skills/go-test-engineering/SKILL.md" 'Correctness outranks pass rate'
 
 require_file "$ROOT_DIR/.codex/INSTALL.md"
 require_contains "$ROOT_DIR/.codex/INSTALL.md" 'sphere-workflow'

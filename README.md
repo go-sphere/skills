@@ -157,6 +157,8 @@ Cross-layer scaffold implementation
   -> sphere-feature-workflow
 Admin CRUD surface
   -> pure-admin-crud-generator
+Go test review, repair, and authoring
+  -> go-test-engineering
 ```
 
 The bootstrap rule is simple:
@@ -192,6 +194,10 @@ The bootstrap rule is simple:
 
 - `sphere-feature-workflow` handles end-to-end scaffold feature delivery.
 - `pure-admin-crud-generator` scaffolds pure-admin-thin CRUD pages and routes.
+
+### Quality and Verification
+
+- `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
 
 ## Legacy Direct Install
 

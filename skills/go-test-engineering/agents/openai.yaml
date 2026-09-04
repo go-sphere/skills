@@ -1,0 +1,4 @@
+interface:
+  display_name: "Go Test Engineering"
+  short_description: "Engineer and audit trustworthy Go tests"
+  default_prompt: "Use $go-test-engineering to write, audit, and improve this Go test suite without weakening its behavioral contracts."
