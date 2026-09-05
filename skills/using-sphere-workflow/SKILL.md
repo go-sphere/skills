@@ -61,6 +61,8 @@ Do not load every bundled skill preemptively.
 
 - `go-test-engineering`
   - Use to audit, repair, or write Go tests, including reusable interface contract suites and justified golden tests.
+- `go-sphere-makefiles`
+  - Use to standardize or repair repository Make targets, root batch orchestration, and Make-driven CI while preserving multi-module, generator, and layout behavior.
 
 ## Common Starting Points
 
@@ -78,6 +80,8 @@ Do not load every bundled skill preemptively.
   - Start with `sphere-feature-workflow`.
 - Need to audit AI-generated tests or add trustworthy Go tests:
   - Start with `go-test-engineering`.
+- Need consistent Makefiles or Make-driven CI across repositories:
+  - Start with `go-sphere-makefiles`.
 
 ## Operating Constraints
 
@@ -89,4 +93,4 @@ Do not load every bundled skill preemptively.
 ## Plugin Bootstrap Note
 
 When this skill is injected by the `sphere-workflow` plugin, treat it as already loaded bootstrap context.
-Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, or `go-test-engineering`.
+Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, `go-test-engineering`, or `go-sphere-makefiles`.

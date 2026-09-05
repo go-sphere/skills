@@ -1,0 +1,4 @@
+interface:
+  display_name: "Go-Sphere Makefiles"
+  short_description: "Standardize Makefiles across go-sphere repositories"
+  default_prompt: "Use $go-sphere-makefiles to standardize this repository Makefile while preserving its specialized build and generation targets."

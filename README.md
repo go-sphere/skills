@@ -159,6 +159,8 @@ Admin CRUD surface
   -> pure-admin-crud-generator
 Go test review, repair, and authoring
   -> go-test-engineering
+Makefile and Make-driven CI standardization
+  -> go-sphere-makefiles
 ```
 
 The bootstrap rule is simple:
@@ -198,6 +200,7 @@ The bootstrap rule is simple:
 ### Quality and Verification
 
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
+- `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
 ## Legacy Direct Install
 
