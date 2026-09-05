@@ -35,9 +35,9 @@ VALUES
 -- 2) users
 INSERT INTO users (id, org_id, email, display_name, password_hash, created_at)
 VALUES
-  (1001, 2001, 'john.doe@acme-corp.dev', 'John Doe', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-15 09:00:00'),
-  (1002, 2001, 'jane.smith@acme-corp.dev', 'Jane Smith', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-16 14:30:00'),
-  (1003, 2002, 'alex@techstart-inc.dev', 'Alex Chen', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqKx8pUv2S', '2026-01-20 11:00:00');
+  (1001, 2001, 'john.doe@acme-corp.dev', 'John Doe', '$2a$10$0Ah2j61iId12kpgsbARXoevqxQrR0FLxJoQJJ9hDiPle0C2a6I.te', '2026-01-15 09:00:00'),
+  (1002, 2001, 'jane.smith@acme-corp.dev', 'Jane Smith', '$2a$10$0Ah2j61iId12kpgsbARXoevqxQrR0FLxJoQJJ9hDiPle0C2a6I.te', '2026-01-16 14:30:00'),
+  (1003, 2002, 'alex@techstart-inc.dev', 'Alex Chen', '$2a$10$0Ah2j61iId12kpgsbARXoevqxQrR0FLxJoQJJ9hDiPle0C2a6I.te', '2026-01-20 11:00:00');
 
 -- 3) projects
 INSERT INTO projects (id, org_id, owner_id, name, status, created_at)

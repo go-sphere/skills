@@ -16,6 +16,8 @@ Do not load every bundled skill preemptively.
 2. If the request spans multiple lifecycle stages, start at the earliest missing artifact.
 3. If the request is already narrowed to a single stage, invoke only that stage skill.
 4. If the task will modify go-sphere scaffold contracts, schemas, services, or generation commands, route into `sphere-feature-workflow`.
+5. If the task is about pulling upstream layout changes into an existing project, or adopting a pre-contract project, route into `sphere-layout-sync` — not `sphere-feature-workflow`.
+6. If the task is about the `protoc-gen-*` plugins themselves rather than the `.proto` contracts they consume, route into `protoc-plugin-engineering` — not `proto-api-generator`.
 
 ## Workflow Map
 
@@ -57,6 +59,13 @@ Do not load every bundled skill preemptively.
 - `pure-admin-crud-generator`
   - Use to scaffold pure-admin-thin CRUD views and router modules from swagger-generated client methods.
 
+### Layout and Toolchain Maintenance
+
+- `sphere-layout-sync`
+  - Use to update a generated project to a newer layout revision, resolve layout drift, or adopt a legacy project into the `.sphere/layout.lock.json` contract.
+- `protoc-plugin-engineering`
+  - Use to write, refactor, or review the `protoc-gen-*` plugins themselves, including config, templates, generated-output stability, and golden tests.
+
 ### Quality and Verification
 
 - `go-test-engineering`
@@ -82,10 +91,16 @@ Do not load every bundled skill preemptively.
   - Start with `go-test-engineering`.
 - Need consistent Makefiles or Make-driven CI across repositories:
   - Start with `go-sphere-makefiles`.
+- Need to upgrade a project to a newer layout revision or fix layout drift:
+  - Start with `sphere-layout-sync`.
+- Need to change or review a `protoc-gen-*` plugin:
+  - Start with `protoc-plugin-engineering`.
 
 ## Operating Constraints
 
 - Prefer go-sphere repository conventions over generic engineering defaults.
+- Inside a generated project, the project's own `.sphere/layout.json`, `AGENTS.md`, and `docs/LAYOUT_CONTRACT.md` outrank any bundled skill where they disagree. Read them before editing.
+- There are four official layouts (`standard`, `simple`, `bun`, `telegram`) with different capabilities. Do not assume the standard layout.
 - Keep stage boundaries clear: requirements first, then spec, then schema/contract design, then implementation.
 - When multiple skills are needed, progress forward one stage at a time instead of blending outputs.
 - Reuse the existing bundled skill outputs and default artifact locations unless the user specifies otherwise.
@@ -93,4 +108,4 @@ Do not load every bundled skill preemptively.
 ## Plugin Bootstrap Note
 
 When this skill is injected by the `sphere-workflow` plugin, treat it as already loaded bootstrap context.
-Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, `go-test-engineering`, or `go-sphere-makefiles`.
+Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, `sphere-layout-sync`, `protoc-plugin-engineering`, `go-test-engineering`, or `go-sphere-makefiles`.

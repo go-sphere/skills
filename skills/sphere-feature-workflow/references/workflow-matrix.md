@@ -1,4 +1,9 @@
-# Workflow Matrix (sphere-layout)
+# Workflow Matrix (go-sphere layouts)
+
+Paths below use the standard layout. The simple layout has no Ent/schema layer
+and the bun layout uses Bun instead of Ent — confirm the variant via
+[layout-contract-and-ownership.md](layout-contract-and-ownership.md) before applying
+a Schema-first workflow.
 
 ## Quick Decision Guide
 
@@ -16,6 +21,11 @@
 ## 1. Preflight Classification
 
 Run these checks **before** editing any files:
+
+0. **Ownership check (first, always)**
+   - Read `.sphere/layout.json`, `AGENTS.md`, `docs/LAYOUT_CONTRACT.md`
+   - Identify the layout variant and classify every path you plan to touch
+   - A `layout_owned` or `mixed` target changes the plan, not just the diff
 
 1. **API/Contract impact?**
    - Changes to route shape, validation, error contracts → `Contract-first`
@@ -65,10 +75,14 @@ Run these checks **before** editing any files:
 | Proto/schema change | `make gen/proto` | Ent/proto/bind/map synchronized |
 | HTTP/OpenAPI impact | `make gen/docs` | Swagger refreshed |
 | DI signature change | `make gen/wire` | `wire_gen.go` updated |
-| Validation | `go test ./...` | Behavior safety check |
+| Validation | `make test` | Behavior safety check |
+| Delivery gate | `make check` | Dependency, format, lint, and test state clean |
+| Binary-delivering projects | `make build` | Project still builds |
 
 ## 5. Delivery Gate (All Must Pass)
 
+- [ ] Layout variant identified and edited paths classified
+- [ ] Every `layout_owned` / `mixed` edit justified
 - [ ] Workflow type explicitly stated
 - [ ] Source-of-truth edits complete and consistent
 - [ ] Required generation commands ran successfully

@@ -131,6 +131,49 @@ Different HTTP methods have different default binding behaviors:
 - Path parameters are bound to fields marked with `BINDING_LOCATION_URI`
 - By default, all other fields are expected in the JSON request body
 - You can override this with explicit binding locations
+- If `google.api.http` declares no `body` at all, `protoc-gen-sphere` warns (or fails with `fail_on_warn`)
+
+#### Methods With Form Parameters
+
+A method that has **any** `BINDING_LOCATION_FORM` field is treated as body-less,
+regardless of HTTP method. This is a hard rule in `buildHTTPRule`:
+
+- Declaring `body:` on such a method emits `body should not be declared when form
+  parameters are present` — a warning normally, a **hard generation failure**
+  under `fail_on_warn`.
+- The resolved body is cleared and `HasBody` is forced to `false`, so the
+  generated handler emits `ctx.BindForm` and **never** `ctx.BindJSON`.
+- The Swagger annotation becomes `// @Accept mpfd` (multipart form data) instead
+  of `// @Accept json`.
+
+So form uploads and JSON bodies are mutually exclusive on one method:
+
+```protobuf
+// CORRECT - form upload, no body declared
+rpc UploadAvatar(UploadAvatarRequest) returns (UploadAvatarResponse) {
+  option (google.api.http) = {
+    post: "/api/v1/users/{user_id}/avatar"
+    // no body: field
+  };
+}
+
+message UploadAvatarRequest {
+  int64 user_id = 1 [(sphere.binding.location) = BINDING_LOCATION_URI];
+  bytes file = 2 [(sphere.binding.location) = BINDING_LOCATION_FORM];
+  string caption = 3 [(sphere.binding.location) = BINDING_LOCATION_FORM];
+}
+```
+
+```protobuf
+// WRONG - body plus form parameters; warns, and fails under fail_on_warn
+option (google.api.http) = {
+  post: "/api/v1/users/{user_id}/avatar"
+  body: "*"
+};
+```
+
+If a request genuinely needs both a structured JSON payload and a file upload,
+split it into two RPCs rather than mixing the binding locations.
 
 ### Field Binding Locations
 
@@ -268,6 +311,7 @@ message GetUserNameResponse {
 4. **Avoid overly broad wildcards** in paths to prevent ambiguous routing
 5. **Prefer explicit body field** (`body: "fieldName"`) when payloads are nested
 6. **Prefer not to use `oneof`** in HTTP-exposed request/response messages. Tags land on wrapper structs (`Message_Field`); generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled by `BindQuery`/`BindURI`/`BindHeader`. JSON codecs also handle oneof awkwardly on the wire.
+7. **Never combine `body:` with `BINDING_LOCATION_FORM` fields.** Form parameters make the method body-less; declaring a body warns and fails under `fail_on_warn`. Split into two RPCs if you need both.
 
 
 ## Integration with buf

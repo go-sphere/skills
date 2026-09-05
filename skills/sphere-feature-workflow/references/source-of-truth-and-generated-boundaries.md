@@ -1,5 +1,11 @@
 # Source of Truth and Generated Boundaries
 
+`.sphere/layout.json` is authoritative for the project you are in; this file is
+the fallback and the explanation. When the two disagree, follow the project.
+The editable/generated split below is orthogonal to the ownership split in
+[layout-contract-and-ownership.md](layout-contract-and-ownership.md): a file can be
+editable *and* `mixed`, which means edit it carefully rather than freely.
+
 ## Quick Reference
 
 | Category | Editable? | Location |
@@ -41,6 +47,9 @@
 | entpb proto | `proto/entpb/entpb.proto` |
 | Swagger | `swagger/**` |
 | Wire DI | `cmd/app/wire_gen.go` |
+| Resolved config | `config_gen.json`, `config.json` |
+| Build output | `build/**`, `var/**` |
+| Dep locks | `buf.lock`, `go.sum` |
 
 **Rule**: If you think you need to edit generated files → edit source-of-truth and regenerate.
 
@@ -64,7 +73,14 @@ make gen/dts
 
 # 6. Run all generators
 make gen/all
+
+# 7. Delivery gate (deps, format, lint, tests)
+make check
 ```
+
+`make gen/proto` depends on `gen/db`, so it also refreshes Ent. `gen/all` runs
+the full chain and then tidies. Use `make help` to confirm what a given layout
+actually exposes rather than assuming this list.
 
 ## 4. Boundary Rules
 
@@ -73,6 +89,7 @@ make gen/all
 3. **Complete bind coverage**: Every exposed entity needs a `conf.NewEntity` entry in `cmd/tools/gen/entcrud/main.go`
 4. **Ignore sensitive fields**: Use `WithIgnoreFields` for timestamps, soft-delete, secrets
 5. **Stable ownership**: Keep route/error ownership at service scope
+6. **Layout ownership**: New product code goes in `project_owned` paths; `mixed` paths are seams to merge into, not to rewrite
 
 ## 5. Conflict Resolution
 

@@ -65,6 +65,9 @@ Load this reference at final validation time after drafting contracts. Use it as
 - [ ] Mark URI fields with `BINDING_LOCATION_URI` when required.
 - [ ] Use query binding for list filters and pagination.
 - [ ] Use explicit `body` rules for write APIs (`"*"` or specific field).
+- [ ] Ensure no method declares `body:` while also having `BINDING_LOCATION_FORM` fields — form parameters force the method body-less; declaring a body warns and hard-fails under `fail_on_warn`, and Swagger emits `@Accept mpfd`.
+- [ ] Ensure GET/HEAD/DELETE/OPTIONS declare no `body:` and no JSON-bound fields.
+- [ ] Ensure URI path parameters are top-level fields; nested templates like `{user.id}` are rejected.
 - [ ] Prefer not to use `oneof` in HTTP-exposed request/response messages (handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled; JSON codecs also handle oneof poorly).
 
 ### F. API Contract (Required)

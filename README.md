@@ -157,6 +157,10 @@ Cross-layer scaffold implementation
   -> sphere-feature-workflow
 Admin CRUD surface
   -> pure-admin-crud-generator
+Layout upgrade, drift, or legacy adoption
+  -> sphere-layout-sync
+protoc-gen-* plugin authoring and review
+  -> protoc-plugin-engineering
 Go test review, repair, and authoring
   -> go-test-engineering
 Makefile and Make-driven CI standardization
@@ -169,6 +173,10 @@ The bootstrap rule is simple:
 - If the task spans multiple stages, start at the earliest missing artifact.
 - If the task touches proto, schema, service, or generation boundaries, route into
   `sphere-feature-workflow`.
+- If the task is about updating a project to a newer layout revision, route into
+  `sphere-layout-sync`.
+- If the task is about the `protoc-gen-*` plugins themselves rather than the
+  `.proto` files they consume, route into `protoc-plugin-engineering`.
 
 ## Bundled Skills
 
@@ -196,6 +204,11 @@ The bootstrap rule is simple:
 
 - `sphere-feature-workflow` handles end-to-end scaffold feature delivery.
 - `pure-admin-crud-generator` scaffolds pure-admin-thin CRUD pages and routes.
+
+### Layout and Toolchain Maintenance
+
+- `sphere-layout-sync` updates a generated project to a newer layout revision, resolves layout drift, and adopts pre-contract projects into the `.sphere/layout.lock.json` model.
+- `protoc-plugin-engineering` covers authoring, refactoring, and reviewing the `protoc-gen-*` plugins themselves, including config immutability, read-only templates, output determinism, and golden-file discipline.
 
 ### Quality and Verification
 
@@ -316,10 +329,11 @@ and install only the skills you need.
 ## Tech Stack
 
 - Backend framework: [go-sphere](https://github.com/go-sphere)
-- ORM: [ent](https://entgo.io/)
+- ORM: [ent](https://entgo.io/) (Bun in the `bun` layout)
 - Protocol: Protocol Buffers (proto3)
 - Frontend: Vue 3 + Element Plus (pure-admin-thin)
-- Code generation: `protoc-gen-sphere*`, `protoc-gen-route`
+- Code generation: `protoc-gen-sphere`, `protoc-gen-sphere-binding`, `protoc-gen-sphere-errors`, and `protoc-gen-route` (Telegram layout only)
+- Project layouts: `standard`, `simple`, `bun`, `telegram` — created by `sphere-cli create --layout`, each carrying `.sphere/layout.json` ownership rules
 
 ## Contributing
 

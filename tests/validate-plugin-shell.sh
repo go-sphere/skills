@@ -35,10 +35,24 @@ require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" '^name:\s*usi
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'sphere-feature-workflow'
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'proto-api-generator'
 require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'go-test-engineering'
+require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'sphere-layout-sync'
+require_contains "$ROOT_DIR/skills/using-sphere-workflow/SKILL.md" 'protoc-plugin-engineering'
 
 require_file "$ROOT_DIR/skills/go-test-engineering/SKILL.md"
 require_contains "$ROOT_DIR/skills/go-test-engineering/SKILL.md" '^name:\s*go-test-engineering$'
 require_contains "$ROOT_DIR/skills/go-test-engineering/SKILL.md" 'Correctness outranks pass rate'
+
+require_file "$ROOT_DIR/skills/sphere-layout-sync/SKILL.md"
+require_contains "$ROOT_DIR/skills/sphere-layout-sync/SKILL.md" '^name:\s*sphere-layout-sync$'
+require_contains "$ROOT_DIR/skills/sphere-layout-sync/SKILL.md" 'layout\.lock\.json'
+
+require_file "$ROOT_DIR/skills/protoc-plugin-engineering/SKILL.md"
+require_contains "$ROOT_DIR/skills/protoc-plugin-engineering/SKILL.md" '^name:\s*protoc-plugin-engineering$'
+require_file "$ROOT_DIR/skills/protoc-plugin-engineering/references/plugin-conventions.md"
+require_file "$ROOT_DIR/skills/protoc-plugin-engineering/references/plugin-testing.md"
+
+require_file "$ROOT_DIR/skills/sphere-feature-workflow/references/layout-contract-and-ownership.md"
+require_contains "$ROOT_DIR/skills/sphere-feature-workflow/SKILL.md" '\.sphere/layout\.json'
 
 require_file "$ROOT_DIR/.codex/INSTALL.md"
 require_contains "$ROOT_DIR/.codex/INSTALL.md" 'sphere-workflow'
