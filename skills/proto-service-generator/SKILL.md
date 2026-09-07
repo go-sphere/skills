@@ -1,6 +1,6 @@
 ---
 name: proto-service-generator
-description: "Generate or complete Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when you need to create `internal/service/<module>/*.go` files, add missing method implementations to existing services, or generate compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, append-only update, interface assertion, CRUD via Ent, stub method generation."
+description: "Generate or complete unary and server-streaming Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when creating internal service files, adding missing method implementations, or generating compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, SSE producer, append-only update, interface assertion, CRUD via Ent, stub method generation."
 ---
 
 # Proto Service Generator
@@ -40,6 +40,7 @@ Load sections selectively:
 3. Unknown logic: `2) Stub Template for Unknown Logic`.
 4. Complex orchestration and DI changes: `5) Complex Logic Split to Usecase`, `6) Wire Injection Pattern`.
 5. Reuse checks: `8) Sphere Feature Reuse Pattern`.
+6. Server-streaming methods: `9) Server-Streaming SSE Template`.
 
 ## Companion Skill Policy
 
@@ -74,6 +75,7 @@ If `sphere-feature-workflow` is unavailable, continue with this skill and enforc
 
 | Scenario | Strategy |
 |----------|----------|
+| Signature ends with `send func(*Reply) error) error` | Server-streaming producer; honor cancellation and send errors |
 | Method is `Create*`, `Get*`, `List*`, `Update*`, `Delete*` on single entity | Simple CRUD via direct Ent |
 | Logic cannot be inferred | Compilable stub with `errors.New("not implemented")` |
 | Cross-entity transactions or complex orchestration | Split to usecase + wire DI |
@@ -90,9 +92,10 @@ If `sphere-feature-workflow` is unavailable, continue with this skill and enforc
 
 ## Decision Rules
 
-1. **Simple CRUD**: Method name matches `Create*`, `Get*`, `List*`, `Update*`, `Delete*` + single entity = direct Ent.
-2. **Stub**: Logic unclear = `return nil, errors.New("not implemented: <Method>")`
-3. **Usecase**: Cross-entity, reusable orchestration, or long flows = split to `internal/usecase/`.
+1. **Server stream first**: A `send func(*Reply) error` signature always uses the streaming template, even when the method name starts with `List` or another CRUD verb.
+2. **Simple CRUD**: Method name matches `Create*`, `Get*`, `List*`, `Update*`, `Delete*` + single entity = direct Ent.
+3. **Stub**: Logic unclear = `return nil, errors.New("not implemented: <Method>")`; streaming stubs return only the error.
+4. **Usecase**: Cross-entity, reusable orchestration, or long flows = split to `internal/usecase/`.
 
 ## Hard Rules
 
@@ -101,6 +104,7 @@ If `sphere-feature-workflow` is unavailable, continue with this skill and enforc
 3. Do not delete or rewrite existing assertions or method bodies in target service files.
 4. Add only required imports.
 5. Keep dependency injection compilable when constructor signatures change.
+6. Never retain or use `httpx.Context` in a streaming producer. The generated interface supplies a standard `context.Context`, request, and send callback.
 
 ## Output Contract
 
@@ -124,3 +128,4 @@ Output in this exact order:
 2. Existing-file case: only missing methods are appended; existing implementations are unchanged.
 3. Simple CRUD case: direct Ent via `s.db` with render helpers.
 4. Complex-flow case: usecase split plus DI chain updates remain compilable.
+5. Server-streaming case: signature matches the generated interface, every send error is handled, and the producer observes context cancellation.

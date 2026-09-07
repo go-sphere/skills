@@ -8,7 +8,7 @@ Provide a full local copy of go-sphere protocol-first and code generation guidan
 
 - URL: https://go-sphere.github.io/docs/concepts/protocol-and-codegen/
 - Upstream markdown: https://raw.githubusercontent.com/go-sphere/go-sphere.github.io/master/content/docs/concepts/protocol-and-codegen.md
-- Last synced by this skill update: 2026-08-23
+- Last synced by this skill update: 2026-09-07
 
 ## How To Use This Reference
 
@@ -63,6 +63,7 @@ Your `.proto` files serve as the authoritative definition of:
 - **API operations** (services and methods)
 - **Error conditions** (enums with metadata)
 - **HTTP mapping** (via annotations)
+- **Transport shape** (unary response or server stream)
 - **Field constraints** (via validation rules)
 
 ## Code Generation Pipeline
@@ -85,7 +86,8 @@ From your proto definitions, you automatically get:
 - Service interfaces to implement
 - `httpx` HTTP handlers and route registration
 - Request binding with validation (`BindJSON` / `BindQuery` / `BindURI` / …)
-- `httpz` JSON envelopes
+- `httpz` JSON envelopes for unary methods
+- `httpz` SSE producers for `returns (stream Reply)` methods
 - Error handling with consistent formatting
 
 **Client-side Code:**
@@ -154,6 +156,7 @@ proto/
 2. **Proper grouping**: Organize by domain and version
 3. **Forward compatibility**: Design for future evolution
 4. **Documentation**: Comment services, methods, and fields
+5. **Streaming intent**: Use server-streaming only when clients benefit from incremental replies; define completion, failure, cancellation, and resume semantics as part of the contract
 
 ### Code Generation
 1. **Frequent regeneration**: Update generated code early and often
@@ -166,6 +169,7 @@ proto/
 For detailed information on:
 - **Defining HTTP APIs**: See [API Definitions](go-sphere-api-definitions-reference.md)
 - **HTTP runtime**: See [HTTP Runtime](https://go-sphere.github.io/docs/guides/http-runtime)
+- **Server streaming**: See [Server Streaming](https://go-sphere.github.io/docs/guides/server-streaming)
 - **Error handling**: See [Error Handling](go-sphere-error-handling-reference.md)
 - **Proto packages**: See [Proto Packages & Runtime](proto-packages-and-runtime-reference.md)
 - **Upgrading**: See [Upgrading to v0.0.4](https://go-sphere.github.io/docs/guides/upgrading)

@@ -8,7 +8,7 @@ Provide a full local copy of the official go-sphere API definitions guide so the
 
 - URL: https://go-sphere.github.io/docs/guides/api-definitions/
 - Upstream markdown: https://raw.githubusercontent.com/go-sphere/go-sphere.github.io/master/content/docs/guides/api-definitions.md
-- Last synced by this skill update: 2026-08-23
+- Last synced by this skill update: 2026-09-07
 
 ## How To Use This Reference
 
@@ -34,6 +34,7 @@ If any generic example here conflicts with scaffold conventions or hard gates in
 - [Advanced Binding Configuration](#advanced-binding-configuration)
 - [Request Body Patterns](#request-body-patterns)
 - [Response Body Patterns](#response-body-patterns)
+- [Server-Streaming Responses](#server-streaming-responses)
 - [Best Practices](#best-practices)
 - [Integration with buf](#integration-with-buf)
 
@@ -294,6 +295,32 @@ message GetUserNameResponse {
 // Returns: "John Doe" (just the string, not wrapped in JSON object)
 ```
 
+## Server-Streaming Responses
+
+Add `stream` to the reply type to expose a server-streaming RPC as SSE:
+
+```protobuf
+rpc Watch(WatchRequest) returns (stream WatchResponse) {
+  option (google.api.http) = { get: "/v1/watch/{topic}" };
+}
+```
+
+`protoc-gen-sphere` generates a push-style service method:
+
+```go
+Watch(context.Context, *WatchRequest, func(*WatchResponse) error) error
+```
+
+Request fields use the same URI, query, header, form, and JSON binding rules as
+unary methods. Each `send` becomes one SSE JSON event. The default runtime ends
+a successful stream with a `done` event and a committed failure with an `error`
+event. See the official [Server Streaming](https://go-sphere.github.io/docs/guides/server-streaming/)
+guide for implementation, wire format, resume, and operational guidance.
+
+Only server-streaming is supported by the HTTP generator. Client-streaming and
+bidirectional RPCs are skipped with a warning. Do not use `response_body` on a
+stream: the generator warns and sends each whole reply message.
+
 ## Best Practices
 
 1. **Use meaningful field names**: Field names become tag values, so use clear, descriptive names
@@ -312,6 +339,8 @@ message GetUserNameResponse {
 5. **Prefer explicit body field** (`body: "fieldName"`) when payloads are nested
 6. **Prefer not to use `oneof`** in HTTP-exposed request/response messages. Tags land on wrapper structs (`Message_Field`); generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled by `BindQuery`/`BindURI`/`BindHeader`. JSON codecs also handle oneof awkwardly on the wire.
 7. **Never combine `body:` with `BINDING_LOCATION_FORM` fields.** Form parameters make the method body-less; declaring a body warns and fails under `fail_on_warn`. Split into two RPCs if you need both.
+8. **Use only server response streams for SSE**. Model uploads and bidirectional conversations as unary HTTP operations, WebSockets, or a separate transport.
+9. **Treat stream termination as part of the contract**. Clients should understand `done`, `error`, and an interrupted connection without either terminal event.
 
 
 ## Integration with buf

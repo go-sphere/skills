@@ -69,6 +69,11 @@ Load this reference at final validation time after drafting contracts. Use it as
 - [ ] Ensure GET/HEAD/DELETE/OPTIONS declare no `body:` and no JSON-bound fields.
 - [ ] Ensure URI path parameters are top-level fields; nested templates like `{user.id}` are rejected.
 - [ ] Prefer not to use `oneof` in HTTP-exposed request/response messages (handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled; JSON codecs also handle oneof poorly).
+- [ ] For each streaming HTTP RPC, allow only a server stream (`returns (stream Reply)`); reject client-streaming and bidirectional shapes.
+- [ ] Ensure server-streaming RPCs do not declare `response_body`; each SSE event carries the whole reply message.
+- [ ] Define client-visible stream termination: successful `done`, terminal `error`, and interruption without either event.
+- [ ] If resume is required, specify replay/cursor semantics and bind `Last-Event-ID` or a query cursor; the default wrapper emits no SSE `id:` fields, so require a custom stream wrapper for transport-level IDs.
+- [ ] For streams that may wait indefinitely before the first event, decide whether the project needs eager commit; the generated default commits lazily on the first reply.
 
 ### F. API Contract (Required)
 

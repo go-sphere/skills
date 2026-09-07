@@ -1,6 +1,6 @@
 ---
 name: proto-api-generator
-description: Design proto3 + HTTP API contracts for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch.
+description: Design proto3 + HTTP API contracts, including server-streaming SSE endpoints, for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch.
 ---
 
 # Proto API Generator
@@ -64,7 +64,7 @@ Do not load every reference by default. Load the smallest set that can support t
    - [references/proto-output-full-template.md](references/proto-output-full-template.md)
 2. Service routes, path templates, or backend portability:
    [references/router-conflict-reference.md](references/router-conflict-reference.md)
-3. HTTP method, binding, body, or response shaping:
+3. HTTP method, binding, body, response shaping, or server-streaming SSE:
    [references/go-sphere-api-definitions-reference.md](references/go-sphere-api-definitions-reference.md)
 4. Error enums, `sphere.errors`, or runtime error behavior:
    [references/go-sphere-error-handling-reference.md](references/go-sphere-error-handling-reference.md)
@@ -119,7 +119,7 @@ Use custom DTO or VO only when at least one condition is true:
 1. Classify each target file by mode.
 2. Read scaffold conventions first and choose package style, service prefix, and compatibility constraints before drafting.
 3. Decide reuse (`entpb`, `shared.v1`, custom DTO or VO`) before finalizing message shapes.
-4. For `service proto`, define business use cases, HTTP bindings, route-safe paths, and error enums.
+4. For `service proto`, define business use cases, unary/server-streaming transport shape, HTTP bindings, route-safe paths, and error enums.
 5. For `message-only proto`, draft messages and enums only, then record service-only exemptions in validation notes.
 6. Load detailed HTTP, error, router, or runtime references only when the draft actually depends on them.
 7. Choose the deliverable shape late:
@@ -138,6 +138,8 @@ Keep these principles in mind throughout the task. Detailed rule text lives in t
 5. Do not leak sensitive or storage-only fields into external contracts.
 6. Keep routes conflict-safe; when backend is unknown, design for the Gin-safe subset first. Generated handlers use `httpx`, not `*gin.Context`.
 7. Add concise `//` business comments for exposed `service/rpc`, core messages, and key enum values.
+8. Map only `returns (stream Reply)` methods to SSE. Client-streaming and bidirectional methods are not supported by `protoc-gen-sphere`'s HTTP transport.
+9. Treat stream completion, failure, cancellation, optional resume behavior, and lazy-vs-eager commit needs as explicit API-contract decisions. Streaming events always carry the whole reply message; do not use `response_body`.
 
 ## Mandatory Pre-Output Checklist
 
@@ -151,6 +153,7 @@ BEFORE writing the final proto file, you MUST verify all of the following:
 - [ ] Every RPC method has `option (google.api.http)` annotation
 - [ ] HTTP method (get/post/put/delete) matches the operation semantics
 - [ ] Route path follows REST conventions with proper path parameters
+- [ ] Every streaming method is server-streaming only (`returns (stream Reply)`), has no `response_body`, and documents terminal/interruption semantics
 
 ### Error Handling Check
 - [ ] Service proto files MUST include a service-local error enum (e.g., `ArticleError`, `OrderError`, `AuthError`)

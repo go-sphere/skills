@@ -11,6 +11,7 @@ Reference for `proto-service-generator`. Load sections as needed.
 | Simple CRUD template | Section 3 |
 | Stub for unknown logic | Section 2 |
 | Complex logic + DI | Sections 5, 6 |
+| Server-streaming SSE method | Section 9 |
 
 ---
 
@@ -105,6 +106,7 @@ func (s *Service) DeleteXxx(ctx context.Context, req *v1.DeleteXxxRequest) (*v1.
 1. Read interface signatures from `api/<module>/v1/*.sphere.pb.go`
 2. Check existing methods in `internal/service/<module>/xxx.go`
 3. Append only missing methods + assertion + required imports
+4. Classify each method by its generated signature before choosing a template; a server stream returns `error` and receives `send func(*Reply) error`.
 
 ---
 
@@ -181,3 +183,61 @@ rg -n "entbind\.|s\.render\." internal
 # Find provider sets
 rg -n "ProviderSet" internal/service
 ```
+
+---
+
+## 9) Server-Streaming SSE Template
+
+`protoc-gen-sphere` generates a push-style interface for
+`rpc Watch(Request) returns (stream Reply)`:
+
+```go
+Watch(context.Context, *v1.WatchRequest, func(*v1.WatchReply) error) error
+```
+
+For unknown business logic, keep the stub shape exact:
+
+```go
+func (s *Service) Watch(
+    ctx context.Context,
+    req *v1.WatchRequest,
+    send func(*v1.WatchReply) error,
+) error {
+    return errors.New("not implemented: Watch")
+}
+```
+
+For an implemented producer, observe both cancellation and backpressure:
+
+```go
+func (s *Service) Watch(
+    ctx context.Context,
+    req *v1.WatchRequest,
+    send func(*v1.WatchReply) error,
+) error {
+    ticker := time.NewTicker(time.Second)
+    defer ticker.Stop()
+
+    for seq := int64(0); ; seq++ {
+        select {
+        case <-ctx.Done():
+            return ctx.Err()
+        case <-ticker.C:
+            if err := send(&v1.WatchReply{Sequence: seq}); err != nil {
+                return err
+            }
+        }
+    }
+}
+```
+
+Rules:
+
+- Treat `send` as a blocking operation that provides backpressure.
+- Stop immediately on a send error; it commonly means the client disconnected.
+- Do not start an untracked goroutine or retain `send` after the method returns.
+- Do not use `httpx.Context`; the runtime deliberately separates request
+  preparation from the producer phase.
+- Returning `nil` emits the terminal `done` event. Returning an error before
+  the first reply may produce a regular JSON error; a later error becomes the
+  terminal SSE `error` event.
