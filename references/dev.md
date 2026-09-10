@@ -398,7 +398,7 @@ PRD 不需要写：
 把 `SPEC` 中的事实对象落到可持久化模型。
 
 #### 主要 agent
-- `ent-schema-generator`
+- `db-schema-designer`
 - `data-model-agent`
 
 #### 输入
@@ -754,10 +754,10 @@ ops/
 | `spec-agent` | 写 SPEC | 已有 `spec-writer` skill |
 | `spec-diff-pipeline` | 影响分析 | 已有 `spec-diff-pipeline` skill |
 | `api-agent` | 设计 API/proto | 已有 `proto-api-generator` skill |
-| `schema-agent` | 设计 schema | 已有 `ent-schema-generator` skill |
+| `schema-agent` | 设计 schema | 已有 `db-schema-designer` skill |
 | `seed-agent` | 生成测试数据 | 已有 `ent-seed-sql-generator` skill |
 | `service-agent` | 生成 service 骨架 | 已有 `proto-service-generator` skill |
-| `frontend-agent` | 生成 admin 页面 | 已有 `pure-admin-crud-generator` skill |
+| `frontend-agent` | 生成前端页面与路由 | 已有 `frontend-crud-generator` skill |
 | `planning-agent` | 拆任务 | Codex/Claude Code plan 功能 |
 | `implementation-agent` | 落代码 | 已有 `sphere-feature-workflow` skill |
 | `review-agent` | 代码 review | Codex/Claude Code review 功能 |
@@ -796,7 +796,7 @@ ops/
 
 7. `schema-agent`
    - 设计 schema/DDL/Ent
-   - **实现方式**：使用现有 `ent-schema-generator` skill
+   - **实现方式**：使用现有 `db-schema-designer` skill
 
 8. `seed-agent`
    - 生成测试数据
@@ -809,9 +809,9 @@ ops/
    - **实现方式**：使用现有 `proto-service-generator` skill
 
 10. `frontend-agent`
-    - 生成 admin 页面
-    - 负责从 API 定义生成 CRUD 页面和路由
-    - **实现方式**：使用现有 `pure-admin-crud-generator` skill
+    - 生成前端页面与路由
+    - 负责从生成的 TS swagger client 生成页面和路由注册
+    - **实现方式**：使用现有 `frontend-crud-generator` skill
 
 11. `planning-agent`
     - 拆任务

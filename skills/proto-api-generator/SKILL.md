@@ -1,6 +1,6 @@
 ---
 name: proto-api-generator
-description: Design proto3 + HTTP API contracts, including server-streaming SSE endpoints, for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch.
+description: Design proto3 + HTTP API contracts, including server-streaming SSE endpoints, for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch. Do not use for the `protoc-gen-*` plugins themselves — that is `protoc-plugin-engineering`.
 ---
 
 # Proto API Generator
@@ -183,3 +183,11 @@ Before final formatting, load exactly one of:
 
 1. [references/proto-output-condensed-template.md](references/proto-output-condensed-template.md)
 2. [references/proto-output-full-template.md](references/proto-output-full-template.md)
+
+## Related Skills
+
+- Upstream — `spec-writer` supplies service boundaries, entities, and states; `prd` supplies scope. When a spec changed, `spec-diff-pipeline` supplies `03-api-delta.md`.
+- Downstream — `sphere-feature-workflow` lands the `.proto` and runs generation; `proto-service-generator` completes the generated service interfaces; `frontend-crud-generator` builds the frontend pages and routes once the swagger client is regenerated. Hand off when the pre-output checklist passes.
+- Boundary — use `protoc-plugin-engineering` for the `protoc-gen-*` plugins themselves; this skill owns the `.proto` contracts they consume.
+- Companion — `sphere-feature-workflow` when the contract change must land together with schema, service, or generation changes; if it is unavailable, finish the contract and list the integration steps as follow-up.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

@@ -178,3 +178,11 @@ Deliver exactly one SQL artifact (inline or file, per user request) with:
 - Never expose production credentials — use test-only values
 - Never mix dialects in one file
 - Never omit required fields
+
+## Related Skills
+
+- Upstream — `ent-schema-implementer` supplies `ent/schema/*.go`, the primary input; `db-schema-designer` supplies `prd/DDL.md` when the schemas are not written yet. When neither exists, work from the schema evidence the user provides rather than inventing tables.
+- Downstream — none; the SQL artifact is terminal. Use `sphere-feature-workflow` when the runtime service code, not the data, is what needs work.
+- Boundary — use `db-schema-designer` for schema and migration design; this skill owns deterministic seed and fixture SQL only.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

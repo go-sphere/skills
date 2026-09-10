@@ -127,3 +127,11 @@ quality-gate commands actually run, with any skipped step named explicitly.
 If a plugin must deviate from these conventions, record the deviation, the
 reason, its blast radius, and the condition for returning to the common shape in
 that plugin's README.
+
+## Related Skills
+
+- Upstream — none; this skill starts from an existing plugin, its generated output, or a golden-file failure.
+- Downstream — `go-test-engineering` when plugin tests need redesign beyond golden discipline, and `go-sphere-makefiles` when the quality-gate targets above are missing or weakened. Hand off after reporting which gates actually ran.
+- Boundary — use `proto-api-generator` for the `.proto` contracts; this skill owns the `protoc-gen-*` plugins that consume them. Use `go-test-engineering` for general Go test value outside plugin golden discipline.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

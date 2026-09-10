@@ -1,6 +1,6 @@
 ---
 name: go-test-engineering
-description: Audit, repair, or write Go tests so they enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, removing duplicate or low-value tests, strengthening weak assertions, designing reusable interface contract suites, deciding when golden tests are justified, fixing implementation bugs exposed by valid tests, or adding focused unit and integration tests. Do not use for ordinary Go implementation work that does not involve tests.
+description: Audit, repair, or write Go tests so they enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, removing duplicate or low-value tests, strengthening weak assertions, designing reusable interface contract suites, deciding when golden tests are justified, fixing implementation bugs exposed by valid tests, or adding focused unit and integration tests. Do not use for ordinary Go implementation work that does not involve tests. Do not use to author or repair Make targets and Make-driven CI — that is `go-sphere-makefiles`.
 ---
 
 # Go Test Engineering
@@ -212,3 +212,11 @@ Conclude with:
 - any unverified integration paths, ambiguous contracts, or remaining risks.
 
 For review-only work, report findings by severity with file and line evidence, then summarize residual risk. For implementation work, lead with the achieved behavior rather than the mechanics of editing.
+
+## Related Skills
+
+- Upstream — none; this skill applies after any implementation, or directly to existing suites.
+- Downstream — none; the verification result and remaining-risk report are the deliverable.
+- Boundary — use `go-sphere-makefiles` for Make targets and Make-driven CI, `protoc-plugin-engineering` for plugin golden-test infrastructure, and `sphere-feature-workflow` for implementation work with no test scope.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

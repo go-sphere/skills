@@ -18,6 +18,23 @@ Do not load every bundled skill preemptively.
 4. If the task will modify go-sphere scaffold contracts, schemas, services, or generation commands, route into `sphere-feature-workflow`.
 5. If the task is about pulling upstream layout changes into an existing project, or adopting a pre-contract project, route into `sphere-layout-sync` — not `sphere-feature-workflow`.
 6. If the task is about the `protoc-gen-*` plugins themselves rather than the `.proto` contracts they consume, route into `protoc-plugin-engineering` — not `proto-api-generator`.
+7. If the work is only filling in missing methods in one service file from an existing generated interface, route into `proto-service-generator` — not `sphere-feature-workflow`.
+
+## Stage Handoffs
+
+Stage skills end with a `## Related Skills` block naming their upstream, downstream,
+boundary, and companion skills.
+
+1. When a stage skill finishes and names a default next skill, announce the handoff
+   with the artifact it needs, for example "next: use `db-schema-designer` with `prd/SPEC.md`".
+2. Honor that handoff before re-classifying the request from scratch.
+3. Invoke the next skill when the user agrees, or when the user already asked for the
+   whole flow and the current stage's completion criteria are met. Do not blend two stages in one pass.
+4. If the named skill is not installed in this session, say which skill and artifact are
+   needed, then continue with the current work; do not stall. The user's explicit skill
+   choice still outranks any handoff suggestion.
+5. When one request spans two skills' boundaries, own this stage's side and name the other
+   skill for the rest instead of silently absorbing it.
 
 ## Workflow Map
 
@@ -56,8 +73,8 @@ Do not load every bundled skill preemptively.
 
 - `sphere-feature-workflow`
   - Use for end-to-end go-sphere scaffold implementation, especially when proto, schema, service, bind/map, or generation commands are involved.
-- `pure-admin-crud-generator`
-  - Use to scaffold pure-admin-thin CRUD views and router modules from swagger-generated client methods.
+- `frontend-crud-generator`
+  - Use to generate admin pages and route registration from a sphere-generated TypeScript swagger client, in whatever frontend framework the project already uses.
 
 ### Layout and Toolchain Maintenance
 
@@ -85,8 +102,12 @@ Do not load every bundled skill preemptively.
   - Start with `db-schema-designer`.
 - Need contract-first API definition:
   - Start with `proto-api-generator`.
+- Need deterministic development, test, or demo seed SQL:
+  - Start with `ent-seed-sql-generator`.
 - Need a merge-ready scaffold feature touching generated boundaries:
   - Start with `sphere-feature-workflow`.
+- Need admin or dashboard pages and routes from a generated swagger client:
+  - Start with `frontend-crud-generator`.
 - Need to audit AI-generated tests or add trustworthy Go tests:
   - Start with `go-test-engineering`.
 - Need consistent Makefiles or Make-driven CI across repositories:

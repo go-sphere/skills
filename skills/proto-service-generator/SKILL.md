@@ -1,6 +1,6 @@
 ---
 name: proto-service-generator
-description: "Generate or complete unary and server-streaming Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when creating internal service files, adding missing method implementations, or generating compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, SSE producer, append-only update, interface assertion, CRUD via Ent, stub method generation."
+description: "Generate or complete unary and server-streaming Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when creating internal service files, adding missing method implementations, or generating compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, SSE producer, append-only update, interface assertion, CRUD via Ent, stub method generation. Do not use for cross-layer changes that also touch proto contracts, Ent schemas, bind/map, or generation commands — that is `sphere-feature-workflow`."
 ---
 
 # Proto Service Generator
@@ -41,16 +41,6 @@ Load sections selectively:
 4. Complex orchestration and DI changes: `5) Complex Logic Split to Usecase`, `6) Wire Injection Pattern`.
 5. Reuse checks: `8) Sphere Feature Reuse Pattern`.
 6. Server-streaming methods: `9) Server-Streaming SSE Template`.
-
-## Companion Skill Policy
-
-When `sphere-feature-workflow` is available in the current session, use it together with this skill.
-
-Division of responsibility:
-1. `sphere-feature-workflow`: framework-native end-to-end integration (routing, middleware, auth, errors, wiring flow).
-2. `proto-service-generator`: per-service file generation and completion from `*ServiceHTTPServer`.
-
-If `sphere-feature-workflow` is unavailable, continue with this skill and enforce reuse-first checks from the reference.
 
 ## Repository Conventions
 
@@ -129,3 +119,11 @@ Output in this exact order:
 3. Simple CRUD case: direct Ent via `s.db` with render helpers.
 4. Complex-flow case: usecase split plus DI chain updates remain compilable.
 5. Server-streaming case: signature matches the generated interface, every send error is handled, and the producer observes context cancellation.
+
+## Related Skills
+
+- Upstream — `proto-api-generator` owns the contract; this skill starts only after `make gen/proto` has produced `*ServiceHTTPServer` in `api/<module>/v1/*.sphere.pb.go`.
+- Downstream — none; compilable per-service files are the deliverable. Use `go-test-engineering` when the generated service behavior needs test coverage.
+- Boundary — use `sphere-feature-workflow` instead when the change also touches proto contracts, Ent schemas, bind/map registration, or generation commands.
+- Companion — `sphere-feature-workflow` handles framework-native end-to-end integration (routing, middleware, auth, errors, wiring flow); this skill handles per-service file generation and completion. If it is unavailable, continue here and enforce the reuse-first checks in [references/service-implementation-best-practices.md](references/service-implementation-best-practices.md).
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

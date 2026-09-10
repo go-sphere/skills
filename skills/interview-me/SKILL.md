@@ -1,6 +1,6 @@
 ---
 name: interview-me
-description: Deeply interview the user about technical and product requirements through an interactive, step-by-step decision-tree interview until reaching a shared understanding. Use when planning complex features, architecture changes, API designs, UX refactors, or resolving ambiguous decisions. Enforces exploring the codebase first, asking one question at a time, providing recommended options, and using native interactive question tools.
+description: Deeply interview the user about technical and product requirements through an interactive, step-by-step decision-tree interview until reaching a shared understanding. Use when planning complex features, architecture changes, API designs, UX refactors, or resolving ambiguous decisions. Enforces exploring the codebase first, asking one question at a time, providing recommended options, and using native interactive question tools. Do not use to produce a structured intake document from scattered inputs — that is `project-intake`.
 ---
 
 # Interview Me (Interactive Requirements & Design Alignment)
@@ -100,3 +100,11 @@ Once all critical branches of the decision tree have converged:
 - **User-Centric Phrasing**: Phrase selectable options from the user's perspective (e.g., "Adopt Option A: Keep computations in the frontend").
 - **No Redundant Placeholders**: Do not include redundant generic "Other" options (UI or fallback text naturally allows freeform input).
 - **Exact File References**: Use clickable markdown links when referencing files (e.g., `[AppProviders.tsx](file:///path/to/file#L10)`).
+
+## Related Skills
+
+- Upstream — none; this skill can run before any stage and explores the codebase before asking anything.
+- Downstream — `spec-writer` for technical decisions or `prd` for business direction; hand off once the decision tree converges and the alignment summary is complete.
+- Boundary — use `project-intake` instead to organize scattered inputs into one structured kickoff document; this skill owns interactive, one-question-at-a-time decision resolution.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

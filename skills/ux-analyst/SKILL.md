@@ -228,3 +228,11 @@ Default: `prd/UX-FLOWS.md` and `prd/SCREEN-INVENTORY.md`
 Follow user's specified location if provided.
 
 **Always write to disk. Do not output UX files only in the conversation.**
+
+## Related Skills
+
+- Upstream — `prd` when it exists, or direct visual inputs such as Figma files, HTML demos, screenshots, and videos; at least one visual input is required.
+- Downstream — `spec-writer`; hand off once page behaviors, states, and error scenarios are captured as business-level flows rather than UI descriptions.
+- Boundary — `prd` owns the business-level page inventory and scope; this skill owns per-screen behavior, user-visible states, and failure semantics.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

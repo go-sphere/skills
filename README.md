@@ -12,6 +12,9 @@ The repository URL stays the same: `https://github.com/go-sphere/skills`.
 - Boots the agent into the go-sphere workflow through `using-sphere-workflow`
 - Routes requirement shaping, specification, schema, API, and implementation work
   to the smallest relevant bundled skill
+- Carries stage handoffs: every bundled skill names its upstream, downstream,
+  boundary, and companion skills, so finished work moves to the next stage
+  without re-routing from scratch
 - Preserves direct skill usage for advanced users and existing installs
 - Adds thin platform adapters for Claude Code, Cursor, Codex, and OpenCode
 
@@ -155,8 +158,8 @@ Generated service skeletons
   -> proto-service-generator
 Cross-layer scaffold implementation
   -> sphere-feature-workflow
-Admin CRUD surface
-  -> pure-admin-crud-generator
+Frontend pages and routes
+  -> frontend-crud-generator
 Layout upgrade, drift, or legacy adoption
   -> sphere-layout-sync
 protoc-gen-* plugin authoring and review
@@ -177,6 +180,8 @@ The bootstrap rule is simple:
   `sphere-layout-sync`.
 - If the task is about the `protoc-gen-*` plugins themselves rather than the
   `.proto` files they consume, route into `protoc-plugin-engineering`.
+- After a stage skill finishes, honor the handoff in its `## Related Skills` block
+  before starting a new classification pass.
 
 ## Bundled Skills
 
@@ -203,7 +208,7 @@ The bootstrap rule is simple:
 ### Implementation and Surfaces
 
 - `sphere-feature-workflow` handles end-to-end scaffold feature delivery.
-- `pure-admin-crud-generator` scaffolds pure-admin-thin CRUD pages and routes.
+- `frontend-crud-generator` generates admin pages and route registration from a sphere-generated TypeScript swagger client, following the project's own framework conventions.
 
 ### Layout and Toolchain Maintenance
 
@@ -331,7 +336,7 @@ and install only the skills you need.
 - Backend framework: [go-sphere](https://github.com/go-sphere)
 - ORM: [ent](https://entgo.io/) (Bun in the `bun` layout)
 - Protocol: Protocol Buffers (proto3)
-- Frontend: Vue 3 + Element Plus (pure-admin-thin)
+- Frontend: Vue 3 + Element Plus (pure-admin-thin); the frontend generator follows whatever framework a project actually uses
 - Code generation: `protoc-gen-sphere`, `protoc-gen-sphere-binding`, `protoc-gen-sphere-errors`, and `protoc-gen-route` (Telegram layout only)
 - Project layouts: `standard`, `simple`, `bun`, `telegram` — created by `sphere-cli create --layout`, each carrying `.sphere/layout.json` ownership rules
 

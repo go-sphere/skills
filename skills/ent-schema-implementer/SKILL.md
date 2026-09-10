@@ -178,3 +178,11 @@ Close with a structured summary:
 > **Next skill:** If you need service implementations from the generated interfaces, use `proto-service-generator`.
 
 This makes it easy to hand the work off without the user having to reconstruct what happened.
+
+## Related Skills
+
+- Upstream — `db-schema-designer` owns the approved design; return there when requirements are still fluid. `spec-writer` supplies entity definitions when no schema design exists yet.
+- Downstream — `proto-service-generator` for implementations of the generated interfaces (see the handoff message above); `ent-seed-sql-generator` when the new schemas need deterministic seed data. Hand off after the listed generation and verification commands pass.
+- Boundary — use `db-schema-designer` for entity, field, relationship, and index design; this skill owns Ent schema files and entproto annotations.
+- Companion — `sphere-feature-workflow` when integration spills past schema files into bind, render, or service layers; if it is unavailable, report those touchpoints as manual follow-up instead.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

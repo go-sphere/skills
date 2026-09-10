@@ -1,6 +1,6 @@
 ---
 name: db-schema-designer
-description: Design review-ready database schemas for go-sphere and similar backend projects from requirements, docs, demos, or existing APIs. Use when the goal is to define or review entities, fields, relationships, constraints, indexes, lifecycle states, or schema evolution before any Ent implementation or code generation. Prefer this skill whenever the user wants database design first, review-first modeling, table structure discussion, or approval before coding.
+description: Design review-ready database schemas for go-sphere and similar backend projects from requirements, docs, demos, or existing APIs. Use when the goal is to define or review entities, fields, relationships, constraints, indexes, lifecycle states, or schema evolution before any Ent implementation or code generation. Prefer this skill whenever the user wants database design first, review-first modeling, table structure discussion, or approval before coding. Do not use to write Ent schema code or entproto annotations — that is `ent-schema-implementer`.
 ---
 
 # DB Schema Designer
@@ -174,3 +174,11 @@ Wait for explicit approval before handing off.
 - **Explain type redesigns** — when a requested type is replaced, say why clearly
 - **Every index needs a query** — no speculative indexes
 - **Approved design before final document** — the brief captures decisions already made together, not decisions being revealed for the first time
+
+## Related Skills
+
+- Upstream — `spec-writer` defines entities, boundaries, and states; when a spec changed, `spec-diff-pipeline` supplies `04-schema-delta.md`. When neither exists, model from the requirements the user provides directly.
+- Downstream — `ent-schema-implementer`; hand off only after the user approves the brief written to `prd/DDL.md` or `design/<feature>/schema.md`.
+- Boundary — use `ent-schema-implementer` to write Ent schema code and entproto annotations; this skill owns the review-ready design.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

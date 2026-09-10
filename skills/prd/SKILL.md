@@ -1,6 +1,6 @@
 ---
 name: prd
-description: "Generate high-quality Product Requirements Documents (PRDs) following go-sphere development workflow. Use when: user wants to create a PRD, document requirements, plan a feature, or translate business ideas into product specs. Required for the PRD solidification phase in AI Agent collaboration development."
+description: "Generate high-quality Product Requirements Documents (PRDs) following go-sphere development workflow. Use when: user wants to create a PRD, document requirements, plan a feature, or translate business ideas into product specs. Required for the PRD solidification phase in AI Agent collaboration development. Do not use for API contracts, database schemas, state machines, or implementation-level specification — that is `spec-writer`."
 ---
 
 # Product Requirements Document (PRD)
@@ -218,3 +218,11 @@ Default to `prd/PRD.md`
 Follow user's specified location if provided.
 
 **Always write to disk. Do not output the PRD only in the conversation.**
+
+## Related Skills
+
+- Upstream — `project-intake` supplies `docs/00-intake.md`; run `interview-me` first when the business direction is still unresolved.
+- Downstream — `spec-writer` is always the next stage; when prototypes or demos exist, `ux-analyst` comes first. Hand off once the PRD completion criteria are met and no implementation details leaked in.
+- Boundary — use `spec-writer` for engineering contracts, state machines, and API or schema detail; this skill owns problem framing, personas, scope, and success metrics. Use `ux-analyst` for per-screen behavior semantics.
+- Companion — `interview-me` when discovery answers stay vague; if it is unavailable, list the open questions under risks and dependencies instead.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

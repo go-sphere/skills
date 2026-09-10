@@ -1,6 +1,6 @@
 ---
 name: spec-diff-pipeline
-description: Analyze a changed SPEC or other technical specification from git diff or two version files (v0, v1) and automatically produce downstream planning artifacts such as spec delta, impact map, API/proto delta, schema delta, surface-specific impact reports, task plan, and open questions. Use whenever the user has modified SPEC.md or another design/spec file and wants an AI-run pipeline that reads the diff (either from git or by comparing two version files), traces downstream impact, and prepares implementation-planning markdown outputs for whatever affected surfaces exist in the repo, even if they only say things like 根据 spec diff 分析影响, 刷新 proto/schema 规划, 生成 impact map, 拆 implementation tasks, 分析哪些端受影响, or 对比 v0 v1 版本差异.
+description: Analyze a changed SPEC or other technical specification from git diff or two version files (v0, v1) and automatically produce downstream planning artifacts such as spec delta, impact map, API/proto delta, schema delta, surface-specific impact reports, task plan, and open questions. Use whenever the user has modified SPEC.md or another design/spec file and wants an AI-run pipeline that reads the diff (either from git or by comparing two version files), traces downstream impact, and prepares implementation-planning markdown outputs for whatever affected surfaces exist in the repo, even if they only say things like 根据 spec diff 分析影响, 刷新 proto/schema 规划, 生成 impact map, 拆 implementation tasks, 分析哪些端受影响, or 对比 v0 v1 版本差异. Do not use to write or repair the spec itself — that is `spec-writer`.
 ---
 
 # Spec Diff Pipeline
@@ -303,3 +303,11 @@ For Version Comparison Mode specifically, also confirm:
 - Read [references/pipeline.md](references/pipeline.md) for the agent pipeline order and handoff logic.
 - Read [references/artifact-templates.md](references/artifact-templates.md) for exact markdown sections.
 - Read [references/change-classification.md](references/change-classification.md) to classify spec changes correctly.
+
+## Related Skills
+
+- Upstream — `spec-writer` must have produced a changed SPEC or a v0/v1 pair; this skill reads the diff directly instead of inferring it from memory.
+- Downstream — the task plan fans out to `proto-api-generator` and `db-schema-designer` to refresh contracts and schemas, to `sphere-feature-workflow` to execute the batches, and to `frontend-crud-generator` once the frontend surface has a generated client. Hand off when `05-task-plan.md` is complete and open questions are isolated.
+- Boundary — use `spec-writer` to write or repair the spec itself; this skill never edits the spec, it only traces downstream impact.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

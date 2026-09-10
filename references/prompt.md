@@ -207,7 +207,7 @@ demo 是"行为参考"还是"视觉参考"：行为参考
 
 ### 第六轮：Schema 设计
 
-**Skill**: `/ent-schema-generator`
+**Skill**: `/db-schema-designer`
 
 **提示词**:
 ```
@@ -290,9 +290,9 @@ demo 是"行为参考"还是"视觉参考"：行为参考
 
 ---
 
-### 第九轮：Admin 页面生成（如需要）
+### 第九轮：前端页面与路由生成（如需要）
 
-**Skill**: `/pure-admin-crud-generator`
+**Skill**: `/frontend-crud-generator`
 
 **提示词**:
 ```
@@ -307,7 +307,7 @@ demo 是"行为参考"还是"视觉参考"：行为参考
 - CRUD 页面
 - 路由模块
 
-遵循 pure-admin-thin 规范
+遵循项目既有的前端框架与页面规范
 ```
 
 ---
@@ -335,10 +335,10 @@ demo 是"行为参考"还是"视觉参考"：行为参考
 | 3 | `/spec-writer` | prd/SPEC.md | ✅ |
 | 4 | `/spec-diff-pipeline` | design/changes/... | ✅ |
 | 5 | `/proto-api-generator` | prd/API.md | 可选 |
-| 6 | `/ent-schema-generator` | prd/DDL.md | 可选 |
+| 6 | `/db-schema-designer` | prd/DDL.md | 可选 |
 | 7 | `/sphere-feature-workflow` | 代码 | ✅ |
 | 8 | `/ent-seed-sql-generator` | seed SQL | 可选 |
-| 9 | `/pure-admin-crud-generator` | Admin 页面 | 可选 |
+| 9 | `/frontend-crud-generator` | 前端页面与路由 | 可选 |
 
 ---
 

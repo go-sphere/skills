@@ -1,6 +1,6 @@
 ---
 name: spec-writer
-description: "Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs. Use when asked to create a new spec from requirements, rewrite an ambiguous PRD or design doc into an executable SPEC.md, deepen an existing specification that feels too thin or hand-wavy, update a spec after scope changes, or modify a specification without leaving contradictions. Trigger on requests such as write spec, rewrite PRD as spec, improve this SPEC.md, make the spec more complete, modify spec, 修改规范, 写技术规格, 改 SPEC, 补技术细节, or 整理实现方案."
+description: "Write or revise implementation-ready specifications for products, systems, APIs, workflows, runtime services, and technical designs. Use when asked to create a new spec from requirements, rewrite an ambiguous PRD or design doc into an executable SPEC.md, deepen an existing specification that feels too thin or hand-wavy, update a spec after scope changes, or modify a specification without leaving contradictions. Trigger on requests such as write spec, rewrite PRD as spec, improve this SPEC.md, make the spec more complete, modify spec, 修改规范, 写技术规格, 改 SPEC, 补技术细节, or 整理实现方案. Do not use to trace downstream proto/schema/task impact after a spec change — that is `spec-diff-pipeline`."
 ---
 
 # Spec Writer
@@ -250,3 +250,11 @@ Notes:
 - Read [references/completeness-rubric.md](references/completeness-rubric.md) when the output needs to feel more complete, operational, or implementation-ready.
 - Read [references/upgrade-patterns.md](references/upgrade-patterns.md) when upgrading a thin spec into a stronger one.
 - Read [references/spec-editing.md](references/spec-editing.md) when updating an existing spec or checking change completeness.
+
+## Related Skills
+
+- Upstream — `prd` and `ux-analyst` supply product and behavior context; use `interview-me` when key decisions are still unresolved. When those artifacts are missing, write from what the user provides and record assumptions rather than inventing context.
+- Downstream — `db-schema-designer` for the data model and `proto-api-generator` for contracts; hand off once the spec tells one coherent story from goals through conformance. Use `spec-diff-pipeline` after the spec is edited again.
+- Boundary — use `prd` for product framing and success metrics; this skill owns the engineering contract. Use `spec-diff-pipeline` to analyze downstream impact; this skill performs the edit.
+- Companion — none.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

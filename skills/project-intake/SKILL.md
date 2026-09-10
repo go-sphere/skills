@@ -1,6 +1,6 @@
 ---
 name: project-intake
-description: Organize scattered project inputs and generate standardized intake documents. Use when users mention project kickoff, requirement initialization, PRD preparation, input organization, requirement gathering, or turning prototypes/demos/drafts into structured documents. Apply to new feature development, project initialization, requirement clarification, and similar scenarios. Always complete intake before writing PRD or any detailed design.
+description: Organize scattered project inputs and generate standardized intake documents. Use when users mention project kickoff, requirement initialization, PRD preparation, input organization, requirement gathering, or turning prototypes/demos/drafts into structured documents. Apply to new feature development, project initialization, requirement clarification, and similar scenarios. Always complete intake before writing PRD or any detailed design. Do not use for multi-round interactive decision interviews — that is `interview-me`.
 ---
 
 # Project Intake
@@ -123,3 +123,11 @@ If user doesn't specify output location, default to:
 Follow user's specified location if provided.
 
 **Always write the file to disk. Do not output the intake document only in the conversation.**
+
+## Related Skills
+
+- Upstream — none; this skill is the entry point and accepts raw or scattered inputs.
+- Downstream — `prd` once `docs/00-intake.md` is complete; when section 6 marks the demo as a behavior reference, `ux-analyst` comes first. Hand off when the intake document is on disk and the unresolved list is explicit.
+- Boundary — use `interview-me` instead when the goal itself is still unclear and needs multi-round decision-tree interviewing; this skill produces one structured intake document in a single pass.
+- Companion — `interview-me` when inputs conflict or the goal is unresolved; if it is unavailable, record the open questions in section 8 instead.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.
