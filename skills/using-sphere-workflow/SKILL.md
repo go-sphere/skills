@@ -19,6 +19,7 @@ Do not load every bundled skill preemptively.
 5. If the task is about pulling upstream layout changes into an existing project, or adopting a pre-contract project, route into `sphere-layout-sync` — not `sphere-feature-workflow`.
 6. If the task is about the `protoc-gen-*` plugins themselves rather than the `.proto` contracts they consume, route into `protoc-plugin-engineering` — not `proto-api-generator`.
 7. If the work is only filling in missing methods in one service file from an existing generated interface, route into `proto-service-generator` — not `sphere-feature-workflow`.
+8. If the task is auditing or simplifying existing Go code for over-design, over-optimization, or over-defensive checks rather than adding a feature, route into `go-simplify` — not `sphere-feature-workflow`.
 
 ## Stage Handoffs
 
@@ -87,6 +88,8 @@ boundary, and companion skills.
 
 - `go-test-engineering`
   - Use to audit, repair, or write Go tests, including reusable interface contract suites and justified golden tests.
+- `go-simplify`
+  - Use to audit and safely simplify Go codebases for over-design, over-optimization, and over-defensive checks, with a green test baseline as the safety net.
 - `go-sphere-makefiles`
   - Use to standardize or repair repository Make targets, root batch orchestration, and Make-driven CI while preserving multi-module, generator, and layout behavior.
 
@@ -110,6 +113,8 @@ boundary, and companion skills.
   - Start with `frontend-crud-generator`.
 - Need to audit AI-generated tests or add trustworthy Go tests:
   - Start with `go-test-engineering`.
+- Need to slim down over-engineered Go code without changing behavior:
+  - Start with `go-simplify`.
 - Need consistent Makefiles or Make-driven CI across repositories:
   - Start with `go-sphere-makefiles`.
 - Need to upgrade a project to a newer layout revision or fix layout drift:
@@ -129,4 +134,4 @@ boundary, and companion skills.
 ## Plugin Bootstrap Note
 
 When this skill is injected by the `sphere-workflow` plugin, treat it as already loaded bootstrap context.
-Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, `sphere-layout-sync`, `protoc-plugin-engineering`, `go-test-engineering`, or `go-sphere-makefiles`.
+Use the native skill mechanism only for the relevant follow-up skill, such as `project-intake`, `spec-writer`, `db-schema-designer`, `proto-api-generator`, `sphere-feature-workflow`, `sphere-layout-sync`, `protoc-plugin-engineering`, `go-test-engineering`, `go-simplify`, or `go-sphere-makefiles`.

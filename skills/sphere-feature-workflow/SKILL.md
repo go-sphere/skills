@@ -255,7 +255,7 @@ Justify every layout_owned or mixed edit and note the sync cost.]
 ## Related Skills
 
 - Upstream — `spec-writer` supplies intended behavior; `proto-api-generator` and `ent-schema-implementer` supply the contracts and schemas that must exist before generation. When the project has no `.sphere/layout.json`, run `sphere-layout-sync` first instead of guessing ownership.
-- Downstream — `go-test-engineering` when `make test` coverage does not prove the behavior, and `go-sphere-makefiles` when the `make check` delivery gate is missing or broken. Hand off after the final output contract is reported with validation results.
+- Downstream — `go-test-engineering` when `make test` coverage does not prove the behavior; `go-simplify` for an optional behavior-neutral leanness pass once validation is green; and `go-sphere-makefiles` when the `make check` delivery gate is missing or broken. Hand off after the final output contract is reported with validation results.
 - Boundary — use `sphere-layout-sync` for layout drift and upgrades, `proto-service-generator` for filling in one service file from an existing generated interface, and `frontend-crud-generator` for frontend pages and routes.
 - Companion — `proto-service-generator` covers per-service file completion while this skill owns cross-layer integration; if it is unavailable, complete the service files here and say so in the validation section.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

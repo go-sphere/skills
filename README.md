@@ -166,6 +166,8 @@ protoc-gen-* plugin authoring and review
   -> protoc-plugin-engineering
 Go test review, repair, and authoring
   -> go-test-engineering
+Go code leanness audit and safe simplification
+  -> go-simplify
 Makefile and Make-driven CI standardization
   -> go-sphere-makefiles
 ```
@@ -180,6 +182,9 @@ The bootstrap rule is simple:
   `sphere-layout-sync`.
 - If the task is about the `protoc-gen-*` plugins themselves rather than the
   `.proto` files they consume, route into `protoc-plugin-engineering`.
+- If the task is auditing or simplifying existing Go code for over-design,
+  over-optimization, or over-defensive checks rather than adding a feature,
+  route into `go-simplify`.
 - After a stage skill finishes, honor the handoff in its `## Related Skills` block
   before starting a new classification pass.
 
@@ -218,6 +223,7 @@ The bootstrap rule is simple:
 ### Quality and Verification
 
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
+- `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
 ## Legacy Direct Install

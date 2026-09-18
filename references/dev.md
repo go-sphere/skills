@@ -570,6 +570,15 @@ AI agent 在这一步最容易偏，所以要强约束：
 - 实现行为能映射回 SPEC 中的规则
 - 不只是“接口通了”
 
+#### 可选：安全精简 pass
+
+验证通过后，若代码存在 AI 生成代码常见的过度设计、过度优化、过度防御，可跑一次 `go-simplify`：
+
+- 前置条件：测试基线全绿，测试是本步骤唯一的安全网
+- 硬约束：不破坏导出 API、零行为变化（含非法输入的处理方式）
+- 产出：已改清单、有意不动清单、验证证据
+- 注意：扫描给出的“死代码”结论只是假设，必须先读源码验证才能动手
+
 ---
 
 ### 11. 发布准备
@@ -760,6 +769,7 @@ ops/
 | `frontend-agent` | 生成前端页面与路由 | 已有 `frontend-crud-generator` skill |
 | `planning-agent` | 拆任务 | Codex/Claude Code plan 功能 |
 | `implementation-agent` | 落代码 | 已有 `sphere-feature-workflow` skill |
+| `simplify-agent` | 安全精简代码 | 已有 `go-simplify` skill |
 | `review-agent` | 代码 review | Codex/Claude Code review 功能 |
 | `qa-agent` | 验证报告 | 提示词实现 |
 | `release-agent` | 发布准备 | 提示词实现 |
@@ -822,17 +832,22 @@ ops/
     - 落代码
     - **实现方式**：使用现有 `sphere-feature-workflow` skill
 
-13. `review-agent`
+13. `simplify-agent`
+    - 安全精简代码
+    - 负责在测试基线全绿的前提下审计过度设计、过度优化、过度防御，并输出已改清单与有意不动清单
+    - **实现方式**：使用现有 `go-simplify` skill
+
+14. `review-agent`
     - 做变更 review
     - 负责从规格、回归和风险角度审查实现
     - **实现方式**：使用 Codex 或 Claude Code 的 review 功能（无需创建 skill）
 
-14. `qa-agent`
+15. `qa-agent`
     - 做验证报告
     - 负责测试覆盖、验收映射和残留风险整理
     - **实现方式**：提示词实现，不创建独立 skill
 
-15. `release-agent`
+16. `release-agent`
     - 准备发布和 runbook
     - 负责发布计划、迁移步骤和运行手册整理
     - **实现方式**：提示词实现，不创建独立 skill

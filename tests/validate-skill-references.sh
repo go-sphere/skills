@@ -49,7 +49,7 @@ while IFS= read -r dir; do
   skill_dirs+=("$(basename "$dir")")
 done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
-[ "${#skill_dirs[@]}" -eq 18 ] || fail "expected 18 skill directories, found ${#skill_dirs[@]}"
+[ "${#skill_dirs[@]}" -eq 19 ] || fail "expected 19 skill directories, found ${#skill_dirs[@]}"
 
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
