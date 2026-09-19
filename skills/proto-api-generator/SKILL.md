@@ -136,7 +136,7 @@ Keep these principles in mind throughout the task. Detailed rule text lives in t
 3. Prefer not to use `oneof` in HTTP-exposed request or response messages. Tags land on wrapper structs; generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled. JSON codecs also handle oneof poorly.
 4. Keep error contracts machine-readable and stable.
 5. Do not leak sensitive or storage-only fields into external contracts.
-6. Keep routes conflict-safe; when backend is unknown, design for the Gin-safe subset first. Generated handlers use `httpx`, not `*gin.Context`.
+6. Keep routes conflict-safe; official templates serve on `stdx` (net/http), but design for the strictest adapter's subset (Gin's) so routes stay portable. Generated handlers use `httpx`, not a framework context.
 7. Add concise `//` business comments for exposed `service/rpc`, core messages, and key enum values.
 8. Map only `returns (stream Reply)` methods to SSE. Client-streaming and bidirectional methods are not supported by `protoc-gen-sphere`'s HTTP transport.
 9. Treat stream completion, failure, cancellation, optional resume behavior, and lazy-vs-eager commit needs as explicit API-contract decisions. Streaming events always carry the whole reply message; do not use `response_body`.

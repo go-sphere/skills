@@ -13,9 +13,9 @@ generated project. Capabilities differ; do not assume the standard layout.
 
 | Layout | `name` | Upstream module | Capabilities |
 |--------|--------|-----------------|--------------|
-| Standard | `standard` | `github.com/go-sphere/sphere-layout` | protobuf, gin-http, ent, wire, swagger, typescript-client, dashboard, password-auth, local-storage |
-| Simple | `simple` | `github.com/go-sphere/sphere-simple-layout` | protobuf, gin-http, wire |
-| Bun | `bun` | `github.com/go-sphere/sphere-bun-layout` | protobuf, gin-http, bun, wire, swagger, password-auth |
+| Standard | `standard` | `github.com/go-sphere/sphere-layout` | protobuf, stdx-http, ent, wire, swagger, typescript-client, dashboard, password-auth, local-storage |
+| Simple | `simple` | `github.com/go-sphere/sphere-simple-layout` | protobuf, stdx-http, wire |
+| Bun | `bun` | `github.com/go-sphere/sphere-bun-layout` | protobuf, stdx-http, bun, wire, swagger, password-auth |
 | Telegram | `telegram` | `github.com/go-sphere/sphere-telegram-layout` | everything in standard, plus telegram-bot |
 
 Consequences that bite:

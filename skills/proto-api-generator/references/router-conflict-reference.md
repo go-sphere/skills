@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Prevent generated HTTP paths from causing runtime router conflicts or ambiguous matches across Go router backends used by Sphere (`gin`, `fiber`, `echo`, `hertz`). Generated handlers register on `httpx.Router`; the adapter still inherits the backend's radix/order rules.
+Prevent generated HTTP paths from causing runtime router conflicts or ambiguous matches across Go router backends used by Sphere (`stdx`/net/http, the official-template default, plus `gin`, `fiber`, `echo`, `hertz`). Generated handlers register on `httpx.Router`; the adapter still inherits the backend's radix/order rules.
 
 ## When To Load
 

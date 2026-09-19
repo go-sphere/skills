@@ -200,6 +200,7 @@ does not declare it.
 ## HTTP Framework (httpx)
 
 The `server/httpz` package uses `httpx` as its foundation — a unified HTTP framework abstraction that supports multiple backends:
+- **stdx** (net/http, the default in the official templates)
 - **ginx** (Gin), **fiberx** (Fiber), **echox** (Echo), **hertzx** (Hertz)
 
 Core interfaces: `Handler`, `Middleware`, `Router`, `Engine`, `Context`. Generated handlers call `ctx.BindJSON` / `BindQuery` / `BindURI` / `BindHeader` / `BindForm` and wrap results with `httpz.WithJson`. Do not generate `*gin.Context` handlers.
