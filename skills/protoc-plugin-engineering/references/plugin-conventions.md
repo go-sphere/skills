@@ -78,7 +78,7 @@ CLI flags use `snake_case`; Go identifiers use Go conventions:
 | `omit_empty` | `OmitEmpty` |
 | `auto_remove_json` | `AutoRemoveJSON` |
 | `template_file` | `TemplateFile` |
-| `new_error_func` | `NewErrorFunc` |
+| `new_errors_func` | `NewErrorFunc` |
 
 Initialisms stay uppercase: `JSON`, `HTTP`, `URI`, `URL`, `API`, `ID`. Never
 `Json`, `Http`, `Id`.
