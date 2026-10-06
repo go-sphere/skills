@@ -1,104 +1,67 @@
 ---
 name: proto-service-generator
-description: "Generate or complete unary and server-streaming Go service implementations from protobuf-generated HTTP interfaces in go-sphere scaffold projects. Use when creating internal service files, adding missing method implementations, or generating compilable stubs for new proto endpoints. Trigger for: service implementation, proto handler, SSE producer, append-only update, interface assertion, CRUD via Ent, stub method generation. Do not use for cross-layer changes that also touch proto contracts, Ent schemas, bind/map, or generation commands — that is `sphere-feature-workflow`."
+description: "Generate or complete unary and server-streaming Go service implementations from the protobuf-generated HTTP interfaces in a go-sphere project. Use to create internal service files, append missing method implementations, or produce compilable stubs — service implementation, proto handler, SSE producer, interface assertion. Not for cross-layer changes — that is `sphere-feature-workflow`."
 ---
 
 # Proto Service Generator
 
-Generate or complete compilable service implementations under `internal/service/<module>/` from generated `*ServiceHTTPServer` interfaces in `api/<module>/v1/*.sphere.pb.go`.
+Generate or complete compilable service implementations under `internal/service/<module>/` from the
+generated `*ServiceHTTPServer` interfaces in `api/<module>/v1/*.sphere.pb.go`.
 
-<HARD-GATE>
-Do not generate or modify any service file until:
-1. The target module is known (e.g., `task`, `user`, `order`)
-2. The generated `*ServiceHTTPServer` interface exists in `api/<module>/v1/*.sphere.pb.go`
+Out of scope: `BotServer` and other non-HTTP interfaces, redesigning proto contracts, editing
+generated files, and rewriting existing business logic unless explicitly asked.
 
-If the module name is not specified, ask: "Which module should I generate service files for?"
-If the proto generation has not been run yet, stop and ask the user to run `make gen/proto` first.
-Do not guess the module from context alone if there are multiple candidates.
-</HARD-GATE>
+## Inputs
 
-## When To Use
+Do not generate or modify any service file until both are true:
 
-1. Proto and generated API files already exist.
-2. You need missing service files or method implementations for `*ServiceHTTPServer`.
-3. You need safe append-only completion for existing service files.
+1. The target module is known, for example `task`, `user`, `order`.
+2. The generated `*ServiceHTTPServer` interface exists in `api/<module>/v1/*.sphere.pb.go`.
 
-## Out of Scope
+If the module is unspecified, ask: "Which module should I generate service files for?" Never guess
+the module from context when several candidates exist. If proto generation has not run yet, stop
+and ask the user to run `make gen/proto` first.
 
-1. `BotServer` and non-HTTP interfaces.
-2. Redesigning proto contracts or editing generated files.
-3. Rewriting existing business logic unless explicitly requested.
+## Steps
 
-## Required Reading
+1. Find every `type XxxServiceHTTPServer interface` in `api/<module>/v1/*.sphere.pb.go` and list all method signatures.
+2. Check whether `internal/service/<module>/xxx.go` exists. If it does, list the methods already implemented. If not, mark it for creation.
+3. Pick a strategy per method using the table below.
+4. Implement append-only: create the file with the assertion and all methods when missing; append only the missing methods when it exists; add only the imports you need; leave existing implementations untouched.
+5. Run `go build ./internal/service/...`, then `go test ./internal/service/...` and `go test ./cmd/app/...`. If a constructor or provider signature changed, run `make gen/wire` and rerun the tests.
+6. Report using the Output contract.
 
-Read before generation:
-1. [references/service-implementation-best-practices.md](references/service-implementation-best-practices.md)
+| When the method | Strategy |
+|-----------------|----------|
+| has a `send func(*Reply) error) error` signature | Server-streaming producer. Honor cancellation and every send error. This wins even when the name starts with `List`. |
+| is `Create*`, `Get*`, `List*`, `Update*`, or `Delete*` on a single entity | Simple CRUD, direct Ent through `s.db` with render helpers |
+| has logic you cannot infer | Compilable stub: `return nil, errors.New("not implemented: <Method>")`. A streaming stub returns only the error. |
+| spans entities, is reusable orchestration, or is a long flow | Split into `internal/usecase/` plus wire DI |
 
-Load sections selectively:
-1. Always: `1) Interface Assertion and File Mapping`, `4) Append-Only Update Procedure`, `7) Import and Naming Checklist`.
-2. Simple CRUD: `3) Simple CRUD (Direct Ent) Template`.
-3. Unknown logic: `2) Stub Template for Unknown Logic`.
-4. Complex orchestration and DI changes: `5) Complex Logic Split to Usecase`, `6) Wire Injection Pattern`.
-5. Reuse checks: `8) Sphere Feature Reuse Pattern`.
-6. Server-streaming methods: `9) Server-Streaming SSE Template`.
+## Reference Map
 
-## Repository Conventions
+| Read | When |
+|------|------|
+| [references/service-implementation-best-practices.md](references/service-implementation-best-practices.md) | Always, before step 4 — interface assertion, file mapping, append-only procedure, stub template |
+| [references/implementation-templates.md](references/implementation-templates.md) | Writing a CRUD method, an append-only update, or a usecase split |
+| [references/wiring-and-streaming.md](references/wiring-and-streaming.md) | Wire injection, import and naming checks, reuse lookups, or a server-streaming method |
 
-1. Keep one `Service` struct per proto module.
-2. Keep one Go file per proto service.
-3. File naming: `XxxService -> xxx.go` (snake_case, remove `Service` suffix).
-4. Every service file must include an interface assertion:
-`var _ <pkg>.<ServiceName>HTTPServer = (*Service)(nil)`
+## Rules
 
-## Workflow
+1. One `Service` struct per proto module, one Go file per proto service.
+2. File naming: `XxxService` becomes `xxx.go` — snake_case, `Service` suffix removed.
+3. Every service file carries the interface assertion: `var _ <pkg>.<ServiceName>HTTPServer = (*Service)(nil)`.
+4. Never modify generated files under `api/*`.
+5. Never add a new DAO wrapper for simple CRUD.
+6. Never delete or rewrite an existing assertion or method body in a target service file.
+7. Add only the imports the new code requires.
+8. Keep dependency injection compilable when a constructor signature changes.
+9. Never retain or use `httpx.Context` in a streaming producer. The generated interface supplies a standard `context.Context`, the request, and the send callback.
 
-### Step 1: Discover Interface
-1. Find all `type XxxServiceHTTPServer interface` in `api/<module>/v1/*.sphere.pb.go`.
-2. List all method signatures from each interface.
+## Output
 
-### Step 2: Check Existing Files
-1. Check if `internal/service/<module>/xxx.go` exists.
-2. If exists, list implemented methods.
-3. If missing, mark for creation.
+Report in this exact order:
 
-### Step 3: Decide Implementation Strategy
-
-| Scenario | Strategy |
-|----------|----------|
-| Signature ends with `send func(*Reply) error) error` | Server-streaming producer; honor cancellation and send errors |
-| Method is `Create*`, `Get*`, `List*`, `Update*`, `Delete*` on single entity | Simple CRUD via direct Ent |
-| Logic cannot be inferred | Compilable stub with `errors.New("not implemented")` |
-| Cross-entity transactions or complex orchestration | Split to usecase + wire DI |
-
-### Step 4: Implement (Append-Only)
-1. Create file if missing with assertion + all methods.
-2. If existing, append only missing methods.
-3. Add only required imports.
-4. Keep existing implementations untouched.
-
-### Step 5: Validate
-1. Run `go build ./internal/service/...`
-2. Report using Output Contract.
-
-## Decision Rules
-
-1. **Server stream first**: A `send func(*Reply) error` signature always uses the streaming template, even when the method name starts with `List` or another CRUD verb.
-2. **Simple CRUD**: Method name matches `Create*`, `Get*`, `List*`, `Update*`, `Delete*` + single entity = direct Ent.
-3. **Stub**: Logic unclear = `return nil, errors.New("not implemented: <Method>")`; streaming stubs return only the error.
-4. **Usecase**: Cross-entity, reusable orchestration, or long flows = split to `internal/usecase/`.
-
-## Hard Rules
-
-1. Do not modify generated files under `api/*`.
-2. Do not add a new DAO wrapper for simple CRUD.
-3. Do not delete or rewrite existing assertions or method bodies in target service files.
-4. Add only required imports.
-5. Keep dependency injection compilable when constructor signatures change.
-6. Never retain or use `httpx.Context` in a streaming producer. The generated interface supplies a standard `context.Context`, request, and send callback.
-
-## Output Contract
-
-Output in this exact order:
 1. `Scaffold Plan`
 2. `Files To Create/Update`
 3. `Interface Coverage Check`
@@ -106,24 +69,18 @@ Output in this exact order:
 5. `Usecase Split Decision`
 6. `Validation Result`
 
-## Minimal Validation Checklist
+Acceptance, by case:
 
-1. `go test ./internal/service/...`
-2. `go test ./cmd/app/...`
-3. If constructor or provider signatures changed, run `make gen/wire` and rerun tests.
-
-## Acceptance Checklist
-
-1. New-file case: file exists, assertion exists, all interface methods exist, and code compiles.
-2. Existing-file case: only missing methods are appended; existing implementations are unchanged.
-3. Simple CRUD case: direct Ent via `s.db` with render helpers.
-4. Complex-flow case: usecase split plus DI chain updates remain compilable.
-5. Server-streaming case: signature matches the generated interface, every send error is handled, and the producer observes context cancellation.
+- New file — the file exists, the assertion exists, every interface method exists, and the code compiles.
+- Existing file — only missing methods were appended; existing implementations are unchanged.
+- Simple CRUD — direct Ent via `s.db` with render helpers.
+- Complex flow — the usecase split plus the DI chain updates still compile.
+- Server-streaming — the signature matches the generated interface, every send error is handled, and the producer observes context cancellation.
 
 ## Related Skills
 
 - Upstream — `proto-api-generator` owns the contract; this skill starts only after `make gen/proto` has produced `*ServiceHTTPServer` in `api/<module>/v1/*.sphere.pb.go`.
 - Downstream — none; compilable per-service files are the deliverable. Use `go-test-engineering` when the generated service behavior needs test coverage.
 - Boundary — use `sphere-feature-workflow` instead when the change also touches proto contracts, Ent schemas, bind/map registration, or generation commands.
-- Companion — `sphere-feature-workflow` handles framework-native end-to-end integration (routing, middleware, auth, errors, wiring flow); this skill handles per-service file generation and completion. If it is unavailable, continue here and enforce the reuse-first checks in [references/service-implementation-best-practices.md](references/service-implementation-best-practices.md).
+- Companion — `sphere-feature-workflow` handles framework-native end-to-end integration (routing, middleware, auth, errors, wiring flow); this skill handles per-service file generation and completion. If it is unavailable, continue here and enforce the reuse-first checks in [references/wiring-and-streaming.md](references/wiring-and-streaming.md).
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

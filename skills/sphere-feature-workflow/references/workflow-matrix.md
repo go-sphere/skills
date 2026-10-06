@@ -48,25 +48,43 @@ Run these checks **before** editing any files:
 | Business behavior only | `internal/service/**` / `internal/pkg/dao/**` | Service/DAO code | **Service-only** |
 | Cross-layer | `proto/**` + `schema/**` + service | Proto + schema | **Cross-layer** |
 
-## 3. Minimal File Touchpoints
+## 3. Execution Sequences
+
+Run the sequence for the workflow you classified. Do not reorder the steps.
 
 ### Contract-first
-1. `proto/**` - service/rpc/message/error changes
-2. `internal/service/**` - implement generated server interface
-3. `internal/pkg/dao/**` - query/mutation for contract behavior
-4. `internal/pkg/render/**` non-generated - response shaping, error mapping
+
+1. Classify every target path against `.sphere/layout.json`.
+2. Edit `proto/**`: service, rpc, message, HTTP annotation, validation, error changes.
+3. Run `make gen/proto`.
+4. Resolve the generated impact in `internal/service/**` (implement the generated server
+   interface), `internal/pkg/dao/**` (query and mutation support), and non-generated files under
+   `internal/pkg/render/**` (response shaping, error mapping).
+5. Run `make gen/docs` when the HTTP contract or docs changed.
+6. Run `make test`, then `make check` before delivery.
+7. Verify every generated diff is consumed.
 
 ### Schema-first
-1. `internal/pkg/database/schema/**` - fields/indexes/relations
-2. `cmd/tools/gen/entcrud/main.go` - bind/map registration (`conf.NewFilesConf`)
-3. `internal/service/**` + `dao/**` + `render/**` - consume generated types
-4. `proto/**` (optional) - if external contract needs new fields
+
+1. Classify every target path against `.sphere/layout.json`. `schema/**` and `cmd/tools/**` are
+   commonly `mixed` or `layout_owned`.
+2. Edit `internal/pkg/database/schema/**`: fields, relations, indexes.
+3. Verify bind/map registration in `cmd/tools/gen/entcrud/main.go` (`conf.NewFilesConf`).
+4. Review `WithIgnoreFields` for sensitive and system fields.
+5. Run `make gen/proto`.
+6. Resolve the impact in `internal/service/**`, `internal/pkg/dao/**`, and
+   `internal/pkg/render/**`. Extend `proto/**` only if the external contract needs new fields.
+7. Run `make test`, then `make check` before delivery.
+8. Verify query paths align with the index intent.
 
 ### Service-only
-1. `internal/service/**` - API behavior orchestration
-2. `internal/pkg/dao/**` - query composition
-3. `internal/pkg/render/**` non-generated - masking, shaping
-4. `internal/biz/**` (optional) - shared domain orchestration
+
+1. Edit only non-generated code: `internal/service/**` (orchestration),
+   `internal/pkg/dao/**` (query composition), non-generated `internal/pkg/render/**` (masking,
+   shaping), and optionally `internal/biz/**` (shared domain orchestration).
+2. Keep proto and schema stable.
+3. Run `make test`, then `make check` before delivery.
+4. Verify there is no API regression.
 
 ## 4. Command Policy
 

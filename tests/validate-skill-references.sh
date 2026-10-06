@@ -49,7 +49,7 @@ while IFS= read -r dir; do
   skill_dirs+=("$(basename "$dir")")
 done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
-[ "${#skill_dirs[@]}" -eq 19 ] || fail "expected 19 skill directories, found ${#skill_dirs[@]}"
+[ "${#skill_dirs[@]}" -eq 20 ] || fail "expected 20 skill directories, found ${#skill_dirs[@]}"
 
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
@@ -120,17 +120,42 @@ prompt_doc="$ROOT_DIR/references/prompt.md"
 while IFS= read -r token; do
   [ -n "$token" ] || continue
   resolve_token "$token" || fail "references/prompt.md invokes an unknown skill: /$token"
-done < <(grep -oE '`/[a-z0-9-]+`' "$prompt_doc" | tr -d '`/' | sort -u)
-pass "every slash command in references/prompt.md resolves to a real skill"
+done < <(grep -rhoE '`/[a-z0-9-]+`' "$prompt_doc" "$ROOT_DIR/references/prompt" | tr -d '`/' | sort -u)
+pass "every slash command in the prompt guide resolves to a real skill"
+
+# 5a. Every prompt-guide chapter must be reachable from references/prompt.md.
+prompt_chapters=0
+while IFS= read -r chapter; do
+  prompt_chapters=$((prompt_chapters + 1))
+  grep -q "](prompt/$(basename "$chapter"))" "$prompt_doc" ||
+    fail "prompt guide chapter is not linked from references/prompt.md: $(display_path "$chapter")"
+done < <(find "$ROOT_DIR/references/prompt" -type f -name '*.md' | sort)
+[ "$prompt_chapters" -gt 0 ] || fail "references/prompt/ contains no chapters"
+pass "all $prompt_chapters prompt-guide chapters are linked from references/prompt.md"
 
 # 6. Role-to-skill mappings in the dev guide must resolve to real skills.
 dev_doc="$ROOT_DIR/references/dev.md"
 [ -f "$dev_doc" ] || fail "missing references/dev.md"
 while IFS= read -r token; do
   [ -n "$token" ] || continue
-  resolve_token "$token" || fail "references/dev.md maps a role to an unknown skill: $token"
-done < <(grep -oE '已有 `[a-z0-9-]+` skill' "$dev_doc" | grep -oE '`[a-z0-9-]+`' | tr -d '`' | sort -u)
-pass "references/dev.md role table maps only real skills"
+  resolve_token "$token" || fail "the dev guide maps a role to an unknown skill: $token"
+done < <(grep -rhoE '已有 `[a-z0-9-]+` skill' "$ROOT_DIR/references" | grep -oE '`[a-z0-9-]+`' | tr -d '`' | sort -u)
+pass "the dev guide role table maps only real skills"
+
+# 6a. Every dev-guide chapter must be reachable from references/dev.md, and its links must resolve.
+dev_chapters=0
+while IFS= read -r chapter; do
+  dev_chapters=$((dev_chapters + 1))
+  grep -q "](dev/$(basename "$chapter"))" "$dev_doc" ||
+    fail "dev guide chapter is not linked from references/dev.md: $(display_path "$chapter")"
+done < <(find "$ROOT_DIR/references/dev" -type f -name '*.md' | sort)
+[ "$dev_chapters" -gt 0 ] || fail "references/dev/ contains no chapters"
+while IFS= read -r link; do
+  [ -n "$link" ] || continue
+  [ -f "$ROOT_DIR/references/$link" ] ||
+    fail "references/dev.md links a missing chapter: $link"
+done < <(grep -oE '\]\(dev/[^)#]+\.md' "$dev_doc" | sed -E 's/^\]\(//')
+pass "all $dev_chapters dev-guide chapters are linked from references/dev.md"
 
 # 7. Description boundary clauses must point at real skills.
 for name in "${skill_dirs[@]}"; do
@@ -183,11 +208,79 @@ done
 pass "framework packs and their SKILL.md links stay in sync ($pack_count packs)"
 
 # 11. SKILL.md stays within the progressive-disclosure size budget.
+# Budgets are documented in references/skill-authoring.md.
+SKILL_LINE_BUDGET=150
+REFERENCE_LINE_BUDGET=200
+DESCRIPTION_CHAR_BUDGET=400
+
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   lines="$(wc -l < "$file" | tr -d '[:space:]')"
-  [ "$lines" -le 500 ] || fail "SKILL.md exceeds 500 lines ($lines): $(display_path "$file")"
+  [ "$lines" -le "$SKILL_LINE_BUDGET" ] ||
+    fail "SKILL.md exceeds $SKILL_LINE_BUDGET lines ($lines): $(display_path "$file")"
 done
-pass "every SKILL.md is within the 500-line budget"
+pass "every SKILL.md is within the $SKILL_LINE_BUDGET-line budget"
+
+# 12. Reference files stay small enough to load one at a time.
+for name in "${skill_dirs[@]}"; do
+  ref_dir="$SKILLS_DIR/$name/references"
+  [ -d "$ref_dir" ] || continue
+  while IFS= read -r ref; do
+    lines="$(wc -l < "$ref" | tr -d '[:space:]')"
+    [ "$lines" -le "$REFERENCE_LINE_BUDGET" ] ||
+      fail "reference exceeds $REFERENCE_LINE_BUDGET lines ($lines): $(display_path "$ref")"
+  done < <(find "$ref_dir" -type f -name '*.md' | sort)
+done
+pass "every reference file is within the $REFERENCE_LINE_BUDGET-line budget"
+
+# 13. Descriptions stay cheap: one line, under budget, and they say when to use the skill.
+for name in "${skill_dirs[@]}"; do
+  file="$SKILLS_DIR/$name/SKILL.md"
+  desc_lines="$(grep -c '^description:' "$file")"
+  [ "$desc_lines" -eq 1 ] ||
+    fail "expected exactly one 'description:' line, found $desc_lines: $(display_path "$file")"
+  # A continued (multi-line) description would leave a non-key line before the closing '---'.
+  awk 'NR>1 && /^---$/ {exit} /^description:/{found=1; next} found && !/^[a-z_]+:/ {exit 1}' "$file" ||
+    fail "description spans multiple lines: $(display_path "$file")"
+  desc="$(sed -n 's/^description:[[:space:]]*//p' "$file" | head -n 1)"
+  chars="$(printf '%s' "$desc" | wc -m | tr -d '[:space:]')"
+  [ "$chars" -le "$DESCRIPTION_CHAR_BUDGET" ] ||
+    fail "description exceeds $DESCRIPTION_CHAR_BUDGET characters ($chars): $(display_path "$file")"
+  case "$desc" in
+    *"Use when"*|*"Use to"*|*"Use for"*|*"Use at"*|*"Use whenever"*) ;;
+    *) fail "description never says when to use the skill: $(display_path "$file")" ;;
+  esac
+done
+pass "every description is one line, within $DESCRIPTION_CHAR_BUDGET characters, and states when to use the skill"
+
+# 14. Progressive disclosure: every reference file is reachable from its SKILL.md.
+for name in "${skill_dirs[@]}"; do
+  ref_dir="$SKILLS_DIR/$name/references"
+  [ -d "$ref_dir" ] || continue
+  file="$SKILLS_DIR/$name/SKILL.md"
+  while IFS= read -r ref; do
+    rel="references/${ref#"$ref_dir"/}"
+    grep -q "]($rel)" "$file" ||
+      fail "reference file is not linked from $(display_path "$file"): $rel"
+  done < <(find "$ref_dir" -type f -name '*.md' | sort)
+  grep -q '^## Reference Map$' "$file" ||
+    fail "SKILL.md has reference files but no '## Reference Map' section: $(display_path "$file")"
+done
+pass "every reference file is linked from its skill's Reference Map"
+
+# 15. Reference files must not dangle: relative links between them have to resolve.
+for name in "${skill_dirs[@]}"; do
+  ref_dir="$SKILLS_DIR/$name/references"
+  [ -d "$ref_dir" ] || continue
+  while IFS= read -r ref; do
+    while IFS= read -r link; do
+      [ -n "$link" ] || continue
+      target="${link%%#*}"
+      [ -f "$(dirname "$ref")/$target" ] ||
+        fail "reference links a missing file: $(display_path "$ref") -> $link"
+    done < <(grep -oE '\]\([a-z0-9][a-z0-9./-]*\.md' "$ref" | sed -E 's/^\]\(//')
+  done < <(find "$ref_dir" -type f -name '*.md' | sort)
+done
+pass "every relative link between reference files resolves"
 
 echo "All skill reference checks passed."

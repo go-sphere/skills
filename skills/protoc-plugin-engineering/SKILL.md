@@ -1,6 +1,6 @@
 ---
 name: protoc-plugin-engineering
-description: Write, refactor, or review Go protoc-gen-* plugins in the go-sphere organization. Use when adding a new plugin, changing generated output, reworking plugin config or templates, hardening plugin tests, or reviewing a plugin PR for structure, determinism, immutability, and golden-file discipline. Covers both new-file generators (protoc-gen-sphere, protoc-gen-route, protoc-gen-sphere-errors) and in-place AST rewriters (protoc-gen-sphere-binding). Do not use for authoring .proto API contracts — that is proto-api-generator.
+description: Write, refactor, or review Go `protoc-gen-*` plugins in the go-sphere organization. Use when adding a plugin, changing generated output, reworking plugin config or templates, hardening plugin tests, or reviewing a plugin PR for determinism, immutability, and golden-file discipline. Not for authoring `.proto` contracts — that is `proto-api-generator`.
 ---
 
 # Protoc Plugin Engineering
@@ -44,13 +44,14 @@ or a presentational change. Do not bundle both in one commit.
 5. **Generated files are a stable interface.** They land in version control, code
    review, and downstream builds. Do not create large golden diffs without cause.
 
-## Required Reading
+## Reference Map
 
-1. **[references/plugin-conventions.md](references/plugin-conventions.md)** — directory layout, entrypoint, config, generator contract, templates, output rules, AST-rewriter specifics, compatibility
-2. **[references/plugin-testing.md](references/plugin-testing.md)** — the three test layers, fixture management, golden discipline, and the pitfalls that bite every plugin suite
-
-Load the testing reference whenever you add or change tests, touch `testdata/`,
-or update golden files.
+| Read | When |
+|------|------|
+| [references/plugin-conventions.md](references/plugin-conventions.md) | Always, before writing code — directory layout, entrypoint, config model, generator contract |
+| [references/plugin-output-rules.md](references/plugin-output-rules.md) | Before changing a template, generated output, an AST rewrite, or an exported API |
+| [references/plugin-testing.md](references/plugin-testing.md) | Whenever you add or change tests, touch `testdata/`, or update golden files |
+| [references/review-checklist.md](references/review-checklist.md) | At review time, and before delivering any plugin change |
 
 ## Working Order for a New Plugin
 
@@ -82,40 +83,6 @@ nilaway ./...
 explicit command, followed by a full test rerun. A project Makefile may wrap
 these, but must not weaken their semantics — see the `go-sphere-makefiles` skill
 for the target contract (`test`, `lint`, `check`, `update-golden`, `generate`).
-
-## Review Checklist
-
-**Structure**
-- [ ] `main.go` only adapts the protoc protocol and assembles objects
-- [ ] `Config`, `Generator`, template, and domain logic have clear boundaries
-- [ ] Files named by responsibility; no mixed `utils.go` / `common.go` / `helper.go`
-- [ ] Deviations in special plugins have a stated justification
-
-**Config and state**
-- [ ] `DefaultConfig()` equals the real CLI defaults and returns independent objects
-- [ ] `Validate` is nil-safe and its error text is order-stable
-- [ ] Generator deep-copies reference-typed config
-- [ ] No mutable package-level templates or cross-file state
-- [ ] A custom template affects only its own instance
-
-**Output**
-- [ ] Non-applicable files produce no output — never a header-only shell
-- [ ] Filename, header, package, and imports are stable
-- [ ] Map-derived output is sorted; repeated lists deduped and ordered
-- [ ] Dynamic strings pass through `strconv.Quote`
-- [ ] The generated diff contains only what this change requires
-- [ ] AST rewrites are idempotent and preserve non-target content
-
-**Compatibility**
-- [ ] Changes to exported API, flags, defaults, or template data are identified
-- [ ] Compatible old APIs keep a `Deprecated:` wrapper
-- [ ] Breaking changes have migration notes and a release plan
-
-**Verification**
-- [ ] Unit, descriptor, golden, and CLI tests cover this change
-- [ ] Golden diffs were reviewed by a human, not just made green
-- [ ] `go test -race`, `go vet`, lint, and nilaway pass
-- [ ] Module verifies independently under `GOWORK=off`
 
 ## Reporting
 

@@ -57,7 +57,7 @@ message GetUserRequest {
 }
 ```
 
-See [API Definitions Guide](go-sphere-api-definitions-reference.md) for detailed examples.
+See [Path Mapping and Request Binding](api-binding-basics-reference.md) for detailed examples.
 
 ### sphere/errors
 
@@ -83,7 +83,7 @@ enum UserError {
 }
 ```
 
-See [Error Handling Guide](go-sphere-error-handling-reference.md) for implementation details.
+See [Error Runtime Behavior](error-runtime-reference.md) for implementation details.
 
 ### sphere/options
 

@@ -10,8 +10,11 @@ Use this checklist with:
 
 - [repo-proto-conventions-reference.md](repo-proto-conventions-reference.md)
 - [router-conflict-reference.md](router-conflict-reference.md)
-- [go-sphere-api-definitions-reference.md](go-sphere-api-definitions-reference.md)
-- [go-sphere-error-handling-reference.md](go-sphere-error-handling-reference.md)
+- [api-binding-basics-reference.md](api-binding-basics-reference.md)
+- [api-binding-advanced-reference.md](api-binding-advanced-reference.md)
+- [api-streaming-reference.md](api-streaming-reference.md)
+- [error-definition-reference.md](error-definition-reference.md)
+- [error-runtime-reference.md](error-runtime-reference.md)
 - [protocol-and-codegen-reference.md](protocol-and-codegen-reference.md)
 - [proto-packages-and-runtime-reference.md](proto-packages-and-runtime-reference.md)
 
@@ -101,7 +104,19 @@ Load this reference at final validation time after drafting contracts. Use it as
 - [ ] Confirm response/error assumptions match go-sphere runtime behavior.
 - [ ] Confirm design fits protocol-first generation and does not require manual generated-file edits.
 
-### I. Final QA (Required)
+### I. Field Types and Validation (Required)
+
+- [ ] Package declaration reads `package {name}.v1;` — `dash.v1` for generic surfaces, `{module}.v1` for a domain (`user.v1`, `order.v1`, `article.v1`).
+- [ ] ID fields are `int64`, not `string`.
+- [ ] Timestamps are `google.protobuf.Timestamp`.
+- [ ] List requests use `page` and `page_size`; list replies carry `total_size` and `total_page`.
+- [ ] Every required field carries a `(buf.validate.field)` constraint.
+- [ ] String fields that must be non-empty declare `min_len` or `min_bytes`.
+- [ ] Bounded numeric fields declare `gte` and `lte`.
+- [ ] Every service proto declares a service-local error enum named after the service (`ArticleError`, `OrderError`, `AuthError`) with at least `NOT_FOUND` and `INVALID_PARAMETER`.
+- [ ] Every RPC path follows REST conventions, with path parameters for identifiers.
+
+### J. Final QA (Required)
 
 - [ ] Ensure no sensitive/internal storage fields leak into external contracts.
 - [ ] Ensure error outputs are machine-readable and stable.

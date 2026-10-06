@@ -167,9 +167,9 @@ proto/
 ## Related Guides
 
 For detailed information on:
-- **Defining HTTP APIs**: See [API Definitions](go-sphere-api-definitions-reference.md)
+- **Defining HTTP APIs**: See [Path Mapping and Request Binding](api-binding-basics-reference.md)
 - **HTTP runtime**: See [HTTP Runtime](https://go-sphere.github.io/docs/guides/http-runtime)
 - **Server streaming**: See [Server Streaming](https://go-sphere.github.io/docs/guides/server-streaming)
-- **Error handling**: See [Error Handling](go-sphere-error-handling-reference.md)
+- **Error handling**: See [Defining Proto Errors](error-definition-reference.md)
 - **Proto packages**: See [Proto Packages & Runtime](proto-packages-and-runtime-reference.md)
 - **Upgrading**: See [Upgrading to v0.0.4](https://go-sphere.github.io/docs/guides/upgrading)

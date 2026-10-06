@@ -1,133 +1,68 @@
 ---
 name: project-intake
-description: Organize scattered project inputs and generate standardized intake documents. Use when users mention project kickoff, requirement initialization, PRD preparation, input organization, requirement gathering, or turning prototypes/demos/drafts into structured documents. Apply to new feature development, project initialization, requirement clarification, and similar scenarios. Always complete intake before writing PRD or any detailed design. Do not use for multi-round interactive decision interviews — that is `interview-me`.
+description: Organize scattered project inputs into one standardized intake document that separates what is known from what is missing. Use at project or feature kickoff, for requirement initialization, or to turn prototypes, demos, screenshots, and drafts into a structured document — 项目启动, 需求梳理, 整理输入. Run before any PRD. Not for multi-round decision interviews — that is `interview-me`.
 ---
 
 # Project Intake
 
-Organize scattered project inputs into structured documentation, clarifying project boundaries and known/unknown items.
+Organize scattered project inputs into one structured document that locks down project boundaries
+and separates known items from unknown ones. Output: `docs/00-intake.md`.
 
-<HARD-GATE>
-Do not generate `docs/00-intake.md` until you have confirmed the following from the user:
-- At least one concrete input (PRD draft, prototype, description, or repo link)
-- A one-sentence project goal (or enough context to infer one)
-If inputs are too vague to produce a meaningful intake doc, ask first — do not assume.
-</HARD-GATE>
+## Inputs
 
-## Workflow
+Do not generate `docs/00-intake.md` until both are confirmed:
 
-1. Scan whatever the user has provided — extract project goal, available inputs, and visible gaps
-2. If the goal is unclear or no concrete inputs exist, ask one question to unblock (e.g., "What problem is this project solving?")
-3. Ask one follow-up question at a time until you have enough to fill all 8 sections
-4. Write `docs/00-intake.md` to disk (create `docs/` directory if needed)
-5. Report the file path and ask if anything needs adjusting
+1. At least one concrete input: a PRD draft, a prototype, a description, or a repo link.
+2. A one-sentence project goal, or enough context to infer one.
 
-## When to Use
+If the inputs are too vague to produce a meaningful document, ask first. Never assume.
 
-Use this skill when:
-- User mentions "new project", "new feature", "build something"
-- User provides PRD draft, prototype, screenshots, Figma links
-- User describes ideas without formal documentation
-- Team needs to clarify "what's known vs what's unknown"
-- Before any detailed design work begins
+This skill processes any of: an initial PRD or requirement description; prototype demos (Figma,
+HTML demo, screenshots, videos); interaction specs or user flow diagrams; existing code
+repositories or modules; the user's verbal descriptions and notes; competitive analysis or
+reference cases. None is individually required — identify and document whatever exists.
 
-## Input Types
+## Steps
 
-This skill processes the following input types (not all required, but will identify and document):
+1. Scan everything the user provided. Extract the project goal, the available inputs, and the visible gaps.
+2. If the goal is unclear or no concrete input exists, ask one question to unblock, for example "What problem is this project solving?"
+3. Keep asking one follow-up at a time until all eight sections can be filled.
+4. Write `docs/00-intake.md`, creating the `docs/` directory if needed.
+5. Verify the completion criteria below.
+6. Report the file path and ask whether anything needs adjusting.
 
-- Initial PRD or requirement description
-- Prototype demos (Figma, HTML demo, screenshots, videos)
-- Interaction specifications or user flow diagrams
-- Existing code repositories or modules
-- User's verbal descriptions or supplementary notes
-- Competitive analysis or reference cases
+## Reference Map
 
-## Output Document
+| Read | When |
+|------|------|
+| [references/intake-template.md](references/intake-template.md) | Always, before step 4 — the eight sections and what belongs in each |
 
-Generate `docs/00-intake.md` (create docs directory if it doesn't exist)
+## Rules
 
-## Document Structure
+1. Keep every section to 3-5 lines. Do not expand into detail.
+2. Focus on known versus unknown. This document locks boundaries; it does not specify requirements.
+3. Mark what the user confirmed separately from what you inferred.
+4. Do not write PRD content here. Business processes and feature detail belong to the `prd` stage.
+5. Always write the file to disk. Never deliver the intake document only in the conversation.
 
-Organize content with the following structure, keeping each section concise:
+## Output
 
-### 1. Project Goal (One Sentence)
+Write to `docs/00-intake.md`, or to the location the user names.
 
-Express the core project goal in one sentence. No more than two lines.
+Before finishing, confirm every item:
 
-### 2. Current Available Inputs
-
-List all provided inputs including:
-- PRD/requirement documents (if any)
-- Prototype/design files or links
-- Code repositories or modules
-- User's supplementary descriptions
-
-**Mark the status** of each item: "completed" or "draft/initial"
-
-### 3. Missing Inputs
-
-List inputs required for project kickoff but not yet provided, such as:
-- Key business process diagrams
-- User role definitions
-- Success criteria
-- Existing system boundaries
-
-### 4. Confirmed Primary Roles
-
-List user roles or system roles involved. No need for detailed permission definitions.
-
-### 5. Confirmed Primary Modules
-
-List identified core functional modules or system components.
-
-### 6. Demo Reference Type
-
-Clearly mark:
-- **Visual Reference**: Demo serves as UI/visual style reference only, not representing interaction behavior
-- **Behavior Reference**: Demo shows complete user interaction flow, behaviors need to be implemented
-
-### 7. Existing Code/Repository Boundaries
-
-If existing code exists:
-- Related repositories or modules
-- Technology stack of the code
-- Which parts might be reused
-
-### 8. Unresolved Items List
-
-List all items that are not yet determined and need clarification. One sentence per item.
-
-## Writing Principles
-
-1. **Keep it concise**: 3-5 lines per section, don't expand into details
-2. **Lock down boundaries**: Focus on clarifying "known vs unknown", not writing detailed requirements
-3. **Distinguish facts from assumptions**: Mark what user confirmed vs what's inferred
-4. **Don't write PRD**: Don't expand business processes or feature details here - these belong in PRD phase
-
-## Completion Criteria
-
-Ensure at completion:
-- [x] Project goal clearly expressed in one sentence
-- [x] All available inputs listed with status marked
-- [x] Missing inputs clearly listed, team knows what to collect next
-- [x] Confirmed roles and modules listed
-- [x] Demo reference type clearly marked
-- [x] Code boundaries identified (if applicable)
-- [x] All unresolved items listed
-
-## Output Location
-
-If user doesn't specify output location, default to:
-- `docs/00-intake.md`
-
-Follow user's specified location if provided.
-
-**Always write the file to disk. Do not output the intake document only in the conversation.**
+- [ ] The project goal is one clear sentence.
+- [ ] Every available input is listed with its status.
+- [ ] Missing inputs are listed, so the team knows what to collect next.
+- [ ] Confirmed roles and modules are listed.
+- [ ] The demo reference type is marked as visual or behavior.
+- [ ] Code boundaries are identified, when code exists.
+- [ ] Every unresolved item is listed.
 
 ## Related Skills
 
 - Upstream — none; this skill is the entry point and accepts raw or scattered inputs.
-- Downstream — `prd` once `docs/00-intake.md` is complete; when section 6 marks the demo as a behavior reference, `ux-analyst` comes first. Hand off when the intake document is on disk and the unresolved list is explicit.
+- Downstream — `prd` once `docs/00-intake.md` is complete; when the demo reference type is `behavior reference`, `ux-analyst` comes first. Hand off when the intake document is on disk and the unresolved list is explicit.
 - Boundary — use `interview-me` instead when the goal itself is still unclear and needs multi-round decision-tree interviewing; this skill produces one structured intake document in a single pass.
-- Companion — `interview-me` when inputs conflict or the goal is unresolved; if it is unavailable, record the open questions in section 8 instead.
+- Companion — `interview-me` when inputs conflict or the goal is unresolved; if it is unavailable, record the open questions in the unresolved items list instead.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

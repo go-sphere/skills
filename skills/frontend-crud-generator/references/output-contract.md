@@ -95,4 +95,5 @@ Before reporting, verify all of these; pack-specific checks live in each pack's 
 - [ ] Route names are unique (where the framework uses them) and registration is complete for the project's mechanism
 - [ ] Page-caching identity rule satisfied when the framework caches pages (component name matches route name where required)
 - [ ] Permission wiring uses only keys that exist in the project, or is explicitly absent
+- [ ] The project's own typecheck or build command was run, or its absence is stated in Validation Notes
 - [ ] Report section order and paths match this contract

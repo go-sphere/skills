@@ -1,223 +1,62 @@
 ---
 name: prd
-description: "Generate high-quality Product Requirements Documents (PRDs) following go-sphere development workflow. Use when: user wants to create a PRD, document requirements, plan a feature, or translate business ideas into product specs. Required for the PRD solidification phase in AI Agent collaboration development. Do not use for API contracts, database schemas, state machines, or implementation-level specification — that is `spec-writer`."
+description: "Write a Product Requirements Document: problem framing, personas, business processes, module boundaries, page inventory, measurable success criteria, scope, and risks. Use when the user wants a PRD, requirements documented, or a business idea turned into a product plan — 写 PRD, 整理需求, 需求文档. Not for API contracts, schemas, or implementation detail — that is `spec-writer`."
 ---
 
 # Product Requirements Document (PRD)
 
-Generate comprehensive, production-grade PRDs that bridge the gap between business vision and technical execution.
+Produce a PRD that connects business intent to technical execution without leaking implementation
+detail. Output: `prd/PRD.md`.
 
-<HARD-GATE>
-Do not write `prd/PRD.md` until Phase 1 (Discovery) is complete or the user has provided sufficient context to skip it.
-"Sufficient context" means: problem statement, target users, and at least one success criterion are clear.
-If any of these are missing, ask — one question at a time — before drafting.
-</HARD-GATE>
+## Inputs
 
-## When to Use This Skill
+Do not write `prd/PRD.md` until the problem statement, the target users, and at least one success
+criterion are clear. If any is missing, ask for it — one question at a time — before drafting.
 
-**Trigger when:**
-- User wants to "write a PRD", "create product requirements", or "document a feature"
-- Transitioning from Intake to PRD solidification phase
-- User provides initial ideas, demos, or prototypes needing formalization
-- User asks to "plan a feature", "define scope", or "clarify requirements"
+Skip discovery and draft directly when the user already gave a clear problem statement, target
+users, and success criteria, or explicitly said "just write it".
 
-**Produces:**
-- `prd/PRD.md` - the main Product Requirements Document
+## Steps
 
----
+1. Decide whether discovery is needed. Ask questions first when the idea is vague, when who-and-what-success is missing, or when several reasonable interpretations exist.
+2. Run discovery if needed: at most 3-5 targeted questions covering the problem, why now, how success is measured, what is in and out of scope, and who the users are.
+3. Synthesize: map the key user flows, identify the core business processes, define module boundaries, list the key pages and scenes, and name the risks and dependencies.
+4. Draft the document using the 8-section schema.
+5. Write it to `prd/PRD.md`, creating the `prd/` directory if needed.
+6. Verify the completion criteria below.
+7. Report the file path and ask whether any section needs adjustment.
 
-## Workflow
+## Reference Map
 
-### Decision Point: Discovery or Draft?
+| Read | When |
+|------|------|
+| [references/prd-schema.md](references/prd-schema.md) | Always, before step 4 — the exact sections, the PRD-versus-SPEC split, and the common mistakes |
 
-**Ask clarifying questions FIRST when:**
-- User provides only vague idea ("build something cool")
-- Critical details missing (who, what success looks like)
-- Multiple reasonable interpretations possible
+## Rules
 
-**Skip to drafting when:**
-- User provides sufficient detail in initial request
-- Clear problem statement + target users + success criteria provided
-- User explicitly says "just write it" or provides complete context
+1. Lead with the problem and its context. Never open with the solution.
+2. Every success metric is quantitative and says how it is measured.
+3. State what is explicitly out of scope. A PRD without non-scope is incomplete.
+4. Justify "why now", not only the what and the how.
+5. Keep technical detail out: no field types, no table designs, no API response shapes, no internal state machines, no error codes, no architecture.
+6. Keep the document lightweight. Depth belongs in the SPEC.
+7. Always write to disk. Never deliver the PRD only in the conversation.
 
-### Phase 1: Discovery (If Needed)
+## Output
 
-Gather context through targeted questions. Keep it brief - 3-5 questions max.
+Write to `prd/PRD.md` by default, or to the location the user names.
 
-**Typical Questions:**
-- Problem: What pain point are we solving?
-- Why now: Why important at this time?
-- Success: How will we measure success?
-- Scope: What's in/out of scope?
-- Users: Who are the target users?
+Before finishing, confirm every item:
 
-### Phase 2: Analysis & Synthesis
-
-Synthesize understanding:
-- Map key user flows
-- Identify core business processes
-- Define module boundaries
-- List key pages/scenes
-- Identify risks and dependencies
-
-### Phase 3: PRD Drafting
-
-Generate document using the standard schema below, then:
-1. Write the completed PRD to `prd/PRD.md` (create `prd/` directory if needed)
-2. Report the file path to the user
-3. Ask if any section needs adjustment
-
----
-
-## PRD Schema (Use These Exact Section Names)
-
-### 1. Background & Goals
-
-**Must include:**
-- Problem statement (what pain point?)
-- Why now (why important at this time?)
-- Success criteria (3-5 measurable KPIs)
-
-### 2. User Personas
-
-**Must include:**
-- Primary users identified
-- Their characteristics/jobs
-- Current workflow pain points
-
-### 3. Core Business Processes
-
-**Must include:**
-- Primary workflow steps
-- Decision points
-- Key user interactions
-
-**DO NOT include:** Detailed state machines, API calls, database schemas
-
-### 4. Module Boundaries
-
-**Must include:**
-- What modules/components involved
-- How modules interact (high-level)
-- External dependencies
-
-**DO NOT include:** Technical implementation details, code structure
-
-### 5. Pages & Scenes Inventory
-
-**Must include:**
-- List of key pages/scenes
-- Entry conditions
-- Exit conditions
-
-### 6. Success Criteria
-
-**Must include:**
-- Quantitative metrics (not vague "fast", "easy")
-- How each metric measured
-
-**Example:**
-- BAD: "The system should be fast"
-- GOOD: "Search returns within 200ms for 10k records"
-
-### 7. Scope / Non-Scope
-
-**Must include:**
-- What's built in this phase
-- What's NOT built (explicitly)
-
-### 8. Risks & Dependencies
-
-**Must include:**
-- Technical risks
-- External dependencies
-- Key assumptions
-
----
-
-## Quality Standards
-
-### Include (Do)
-
-- Business context and motivation
-- User roles and workflows
-- Clear measurable success metrics
-- Explicit scope boundaries
-- Known risks and dependencies
-
-### Exclude (Don't)
-
-**These belong in SPEC, NOT PRD:**
-- Field types or data structures
-- Database table designs
-- API response structures
-- Internal state machines
-- Detailed error codes
-- Technical architecture details
-- Code-level implementation
-
-### Example: What Goes Where
-
-| Content | PRD | SPEC |
-|---------|-----|------|
-| Problem statement | ✅ | ✅ |
-| User personas | ✅ | ✅ |
-| User flows | ✅ | ✅ |
-| Success metrics | ✅ | ✅ |
-| Module boundaries | ✅ | ✅ |
-| Page inventory | ✅ | ❌ |
-| API contracts | ❌ | ✅ |
-| Database schema | ❌ | ✅ |
-| State machines | ❌ | ✅ |
-| Technical architecture | ❌ | ✅ |
-
----
-
-## Expert Insights
-
-> "The most important section is the first part - what is the background and context? What is the problem, why does it matter, and why does it matter now?" - Maggie Crowley
-
-> "Whenever we're devising a new product, we start by writing a press release describing it in a way that speaks to the customer." - Bill Carr
-
-> "We tend to keep them pretty light. I like to have the minimal amount of context that ensures everyone's on the same page." - Eric Simons
-
-> "If you're not prototyping and building to see what you want to build, you're doing it wrong." - Aparna Chennapragada
-
----
-
-## Common Mistakes to Avoid
-
-1. **Starting with solution** - Always lead with problem and context
-2. **No success criteria** - Every PRD needs measurable KPIs
-3. **Including technical details** - Save API/schema for SPEC phase
-4. **Vague scope** - Explicitly state what's NOT included
-5. **Missing "Why Now"** - Justify timing, not just what and how
-6. **Over-detailing** - Keep PRD lightweight; save depth for SPEC
-
----
-
-## Completion Criteria
-
-Ensure at completion:
-- [x] Background clearly states problem and why now
-- [x] User personas identified
-- [x] Core business processes documented
-- [x] Module boundaries defined (high-level only)
-- [x] Pages/scenes inventory complete
-- [x] Success criteria are measurable
-- [x] Scope/non-scope explicitly listed
-- [x] Risks and dependencies documented
-- [x] NO technical implementation details
-
----
-
-## Output Location
-
-Default to `prd/PRD.md`
-
-Follow user's specified location if provided.
-
-**Always write to disk. Do not output the PRD only in the conversation.**
+- [ ] Background states the problem and why now.
+- [ ] User personas are identified.
+- [ ] Core business processes are documented.
+- [ ] Module boundaries are defined at a high level only.
+- [ ] The pages and scenes inventory is complete.
+- [ ] Success criteria are measurable.
+- [ ] Scope and non-scope are both explicit.
+- [ ] Risks and dependencies are documented.
+- [ ] No technical implementation detail leaked in.
 
 ## Related Skills
 

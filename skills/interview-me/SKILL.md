@@ -1,15 +1,13 @@
 ---
 name: interview-me
-description: Deeply interview the user about technical and product requirements through an interactive, step-by-step decision-tree interview until reaching a shared understanding. Use when planning complex features, architecture changes, API designs, UX refactors, or resolving ambiguous decisions. Enforces exploring the codebase first, asking one question at a time, providing recommended options, and using native interactive question tools. Do not use to produce a structured intake document from scattered inputs — that is `project-intake`.
+description: Interview the user one question at a time, down a decision tree, until technical and product decisions are actually settled. Use when planning a complex feature, an architecture change, an API design, or a UX refactor, or when a decision is ambiguous — 需求访谈, 方案对齐, 帮我确认设计. Not for organizing scattered inputs into a kickoff document — that is `project-intake`.
 ---
 
 # Interview Me (Interactive Requirements & Design Alignment)
 
 Thoroughly interview the user about every aspect of their task until reaching a complete, shared technical and product understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one.
 
----
-
-## Core Principles
+## Rules
 
 1. **Codebase First (Silent Exploration)**:
    - Before asking any question, actively explore existing code, schema definitions, protobuf contracts, config files, and documentation.
@@ -25,8 +23,6 @@ Thoroughly interview the user about every aspect of their task until reaching a 
 5. **Top-Down Decision Tree**:
    - Resolve decisions in order: System Boundaries -> Architecture & Data Flow -> Storage & Schema -> API Contracts -> Edge Cases.
 
----
-
 ## Multi-Platform Tool Mapping
 
 | Platform / Runtime | Native Tool / Mechanism | Invocation Specification |
@@ -35,27 +31,7 @@ Thoroughly interview the user about every aspect of their task until reaching a 
 | **Antigravity / Gemini** | `ask_question` | Pass `questions` array containing `question`, `options`, and `is_multi_select`. |
 | **OpenAI / Codex / Cursor** | Native user prompt tool (or Markdown fallback) | Dynamically detect and invoke available user-prompt tools (e.g., `ask_user`, `request_user_input`). If none exist, output numbered Markdown options and stop generating to wait for input. |
 
----
-
-## Workflow
-
-```mermaid
-flowchart TD
-    A[Receive Task / Goal] --> B[Silent Codebase Exploration & Context Analysis]
-    B --> C{Are there unresolved design decisions?}
-    C -- Yes --> D[Construct Single Decision Question + Recommended Options]
-    D --> E{Check Available Interactive Tool}
-    E -- Claude Code --> F1[Call AskFollowupQuestion]
-    E -- Antigravity --> F2[Call ask_question]
-    E -- Other Agent Tool --> F3[Call Native Ask Tool]
-    E -- Bare CLI / No Tool --> F4[Output Markdown Numbered Options & Stop]
-    F1 --> H[Record User Decision in Context]
-    F2 --> H
-    F3 --> H
-    F4 --> H
-    H --> C
-    C -- No (Consensus Reached) --> I[Output Alignment Summary / Generate SPEC or Execution Plan]
-```
+## Steps
 
 ### Step 1: Silent Codebase Exploration
 - Read existing implementations, models, schemas, and endpoints related to the user's prompt.
@@ -92,8 +68,6 @@ Please reply with your preferred option number (e.g., `1`) or share your thought
 Once all critical branches of the decision tree have converged:
 - Summarize confirmed architectural decisions clearly.
 - Produce the final deliverable (e.g., update `SPEC.md`, write a PRD, or create a concrete phased implementation plan).
-
----
 
 ## Questioning Guidelines
 

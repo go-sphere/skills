@@ -1,91 +1,134 @@
 # Pipeline
 
-Use this sequence exactly. The value of the skill comes from stabilizing upstream understanding before downstream planning.
+Run these stages in order. The value of the skill comes from stabilizing upstream
+understanding before any downstream planning.
 
-## 1. Resolve Inputs
+## Stage 1 — Resolve the change boundary
 
-Identify the mode and gather inputs:
+Gather the mode inputs, then read the change itself.
 
-### Git Diff Mode:
-- repository root
-- target spec file path
-- diff base (git ref or description)
-- supporting docs and source-of-truth directories
-- declared or inferred affected surfaces
+Git diff mode: repository root, target spec path, diff base, supporting docs and
+source-of-truth directories, declared or inferred surfaces.
 
-### Version Comparison Mode:
-- repository root
-- version A path (older version, baseline)
-- version B path (newer version, target)
-- supporting docs and source-of-truth directories
-- declared or inferred affected surfaces
+Version comparison mode: repository root, version A path (older baseline), version B path
+(newer target), supporting docs and source-of-truth directories, declared or inferred surfaces.
 
-If the repo contains multiple possible supporting sources, prefer the ones closest to the spec change and the implementation source of truth.
+When the repo offers several possible supporting sources, prefer the ones closest to the spec
+change and to the implementation source of truth.
 
-## 2. Generate `00-inputs.md`
+In version mode, compute the semantic diff explicitly by comparing:
 
-### Git Diff Mode:
-Document:
-- spec path
-- diff base
-- files read
-- surface discovery result
-- assumptions about source-of-truth files
-- missing evidence
+- added, removed, or modified sections
+- changed requirements
+- modified API contracts or data models
+- updated workflows or behaviors
 
-### Version Comparison Mode:
-Document:
-- version A path (baseline/older)
-- version B path (target/newer)
-- files read
-- surface discovery result
-- assumptions about source-of-truth files
-- missing evidence
+Answer before moving on:
 
-## 3. Generate `01-spec-delta.md`
+- What changed semantically?
+- Is the change additive, behavioral, breaking, deepening, or mixed?
+- Which contracts, states, entities, or surfaces were touched?
 
-Summarize the semantic change set only. This file is the handoff contract for all downstream artifacts.
+## Stage 2 — `00-inputs.md`
 
-## 4. Generate `02-impact-map.md`
+Git diff mode records: spec path, diff base, files read, surface discovery result,
+source-of-truth assumptions, missing evidence.
 
-Trace the spec delta into downstream contract areas and affected surfaces. This file is the coordination contract for API, schema, surface, and task planning.
+Version comparison mode records: version A path, version B path, files read, surface discovery
+result, source-of-truth assumptions, missing evidence.
 
-## 5. Generate downstream artifacts
+## Stage 3 — `01-spec-delta.md`
 
-These can be created in parallel after the impact map exists.
+Summarize the semantic change set only. This file is the handoff contract for every downstream
+artifact, so keep it free of implementation opinion.
 
-### Core artifacts
-- `03-api-delta.md` when contract boundaries are affected
-- `04-schema-delta.md` when persistence boundaries are affected
+## Stage 4 — `02-impact-map.md`
 
-### Surface artifacts
-For each materially affected surface:
-- `surface-<name>-impact.md`
+Trace the spec delta into downstream contract areas and affected surfaces. Cover:
+
+- enums and states
+- APIs and routes
+- schemas and entities
+- services and orchestration logic
+- tests and validation
+- affected surfaces
+- compatibility risk
+
+Point at concrete files or file groups, not only abstract layers. This file is the coordination
+contract for API, schema, surface, and task planning.
+
+## Stage 5 — Core deltas
+
+Produce only what the change materially requires.
+
+`03-api-delta.md`, when API or contract boundaries are affected, describes:
+
+- new or changed service boundaries
+- new or changed RPCs and routes
+- request and response contract changes
+- new or changed enums and errors
+- compatibility notes
+
+Keep it a planning contract. Do not write proto here unless the user explicitly asks.
+
+`04-schema-delta.md`, when persistence or authoritative data shape is affected, describes:
+
+- authoritative entities touched by the change
+- field additions and removals
+- enum or state persistence changes
+- index and query-shape impact
+- migration and rollout considerations
+- authoritative versus derived state decisions
+
+## Stage 6 — Surface artifacts
+
+For each materially affected surface beyond the core delta set, write
+`surface-<name>-impact.md` answering:
+
+- why this surface is affected
+- which modules or directories are likely touched
+- which contract assumptions changed for it
+- whether it consumes new data, states, actions, or errors
+- what validation or review it needs
 
 Surface artifacts focus on consumer impact, not source-of-truth redesign.
 
-## 6. Generate `05-task-plan.md`
+## Stage 7 — `05-task-plan.md`
 
-Split implementation into ordered batches. Each batch should depend on earlier artifacts, not on fresh rediscovery.
+Write it only after the relevant downstream artifacts are stable. Split work into executable
+batches, normally in this order:
 
-## 7. Generate `06-open-questions.md` when needed
+1. contract layer
+2. schema layer
+3. service layer
+4. surface-specific consumer layers
+5. test layer
+6. generation and validation layer, if the repo has one
 
-Write this only for unresolved items that matter to downstream changes.
+Each batch must be small enough that another agent can own it without rediscovering the whole
+spec, and must depend on earlier artifacts rather than on fresh analysis.
+
+## Stage 8 — `06-open-questions.md`
+
+Write this only for unresolved items that matter to downstream changes. Keep each one bounded
+and concrete.
 
 ## Handoff Logic
 
-When another agent consumes these artifacts, the expected reading order is:
+An agent consuming these artifacts reads them in this order:
+
 1. `01-spec-delta.md`
 2. `02-impact-map.md`
-3. any relevant core and surface artifacts
+3. the relevant core and surface artifacts
 4. `05-task-plan.md`
 5. `06-open-questions.md`
 
 ## Stop Conditions
 
-Stop and record questions instead of guessing when:
+Stop and record a question instead of guessing when:
+
 - the diff base is unclear and materially changes interpretation
 - the spec references a missing contract file that is clearly authoritative
 - the change might be breaking but current consumers are unknown
-- the spec diff mixes multiple unrelated features and cannot be described coherently as one change set
-- the set of affected surfaces cannot be inferred safely from the repo or user input
+- the diff mixes unrelated features and cannot be described as one coherent change set
+- the affected surfaces cannot be inferred safely from the repo or user input

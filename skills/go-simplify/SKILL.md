@@ -1,13 +1,13 @@
 ---
 name: go-simplify
-description: Audit and safely simplify Go codebases for over-design, over-optimization, and over-defensive coding, then apply behavior-neutral cleanups that never break the exported API or the tests. Use whenever the user asks to simplify, slim down, or review Go code for leanness, over-engineering, dead defensive checks, or unnecessary complexity — including requests phrased as 精简/过度设计/过度优化/过度安全/过度防御/死代码清理 — or wants a "YAGNI / less is more" pass over a Go module, even without those exact words.
+description: Audit and safely simplify Go code for over-design, over-optimization, and over-defensive coding, then apply behavior-neutral cleanups that never break the exported API or the tests. Use when asked to simplify, slim down, or review Go code for leanness, over-engineering, or dead defensive checks — including 精简, 过度设计, 过度优化, 过度防御, 死代码清理. Not for test content — that is `go-test-engineering`.
 ---
 
-# Skill: go-simplify
+# Go Simplify
 
 Audit a Go codebase for three classes of excess — **over-design**, **over-optimization**, and **over-defensive coding** — and safely slim it down. Two deliverables: the applied behavior-neutral cleanups, and a written list of findings deliberately left alone.
 
-## Hard Constraints (non-negotiable, in this order)
+## Rules (non-negotiable, in this order)
 
 1. **Never break the exported API.** Change unexported internals only; even a dead exported symbol goes into the report, not the diff. If the repository ships a check such as `make api-compat`, it must run before you finish.
 2. **Satisfy the tests.** The test suite is this skill's safety net, not an obstacle — see "Test-vetoed findings" below.
@@ -16,12 +16,29 @@ Audit a Go codebase for three classes of excess — **over-design**, **over-opti
 
 ## Test-vetoed Findings
 
-A failing test means the "dead code" claim was wrong. **Roll back that change immediately**, record it in the legitimate-defense list, and move on. Two real cases to remember:
+A failing test means the "dead code" claim was wrong. Roll that change back immediately, record it
+in the legitimate-defense list, and move on. Never adjust the test to accommodate the cleanup. Two
+worked cases are in `references/review-guardrails.md`; read them before deleting any unexported
+identifier.
 
-- `atomic.Pointer[T].Store(nil)` does **not** panic (only `atomic.Value` panics, and only on a nil interface). A seemingly unreachable nil fallback may be functionality pinned by a test that explicitly calls `Store(nil)` to simulate "use before initialization".
-- An unexported helper may be referenced directly from `_test.go` — especially around `defer f.Close()`, because `defer _ = f.Close()` is not a legal statement and a tiny helper is the cleanest errcheck-safe spelling. Before deleting any unexported identifier, your grep must include test files.
+## Judgment Criteria
 
-## Workflow
+What separates the three classes:
+
+- **Over-design**: structural cost paid for requirements that do not exist (injection points nobody injects, empty files reserved for the future, abstraction layers with zero callers, sentinel values behaviorally identical to the zero value).
+- **Over-optimization**: complexity with no measurement behind it (wrong capacity hints, reuse tricks on cold paths, eager allocation that could be lazy). It has a mirror image: **failing to be lazy when laziness is possible** is also overpaying.
+- **Over-defensive coding**: checks against states that cannot occur (nil under a paired-lock protocol, index bounds on a range index, re-validation of an already-normalized value, unreachable error branches).
+
+Misclassifying a finding is not the problem. Being unsure **whether to delete it** is — when in doubt, put it under "report only".
+
+## Reference Map
+
+| Read | When |
+|------|------|
+| [references/patterns.md](references/patterns.md) | Always, before scanning — the detection catalog for all three excess classes |
+| [references/review-guardrails.md](references/review-guardrails.md) | Before editing any match — the pitfall checklist and the legitimate-defense whitelist |
+
+## Steps
 
 ### Step 1: Establish a green baseline
 
@@ -64,23 +81,13 @@ Edit package by package in small batches and run that package's tests after each
 - `make lint` or the equivalent (including nilaway / staticcheck-class tools, since lazy-allocation and nil-handling rewrites can trip static analysis)
 - The api-compat script, if the repository has one
 
-### Step 7: Write the report
+## Output
 
 The report must contain all three parts:
 
 1. **What changed**, grouped by the three classes, each entry with file:line and a one-line reason.
 2. **Deliberately untouched**: legitimate defenses plus exported-surface debt, each with its rationale. This list is what stops a future reader (or a future you) from damaging the same code again.
 3. **Verification evidence**: the actual outcomes of the build, test, race, lint, and api-compat runs.
-
-## Judgment Criteria
-
-What separates the three classes:
-
-- **Over-design**: structural cost paid for requirements that do not exist (injection points nobody injects, empty files reserved for the future, abstraction layers with zero callers, sentinel values behaviorally identical to the zero value).
-- **Over-optimization**: complexity with no measurement behind it (wrong capacity hints, reuse tricks on cold paths, eager allocation that could be lazy). It has a mirror image: **failing to be lazy when laziness is possible** is also overpaying.
-- **Over-defensive coding**: checks against states that cannot occur (nil under a paired-lock protocol, index bounds on a range index, re-validation of an already-normalized value, unreachable error branches).
-
-Misclassifying a finding is not the problem. Being unsure **whether to delete it** is — when in doubt, put it under "report only".
 
 ## Related Skills
 

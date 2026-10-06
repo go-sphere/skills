@@ -64,3 +64,12 @@ Keep an internal mapping ledger while drafting:
 - FK references and existence checks
 
 Use this ledger to prevent collisions, orphan rows, and accidental duplicate uniques.
+
+## Special Shapes
+
+Handle each of these inline in the generated SQL:
+
+- **Soft deletes** — set `deleted_at` to `NULL` for every active record.
+- **Self-referential trees** — insert the root row first; every child references an already-inserted parent ID.
+- **Multi-tenant** — seed the tenant table first; every dependent row carries a valid tenant FK.
+- **Composite unique constraints** — verify every column combination is unique across the generated rows, not just each column on its own.

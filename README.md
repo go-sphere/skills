@@ -166,6 +166,8 @@ protoc-gen-* plugin authoring and review
   -> protoc-plugin-engineering
 Go test review, repair, and authoring
   -> go-test-engineering
+Go API documentation and verified usage examples for agents
+  -> godoc
 Go code leanness audit and safe simplification
   -> go-simplify
 Makefile and Make-driven CI standardization
@@ -222,6 +224,7 @@ The bootstrap rule is simple:
 
 ### Quality and Verification
 
+- `godoc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
@@ -346,10 +349,36 @@ and install only the skills you need.
 - Code generation: `protoc-gen-sphere`, `protoc-gen-sphere-binding`, `protoc-gen-sphere-errors`, and `protoc-gen-route` (Telegram layout only)
 - Project layouts: `standard`, `simple`, `bun`, `telegram` — created by `sphere-cli create --layout`, each carrying `.sphere/layout.json` ownership rules
 
+## Progressive Loading
+
+Every bundled skill is written for staged disclosure, so an agent reads only what the
+current decision needs:
+
+- The `description` is the only part always in context. It stays under 400 characters and
+  names the neighbouring skill it should not be used for.
+- `SKILL.md` stays under 150 lines: inputs, a numbered path, the reference map, the rules,
+  and the output contract.
+- Detail lives in `references/*.md`, each under 200 lines and each introduced exactly once,
+  in that skill's `## Reference Map` table, with the condition that makes it worth reading.
+
+`tests/run-tests.sh` enforces these budgets, and fails when a reference file is orphaned
+from its skill's Reference Map.
+
+## Authoring and Documentation
+
+- [references/skill-authoring.md](references/skill-authoring.md) — the authoring contract for
+  skills in this repository: size budgets, description formula, section order, and the
+  plain-language rules that keep skills readable for smaller models.
+- [references/dev.md](references/dev.md) — the AI-agent collaboration workflow guide (indexed,
+  with per-stage chapters under `references/dev/`).
+- [references/prompt.md](references/prompt.md) — per-round prompt templates (indexed, with
+  chapters under `references/prompt/`).
+
 ## Contributing
 
 Issues and pull requests are welcome. The plugin shell lives beside the bundled
 skills, so changes may affect both platform adapters and the skills themselves.
+Run `bash tests/run-tests.sh` before opening a pull request.
 
 ## License
 

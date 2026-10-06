@@ -1,193 +1,98 @@
 ---
 name: proto-api-generator
-description: Design proto3 + HTTP API contracts, including server-streaming SSE endpoints, for go-sphere scaffold projects from prompts, input folders, or requirement docs with mock data. Use when defining service APIs, selecting between entpb/shared/custom messages, and enforcing scaffold conventions, router-safety rules, and service-local error placement. This skill is REQUIRED for any proto API design task in go-sphere scaffold - always use it instead of writing proto files from scratch. Do not use for the `protoc-gen-*` plugins themselves — that is `protoc-plugin-engineering`.
+description: Design proto3 and HTTP API contracts for go-sphere scaffold projects, including server-streaming SSE endpoints. Use when defining service APIs, choosing between entpb, shared, and custom messages, or enforcing scaffold conventions, route-safety rules, and service-local error placement. Not for the `protoc-gen-*` plugins themselves — that is `protoc-plugin-engineering`.
 ---
 
 # Proto API Generator
 
-Design implementation-ready `proto3 + HTTP` contracts for go-sphere scaffold projects.
+Design implementation-ready `proto3` + HTTP contracts for go-sphere scaffold projects. Follow
+scaffold conventions unless the user explicitly asks to deviate. Keep outputs protocol-first:
+reasoning checks replace lint plugins, scripts, and manual edits to generated files.
 
-<HARD-GATE>
-Do not write any `.proto` file or API design document until the following are confirmed through dialogue:
-- Which service module is being designed (e.g., `task`, `user`, `order`)
-- Whether this is a new file or an addition to an existing proto
-- The primary message strategy (entpb / shared / custom) for at least the main entities
+## Inputs
 
-If any of these are missing, ask one question at a time before proceeding.
-When a design decision has multiple reasonable options (message type, route strategy, pagination shape), present 2-3 options with your recommendation — do not choose unilaterally.
-</HARD-GATE>
+Do not write a `.proto` file or an API design document until all three are confirmed through
+dialogue, not inferred from context:
 
-## Operating Model
+1. Which service module is being designed, for example `task`, `user`, `order`.
+2. Whether this is a new file or an addition to an existing proto.
+3. The message strategy (`entpb`, `shared`, or custom) for at least the main entities.
 
-1. Follow go-sphere scaffold conventions unless the user explicitly requests deviation.
-2. Treat local references as the working source of truth for scaffold rules, runtime behavior, and output shape.
-3. Keep outputs protocol-first; do not rely on lint plugins, scripts, or manual edits to generated files as substitutes for reasoning checks.
+Ask one question at a time for anything missing. When a decision has several reasonable options —
+message type, route strategy, pagination shape — present 2-3 options with your recommendation.
+Never choose unilaterally.
 
-## Checklist (track with TodoWrite)
+Three kinds of task input are supported:
 
-At task start, call TodoWrite to create a task for each numbered item below. Mark each complete before moving to the next.
+- Prompt only — infer entities and use cases, then state every assumption explicitly.
+- Folder input — inspect only the provided folders. Prefer scaffold structure (`proto/`, `internal/`, `api/`) when present.
+- Requirement plus mock demo — requirement docs are business truth, mock payloads are response-shape truth, and the Ent schema is implementation reference, not a contract to mirror.
 
-1. Confirm module name, file mode (new / add to existing), and message strategy — through dialogue with the user, not by inferring from context
-2. Ask clarifying questions one at a time for any ambiguous scope or behavior
-3. For non-obvious decisions, propose 2-3 options with recommendation
-4. Present service overview (service name, RPC list) — get approval
-5. Present message designs section by section — get approval for each
-6. Run Final Gate checklist (`references/go-sphere-api-definitions-checklist.md`)
-7. Write the API design doc to disk (`prd/API.md` or `design/<feature>/api.md`)
-8. Ask if the user wants to proceed to proto file generation
+## Steps
 
-**Output path rule:** Use `design/<feature>/api.md` if the user names a specific feature or change-id; default to `prd/API.md` otherwise.
+Track these with TodoWrite. Create one task per step and close it before starting the next.
 
-## Task Intake
+1. Confirm module, file mode, and message strategy with the user.
+2. Classify each target file: `service proto` (contains a `service`) or `message-only proto` (messages and enums only).
+3. Read the scaffold conventions reference. Choose package style, service route prefix, and compatibility constraints before drafting anything.
+4. Decide reuse — `entpb`, `shared.v1`, or a custom DTO/VO — before finalizing message shapes.
+5. Present the service overview (service name, RPC list) and get approval.
+6. Present the message designs section by section and get approval for each.
+7. For a `service proto`, define business use cases, transport shape (unary or server-streaming), HTTP bindings, route-safe paths, and error enums. For a `message-only proto`, draft messages and enums only, then record the service-only exemptions in validation notes.
+8. Run every check in the final-gate checklist. If any check fails, stop and output `Validation Notes -> Blocking Issues` with corrected proposals.
+9. Write the API design doc to disk, then ask whether to proceed to proto file generation.
 
-Supported task inputs:
+## Reference Map
 
-1. Prompt-only: infer entities and use cases, then state assumptions explicitly.
-2. Folder input: inspect only the provided folders; prefer scaffold-standard structure (`proto/`, `internal/`, `api/`) when present.
-3. Requirement + mock demo: treat requirement docs as business truth, mock payloads as response-shape truth, and Ent schema as implementation reference rather than contract mirror.
+Load the smallest set that supports the decision in front of you. Never load everything.
 
-## Progressive Reference Loading
+| Read | When |
+|------|------|
+| [references/repo-proto-conventions-reference.md](references/repo-proto-conventions-reference.md) | Always, at step 3 — package style, route namespace, pagination defaults, reuse policy, naming compatibility, topology |
+| [references/api-binding-basics-reference.md](references/api-binding-basics-reference.md) | Choosing HTTP method, path template, or where a field binds from |
+| [references/api-binding-advanced-reference.md](references/api-binding-advanced-reference.md) | Shaping a request body, a response body, or message-level binding defaults |
+| [references/api-streaming-reference.md](references/api-streaming-reference.md) | Designing a server-streaming SSE endpoint |
+| [references/router-conflict-reference.md](references/router-conflict-reference.md) | Adding service routes, path templates, or checking backend portability |
+| [references/error-definition-reference.md](references/error-definition-reference.md) | Declaring error enums and `sphere.errors` annotations |
+| [references/error-runtime-reference.md](references/error-runtime-reference.md) | Reasoning about runtime error behavior, composition, or the JSON error response |
+| [references/protocol-and-codegen-reference.md](references/protocol-and-codegen-reference.md) | Questions about the codegen pipeline |
+| [references/proto-packages-and-runtime-reference.md](references/proto-packages-and-runtime-reference.md) | Questions about package layout or runtime assumptions |
+| [references/go-sphere-api-definitions-checklist.md](references/go-sphere-api-definitions-checklist.md) | Always, at step 8 — the release gate |
+| [references/proto-output-condensed-template.md](references/proto-output-condensed-template.md) | Final formatting of straightforward CRUD work |
+| [references/proto-output-full-template.md](references/proto-output-full-template.md) | Final formatting of custom logic, multiple services, or complex routing |
 
-Do not load every reference by default. Load the smallest set that can support the current decision.
+## Rules
 
-### Start Here
-
-1. [references/repo-proto-conventions-reference.md](references/repo-proto-conventions-reference.md)
-   Use for package style, route namespace strategy, pagination defaults, reuse policy, naming compatibility, and topology rules.
-
-### Load Only When Needed
-
-1. Final output shape selection or final formatting:
-   [references/proto-output-template.md](references/proto-output-template.md)
-   Then load exactly one template:
-   - [references/proto-output-condensed-template.md](references/proto-output-condensed-template.md)
-   - [references/proto-output-full-template.md](references/proto-output-full-template.md)
-2. Service routes, path templates, or backend portability:
-   [references/router-conflict-reference.md](references/router-conflict-reference.md)
-3. HTTP method, binding, body, response shaping, or server-streaming SSE:
-   [references/go-sphere-api-definitions-reference.md](references/go-sphere-api-definitions-reference.md)
-4. Error enums, `sphere.errors`, or runtime error behavior:
-   [references/go-sphere-error-handling-reference.md](references/go-sphere-error-handling-reference.md)
-5. Package layout, codegen pipeline, or runtime assumptions:
-   [references/protocol-and-codegen-reference.md](references/protocol-and-codegen-reference.md)
-   [references/proto-packages-and-runtime-reference.md](references/proto-packages-and-runtime-reference.md)
-
-### Final Gate
-
-1. [references/go-sphere-api-definitions-checklist.md](references/go-sphere-api-definitions-checklist.md)
-
-If any required check fails, stop and output `Validation Notes -> Blocking Issues` with corrected proposals.
-Do not replace local references with external links in final outputs.
-
-## Core Decisions
-
-### File Mode
-
-Classify each target proto file as one of:
-
-1. `service proto`: contains a `service` definition.
-2. `message-only proto`: contains messages or enums only.
-
-Mode handling:
-
-1. `service proto` must satisfy service-only topology, route, and error-placement rules.
-2. `message-only proto` is allowed and must record service-only exemptions explicitly.
-3. Both modes must still satisfy naming, import, runtime, and codegen compatibility checks.
-
-### Reuse Order
-
-Default reuse priority:
-
-1. Reuse `entpb` when it already satisfies external contract needs.
-2. Reuse or extract `shared.v1` messages for cross-service usage.
-3. Create custom DTO or VO only when contract shaping requires it.
-
-Use custom DTO or VO only when at least one condition is true:
-
-1. Sensitive or internal fields must be hidden.
-2. Cross-aggregate composition is required.
-3. External contract stability must be isolated from storage model changes.
-
-### Error Placement Default
-
-1. Keep service-specific business errors in the same proto file as the owning `service`.
-2. Reuse or create shared errors only for cross-service semantics.
-3. For `message-only proto`, skip service-local error placement rules but still validate runtime and import compatibility.
-
-## Workflow
-
-1. Classify each target file by mode.
-2. Read scaffold conventions first and choose package style, service prefix, and compatibility constraints before drafting.
-3. Decide reuse (`entpb`, `shared.v1`, custom DTO or VO`) before finalizing message shapes.
-4. For `service proto`, define business use cases, unary/server-streaming transport shape, HTTP bindings, route-safe paths, and error enums.
-5. For `message-only proto`, draft messages and enums only, then record service-only exemptions in validation notes.
-6. Load detailed HTTP, error, router, or runtime references only when the draft actually depends on them.
-7. Choose the deliverable shape late:
-   - use the condensed template for straightforward CRUD with clear reuse and routing;
-   - use the full template for custom business logic, multiple services, complex routing, or heavy validation notes.
-8. Run the final checklist before delivery.
-
-## Non-Negotiables
-
-Keep these principles in mind throughout the task. Detailed rule text lives in the references and checklist.
-
-1. Design business capability first; avoid table-mirror public contracts.
-2. List APIs require pagination; batch APIs are preferred over repeated single reads.
-3. Prefer not to use `oneof` in HTTP-exposed request or response messages. Tags land on wrapper structs; generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled. JSON codecs also handle oneof poorly.
-4. Keep error contracts machine-readable and stable.
-5. Do not leak sensitive or storage-only fields into external contracts.
-6. Keep routes conflict-safe; official templates serve on `stdx` (net/http), but design for the strictest adapter's subset (Gin's) so routes stay portable. Generated handlers use `httpx`, not a framework context.
-7. Add concise `//` business comments for exposed `service/rpc`, core messages, and key enum values.
-8. Map only `returns (stream Reply)` methods to SSE. Client-streaming and bidirectional methods are not supported by `protoc-gen-sphere`'s HTTP transport.
-9. Treat stream completion, failure, cancellation, optional resume behavior, and lazy-vs-eager commit needs as explicit API-contract decisions. Streaming events always carry the whole reply message; do not use `response_body`.
-
-## Mandatory Pre-Output Checklist
-
-BEFORE writing the final proto file, you MUST verify all of the following:
-
-### Package Naming Check
-- [ ] Package name follows scaffold convention: `dash.v1` for generic, or `{module}.v1` for domain-specific (e.g., `user.v1`, `order.v1`, `article.v1`)
-- [ ] Package declaration is in the format `package {name}.v1;`
-
-### HTTP Binding Check
-- [ ] Every RPC method has `option (google.api.http)` annotation
-- [ ] HTTP method (get/post/put/delete) matches the operation semantics
-- [ ] Route path follows REST conventions with proper path parameters
-- [ ] Every streaming method is server-streaming only (`returns (stream Reply)`), has no `response_body`, and documents terminal/interruption semantics
-
-### Error Handling Check
-- [ ] Service proto files MUST include a service-local error enum (e.g., `ArticleError`, `OrderError`, `AuthError`)
-- [ ] Error enum uses `(sphere.errors.options)` annotation with proper status codes
-- [ ] At minimum, include `NOT_FOUND` and `INVALID_PARAMETER` error codes
-
-### Field Type Check
-- [ ] ID fields use `int64` (not `string`)
-- [ ] Timestamps use `google.protobuf.Timestamp`
-- [ ] Pagination uses `page`/`page_size` with `total_size`/`total_page` in response
-
-### Validation Check
-- [ ] Required fields have `(buf.validate.field)` constraints
-- [ ] String fields have `min_len` or `min_bytes` where appropriate
-- [ ] Numeric fields have `gte`/`lte` bounds where appropriate
-
-### Reuse Check
-- [ ] Consider using entpb messages when they match contract needs
-- [ ] Consider using shared.v1 for cross-service messages
-
-If ANY check fails, fix the proto file before delivering. Do not output proto files that fail these checks.
+1. Design business capability first. Never publish a table-mirror contract.
+2. A `service proto` must satisfy the service-only topology, route, and error-placement rules. A `message-only proto` is allowed, but must record its exemptions explicitly. Both must satisfy naming, import, runtime, and codegen checks.
+3. Reuse in this order: `entpb` when it already satisfies the external contract, then `shared.v1` for cross-service messages, then a custom DTO/VO. A custom DTO/VO needs at least one of these reasons: sensitive fields must be hidden, cross-aggregate composition is required, or external contract stability must be isolated from storage changes.
+4. Keep service-specific business errors in the same proto file as the owning `service`. Create or reuse a shared error only for cross-service semantics.
+5. List APIs require pagination. Prefer batch APIs over repeated single reads.
+6. Avoid `oneof` in HTTP-exposed request and response messages. Tags land on wrapper structs, generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are never filled. JSON codecs also handle oneof poorly.
+7. Keep error contracts machine-readable and stable.
+8. Never leak sensitive or storage-only fields into an external contract.
+9. Keep routes conflict-safe. Official templates serve on `stdx` (`net/http`), but design for the strictest adapter's subset (Gin's) so routes stay portable. Generated handlers take an `httpx` context, never a framework context.
+10. Add concise `//` business comments on exposed `service`/`rpc`, core messages, and key enum values.
+11. Map only `returns (stream Reply)` methods to SSE. `protoc-gen-sphere`'s HTTP transport does not support client-streaming or bidirectional methods.
+12. For every stream, decide and document completion, failure, cancellation, optional resume, and lazy-versus-eager commit as explicit contract decisions. Streaming events always carry the whole reply message; never use `response_body`.
 
 ## Output
 
-Use [references/proto-output-template.md](references/proto-output-template.md) only as the template selector.
-Before final formatting, load exactly one of:
+Write the API design doc to `design/<feature>/api.md` when the user names a feature or
+change-id. Otherwise write it to `prd/API.md`.
 
-1. [references/proto-output-condensed-template.md](references/proto-output-condensed-template.md)
-2. [references/proto-output-full-template.md](references/proto-output-full-template.md)
+Pick exactly one output template before final formatting: the condensed template for
+straightforward CRUD with clear reuse and routing, or the full template for custom business
+logic, multiple services, complex routing, or heavy validation notes.
+
+Keep drafting notes out of the final deliverable. Emit `All required checks passed.` only when
+the checklist actually passes; otherwise emit `Validation Notes -> Blocking Issues` instead. Do
+not replace local references with external links in final outputs.
 
 ## Related Skills
 
 - Upstream — `spec-writer` supplies service boundaries, entities, and states; `prd` supplies scope. When a spec changed, `spec-diff-pipeline` supplies `03-api-delta.md`.
-- Downstream — `sphere-feature-workflow` lands the `.proto` and runs generation; `proto-service-generator` completes the generated service interfaces; `frontend-crud-generator` builds the frontend pages and routes once the swagger client is regenerated. Hand off when the pre-output checklist passes.
+- Downstream — `sphere-feature-workflow` lands the `.proto` and runs generation; `proto-service-generator` completes the generated service interfaces; `frontend-crud-generator` builds the frontend pages and routes once the swagger client is regenerated. Hand off when the final-gate checklist passes.
 - Boundary — use `protoc-plugin-engineering` for the `protoc-gen-*` plugins themselves; this skill owns the `.proto` contracts they consume.
 - Companion — `sphere-feature-workflow` when the contract change must land together with schema, service, or generation changes; if it is unavailable, finish the contract and list the integration steps as follow-up.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

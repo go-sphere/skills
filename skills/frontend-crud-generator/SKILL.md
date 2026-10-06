@@ -1,187 +1,101 @@
 ---
 name: frontend-crud-generator
-description: Generate frontend CRUD, list, edit, detail, and dashboard pages plus frontend route registration from the TypeScript swagger client that go-sphere generates, or the project's wrapper around it (protoc-gen-sphere, swag, and swagger-typescript-api, usually into src/api/swagger/Api.ts). Use when scaffolding or updating admin panel screens, management modules, route modules, menu entries, or permission-gated actions in whatever frontend framework the project already uses, including Vue 3 + Element Plus/pure-admin-thin and React SPAs with react-router, and when the user asks in Chinese, for example 生成后台管理页面, 生成 CRUD 页面, 生成路由模块, 加管理页, 列表页, 菜单项, 权限控制, 根据 swagger 写界面. It detects the framework and mirrors an existing page, so unknown or custom frontend setups also work. Do not use to design or change the API contract itself — that is `proto-api-generator` — or to regenerate or debug the generated client — that is `sphere-feature-workflow`.
+description: Generate frontend CRUD, detail, and dashboard pages plus route registration from the project's generated TypeScript swagger client. Use for admin screens, route modules, menu entries, and permission-gated actions in the project's own frontend framework (Vue, React, or custom) — including 生成后台管理页面, 生成 CRUD 页面, 生成路由模块, 列表页, 权限控制. Not for changing the API contract — that is `proto-api-generator`.
 ---
 
 # Frontend CRUD Generator
 
-## Overview
+Generate the frontend half of a go-sphere feature: pages and route registration derived from the
+TypeScript swagger client that `protoc-gen-sphere`, `swag`, and `swagger-typescript-api` produce
+(usually `src/api/swagger/Api.ts`).
 
-Generate the frontend half of a go-sphere feature: pages and route registration derived from the TypeScript swagger client that `protoc-gen-sphere`, `swag`, and `swagger-typescript-api` produce.
+The workflow is framework-neutral. Concrete stack rules live in the framework packs; everything
+else goes through the convention-discovery fallback. This is an AI-first generator: no external
+OpenAPI generators, no helper codegen scripts, no new runtime dependencies, and no reusable
+business component library.
 
-The workflow is framework-neutral. Concrete stack rules live in `references/frameworks/` packs (Vue 3 + Element Plus / pure-admin-thin, React SPA), and everything else goes through the convention-discovery fallback.
+Covers CRUD pages, dashboard-first pages, route modules and menu entries, action buttons backed by
+non-CRUD endpoints (retry, enable, disable, export), and permission-gated controls.
 
-This is an AI-first generator: no external OpenAPI generators, no helper codegen scripts, no new runtime dependencies, no reusable business component library.
+## Inputs
 
-## When to Use
+| Parameter | Default | Values |
+|-----------|---------|--------|
+| `moduleSelector` | required | module tag, entity, or path keyword: `user`, `voice-features`, `order` |
+| `selectorMode` | `auto` | `auto`, `tag`, `entity`, `path` |
+| `pageMode` | `crud` | `crud`, `dashboard`, `mixed` |
+| `forceDetailPage` | `auto` | `auto` includes detail only when the endpoint exists and the project pattern has one |
+| `routeBase` | from discovery | route path root; falls back to `/<kebab-module>` |
+| `framework` | `auto` | `auto`, `vue-pure-admin`, `react-spa`, `generic` |
+| `routeRegistration` | `auto` | an explicit file or registry path when the user already knows it |
+| `permissionIntegration` | `auto` | `auto`, `on`, `off` |
+| `outputMode` | `write` | `write` edits project files; `content` prints full file contents and writes nothing |
 
-**ALWAYS use this skill** when the user wants admin, management, or dashboard pages built from an existing generated client, in any frontend framework:
+"Generate pages for user management" means `moduleSelector="user"`. "先给我看，不要写文件" means
+`outputMode="content"`. For a vague module name, resolve with `selectorMode=auto` and state which
+methods matched.
 
-- CRUD pages (list, edit/create, optional detail)
-- dashboard-first pages
-- route modules, menu entries, or route-table registration
-- action buttons backed by non-CRUD endpoints (retry/enable/disable/export)
-- permission-gated pages and controls
+Do not write any page, route, or registration file until all of these hold:
 
-**Trigger examples:**
+1. The target module is specific, not just "management". If vague, ask one question.
+2. The module's existing surface was checked. Any existing page, route module, menu entry, or wrapper method is planned as an update, never duplicated.
+3. The Convention Report is complete: detected framework and chosen pack (or fallback plan), generated client path, API consumption convention, route registration mechanism, page layout, pagination base, the route id/params mechanism, and the representative pages read.
+4. The page mode is known: `crud`, `dashboard`, or `mixed`.
+5. The generated client exists. If it does not, stop and offer the two paths in Step E of `references/conventions-discovery.md` instead of inventing endpoints.
 
-- "Generate admin pages for user management"
-- "Create CRUD for voice-features module"
-- "Add a system page in the React admin"
-- "Scaffold product list/detail in the dashboard"
-- "生成后台管理页面" / "生成 CRUD 页面和路由"
+A matched pack needs no user question. An unknown framework, or `Low` confidence on API
+consumption, route registration, or page layout, does.
 
-Do not use this skill to define or change the API contract, the backend, or the database — route those to `proto-api-generator` and `sphere-feature-workflow`.
+## Steps
 
-## Hard Gates
-
-These are non-optional. If a gate fails, stop and report blocking issues.
-
-1. Generate only from the project's existing generated swagger client and its real consumption layer. Never re-run code generation here, and never hand-edit generated files (`Api.ts` and other generated artifacts).
-2. Complete the Convention Discovery sweep and report the Convention Report before generating. Project conventions outrank pack defaults; pack defaults outrank generic heuristics.
-3. Use exactly one framework pack per generation. Never mix idioms from two stacks.
-4. Do not add runtime dependencies, and do not create a reusable business component library. Reuse the project's existing UI primitives and shared helpers.
-5. Never invent permission keys, roles, or endpoints. Use only identifiers that exist in the project.
-6. Route names must be unique. When the framework caches pages by component name (keepAlive), the component name must match the route name.
-7. Pagination base and query keys must match the project's observed convention. Filters must correspond to real query parameters, and the server total must never be replaced by the current page length.
-8. Missing endpoints degrade the UI explicitly: unsupported actions are removed or disabled, and the gap is reported. A capability the user asked for that no endpoint or field supports (a filter with no query parameter, an edit with no update endpoint) is reported as a contract gap, never approximated with fabricated parameters or client-side tricks.
-
-<HARD-GATE>
-Do NOT write any page, route, or registration file until all of the following are confirmed:
-
-- The target module is known and specific (not just "management"). If vague, ask one clarifying question.
-- The module's existing surface has been checked: any page, route module, menu entry, or wrapper method that already exists is planned as an update, not duplicated.
-- The Convention Report is complete: detected framework and chosen pack (or fallback plan), generated client path, API consumption convention, route registration mechanism, page layout, pagination base, the route id / params mechanism, and the representative pages read.
-- The page mode intent is known: `crud`, `dashboard`, or `mixed`.
-- The generated client exists. If it does not, stop and offer the two paths in [references/conventions-discovery.md](references/conventions-discovery.md) (Step E) instead of inventing endpoints.
-
-A matched pack does not require a user question; an unknown framework or a `Low` confidence on API consumption, route registration, or page layout does.
-</HARD-GATE>
-
-## Framework Detection and Convention Discovery
-
-Discovery is mandatory and read-only. Read [references/conventions-discovery.md](references/conventions-discovery.md) and run its sweep:
-
-1. Rule and ownership files (`AGENTS.md`, `CLAUDE.md`, frontend rule files, `.sphere/layout.json`) — they outrank everything here.
-2. Manifest and build: dependencies, aliases, and the project's actual typecheck/build command.
-3. Generated client location and export shape.
-4. Transport and unwrap convention: what a page receives from a call, and what error type it catches.
-5. Route registration: where routes are declared and exactly which files a new page touches.
-6. One to two representative pages of the same mode; read them fully.
-7. Permissions, formatters, enum-label sources, UI text language, layering bans.
-
-Then pick the pack:
+1. Run the read-only discovery sweep, including the existing-surface check. Emit the Convention Report before anything else.
+2. Pick exactly one framework pack from the table below, or the fallback protocol.
+3. Parse the generated client. Classify list, detail, create, update, delete, and action methods, and for the full path analyze response shapes into a capability matrix.
+4. Plan the file set for `pageMode` and state every target path plus every registration touchpoint (route table, menu, guards, permission maps). Mark existing files as updates.
+5. Generate the pages following the pack and the page blueprint. Add per-region loading, error, and retry where the blueprint requires it.
+6. Generate action buttons only for endpoints that exist, with confirmation on risky ones.
+7. Register routes through the discovered mechanism. Edit shared files only with anchored patches.
+8. Run the pack's `## Verification` section, or the project's discovered typecheck/lint/build command when no pack matched, and say which command ran.
+9. Report with the condensed or full format from the output contract.
 
 | Detected stack | Pack |
 |---|---|
 | Vue 3 + Element Plus / pure-admin-thin | [references/frameworks/vue-pure-admin.md](references/frameworks/vue-pure-admin.md) |
 | React + react-router + Tailwind primitives | [references/frameworks/react-spa.md](references/frameworks/react-spa.md) |
-| anything else | the fallback protocol in `conventions-discovery.md` |
+| anything else | the fallback protocol in `references/conventions-discovery.md` |
 
-Report the result as the Convention Report table before generating. Concrete markup rules live in the packs; this file and the core references stay neutral.
+## Reference Map
 
-## Input Contract
+| Read | When |
+|------|------|
+| [references/conventions-discovery.md](references/conventions-discovery.md) | Always, at step 1 — the discovery sweep, Convention Report, and fallback protocol |
+| [references/client-parsing.md](references/client-parsing.md) | Always, at step 3 — module resolution, endpoint classification, type inference, consumption detection |
+| [references/page-blueprint.md](references/page-blueprint.md) | Always, at step 5 — the framework-neutral behavior contract per page mode |
+| [references/frameworks/vue-pure-admin.md](references/frameworks/vue-pure-admin.md) | Only when the project is Vue 3 + Element Plus or pure-admin-thin |
+| [references/frameworks/react-spa.md](references/frameworks/react-spa.md) | Only when the project is a React SPA with react-router |
+| [references/access-control.md](references/access-control.md) | Only when the project already has a permission system |
+| [references/output-contract.md](references/output-contract.md) | Always, at step 9 — write rules, report format, and the quality gates |
 
-- `moduleSelector` (required): module tag/entity/path keyword (e.g. "user", "voice-features", "order").
-- `selectorMode` (optional, default `auto`): `auto | tag | entity | path`.
-- `forceDetailPage` (optional, default `auto`): `auto | true | false`. When `auto`, include detail only if the detail endpoint exists and the observed project pattern includes one.
-- `pageMode` (optional, default `crud`): `crud | dashboard | mixed`.
-- `routeBase` (optional, default from discovery): route path root; falls back to `/<kebab-module>`.
-- `framework` (optional, default `auto`): `auto | vue-pure-admin | react-spa | generic`.
-- `routeRegistration` (optional, default `auto`): explicit file or registry path when the user already knows where the route belongs.
-- `permissionIntegration` (optional, default `auto`): `auto | on | off`.
-- `outputMode` (optional, default `write`): `write` edits project files; `content` prints complete file contents and writes nothing.
+## Rules
 
-Examples:
+1. Generate only from the project's existing generated client and its real consumption layer. Never re-run code generation, and never hand-edit `Api.ts` or any other generated artifact.
+2. Project conventions outrank pack defaults. Pack defaults outrank generic heuristics.
+3. Use exactly one framework pack per generation. Never mix idioms from two stacks.
+4. Add no runtime dependency, and create no reusable business component library. Use only libraries already in the manifest, and prefer the project's shared helpers. VueUse is a Vue-only optional policy described in the Vue pack; never add it for generated pages.
+5. Never invent a permission key, role, or endpoint. Use only identifiers that exist in the project.
+6. Route names must be unique. Where the framework caches pages by component name (keepAlive), the component name must match the route name.
+7. Pagination base and query keys must match the project's observed convention. Filters must map to real query parameters. Never replace the server total with the current page length.
+8. Degrade explicitly when an endpoint is missing: remove or disable the unsupported action, keep the page runnable, and report the gap. A capability the user asked for with no backing endpoint or field is a contract gap — report it, never approximate it with fabricated parameters or client-side tricks.
+9. When the client exists but the project reaches the backend through another transport, follow the project transport, import types from the client, and report the divergence in Validation Notes.
+10. When a page needs a mechanism the project has no precedent for — a routed id, a form prefill source, a confirmation primitive — degrade to the closest supported flow, or stop and ask. Never invent a convention and present it as observed.
+11. When no analogous page exists to mirror, stop and ask before bootstrapping (Step D of the fallback protocol).
 
-- "Generate pages for user management" → `moduleSelector="user"`, infer module from client tags.
-- "Create dashboard for voice-generate-text" → `moduleSelector="voice-generate-text"`, `pageMode="dashboard"`.
-- "先给我看，不要写文件" → `outputMode="content"`.
+If a rule cannot be satisfied, stop and report blocking issues instead of generating.
 
-If the user provides only a vague module name, resolve with `selectorMode=auto` and explicitly state the matched methods.
+## Output
 
-## Progressive Reference Loading
-
-### Phase 1: Always Read First
-
-1. [references/conventions-discovery.md](references/conventions-discovery.md) — discovery sweep, Convention Report, fallback protocol
-2. [references/client-parsing.md](references/client-parsing.md) — module resolution, endpoint classification, type inference, consumption detection
-3. [references/output-contract.md](references/output-contract.md) — write rules and report format
-
-### Phase 2: The Matching Pack
-
-Exactly one of:
-
-- [references/frameworks/vue-pure-admin.md](references/frameworks/vue-pure-admin.md)
-- [references/frameworks/react-spa.md](references/frameworks/react-spa.md)
-
-For an unknown framework, skip to the fallback protocol in `conventions-discovery.md`.
-
-### Phase 3: By Page Mode
-
-- [references/page-blueprint.md](references/page-blueprint.md) — the framework-neutral behavior contract for every page mode
-- [references/access-control.md](references/access-control.md) — when permissions exist in the project
-
-### Phase 4: Final Gate
-
-Run the Completion Checklist below plus the pack's `## Verification` section. When no pack matched, run the project's discovered typecheck/lint/build command instead and state which command was used.
-
-## Workflow
-
-### Quick Path (Simple CRUD)
-
-1. Run discovery, including the existing-surface check; emit the Convention Report.
-2. Parse the client and classify list/detail/create/update/delete/action methods.
-3. Plan the file set for `pageMode` and state it with the target paths.
-4. Generate pages following the pack (or fallback) and `page-blueprint.md`.
-5. Register routes through the discovered mechanism; edit shared files only with anchored patches.
-6. Report using the condensed format.
-
-### Full Path (Complex / Dashboard / Custom Actions)
-
-1. Run discovery, including the existing-surface check; emit the Convention Report.
-2. Full classification plus response-shape analysis; build the capability matrix.
-3. Plan the file set and every registration touchpoint (route table, menu, guards, permission maps) before writing; mark files that already exist as updates.
-4. Generate pages with per-region loading/error/retry where the blueprint requires it.
-5. Generate action buttons only for exposed endpoints, with confirmation for risky ones.
-6. Register, verify, and report using the full format.
-
-### Unknown Framework Path
-
-Follow the fallback protocol in `conventions-discovery.md`: report first, generate only from discovered primitives, and stop for confirmation when there is no analogous page to mirror.
-
-## Degrade Gracefully
-
-- Generate only valid pages and operations based on available endpoints; remove unsupported actions and report the missing CRUD operations explicitly.
-- Keep generated code runnable when operations are unavailable.
-- When the generated client exists but the project talks to the backend through another transport, follow the project transport, import types from the client, and report the divergence in Validation Notes.
-- When the framework is unknown, use the neutral fallback rather than approximating a pack.
-- When there is no analogous page to mirror, stop and ask before bootstrapping (Step D of the fallback protocol).
-- When a page needs a mechanism the project has no precedent for (routed id, form prefill source, confirmation primitive), degrade to the closest supported flow or stop and ask; never invent a convention and present it as observed.
-
-## Dependency Policy
-
-Use only libraries already in the project's manifest. Prefer the project's shared helpers over new ones. VueUse is a Vue-only optional policy, described in the Vue pack; never add it (or anything else) for generated pages.
-
-## Completion Checklist
-
-Before reporting, verify ALL of the following:
-
-1. **Report format**: section order matches the output contract (condensed or full), and the Convention Report is present with real sources read.
-2. **Single pack**: only one framework pack's idioms appear in the output.
-3. **Type safety**: the project's own typecheck/build command was run, or its absence is stated in Validation Notes.
-4. **Pagination**: internal base and query keys match the observed project convention; filter changes reset to the first page.
-5. **Route id handling**: invalid id shows an error and never silently falls back to create mode.
-6. **Filters**: only filters that match real API query parameters; no fabricated fields.
-7. **Server total**: taken from the response, never from the current page length.
-8. **Destructive actions**: confirmed with the project's confirmation primitive before the request.
-9. **Mutations**: refresh the affected list/region after success.
-10. **Runtime safety**: uncertain API fields are guarded (`Array.isArray` or normalizers); no crash-prone template/JSX expressions.
-11. **Missing endpoints and contract gaps**: unsupported operations, and requested capabilities with no backing endpoint or field, are reported explicitly with the UI degraded rather than broken.
-12. **Route registration**: complete for the project's mechanism; route names unique where the framework uses them.
-13. **Page caching identity**: where the framework caches by component name, component name matches route name.
-14. **No new dependencies; generated files untouched; permission keys only if they exist in the project.**
-15. **Existing surface**: each target path was checked first; existing pages, routes, menus, and wrappers are updated in place, never duplicated or overwritten.
+Follow `references/output-contract.md`: the output mode, the writing rules, the condensed or full
+report format, and the quality gates. Run every quality gate before reporting.
 
 ## Related Skills
 

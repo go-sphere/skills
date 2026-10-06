@@ -1,0 +1,4 @@
+interface:
+  display_name: "Go Doc for Agents"
+  short_description: "Write self-contained Go docs and tested examples"
+  default_prompt: "Use $godoc to document this Go package so an AI agent can use its exported API through go doc, with clear contracts and verified examples."

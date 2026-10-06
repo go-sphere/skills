@@ -20,7 +20,13 @@ Every Go repository should expose these common targets when they apply:
 
 Repositories may retain `build`, `verify`, generation, compatibility, release, benchmark, deployment, or other specialized targets. Do not delete or flatten them merely to make files look identical.
 
-## Inspect Before Editing
+## Reference Map
+
+| Read | When |
+|------|------|
+| [references/makefile-patterns.md](references/makefile-patterns.md) | Before writing or reviewing any target — canonical snippets and CI alignment |
+
+## Steps
 
 1. Read repository instructions, its Makefile, all `go.mod` and `go.work` files, CI workflows, generation scripts, and working-tree status.
 2. Determine whether it is a single module, explicit multi-module repository, generator/protocol repository, executable, or layout/template.
@@ -49,7 +55,7 @@ Keep fixture generation, golden updates, Buf validation, breaking checks, and ge
 
 Retain `build` and the established generation dependency graph. Layout repositories are clean-checkout generators, not ordinary libraries: CI generally needs `make init`, then `make build`, then `make test`. Do not replace their generation, asset, Docker, deployment, or help targets with a minimal library Makefile.
 
-## Behavioral Rules
+## Rules
 
 - Use overridable tool variables such as `GO ?= go`; add tool variables only for tools the repository actually uses.
 - Exclude `.Main`, `.Indirect`, and `.Replace` modules when updating direct dependencies.
@@ -60,8 +66,6 @@ Retain `build` and the established generation dependency graph. Layout repositor
 - Make `check` a predictable composition target. Put slower race, API compatibility, breaking, or release-oriented checks in `verify` unless the repository intentionally requires them for every check.
 - Use `.PHONY` for command targets and simple progress labels for loops.
 - Prefer readable repetition over abstractions that obscure which directory or tool failed.
-
-For canonical snippets and CI alignment, read [references/makefile-patterns.md](references/makefile-patterns.md) when implementing or reviewing changes.
 
 ## Root Organization Makefile
 
