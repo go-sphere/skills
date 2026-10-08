@@ -1,6 +1,6 @@
 # Reference: Error Runtime Behavior
 
-Local copy of https://go-sphere.github.io/docs/guides/error-handling/ (synced 2026-09-07).
+Local copy of https://go-sphere.github.io/docs/guides/error-handling/ (synced 2026-10-08).
 Covers the generated Go methods, returning and composing errors in a service, and the JSON error
 response clients receive. Declaring the enums and their annotations lives in
 `error-definition-reference.md`.
@@ -20,7 +20,7 @@ For each `enum UserError`, the following methods are generated:
 - `GetCode() int32`: Returns the numeric enum value (e.g., `1001`).
 - `GetStatus() int32`: Returns the configured HTTP status code.
 - `GetMessage() string`: Returns the default error message.
-- `Join(errs ...error) error`: Wraps one or more source errors with `httpx.NewError`. This is the recommended way to return an error while preserving the original cause.
+- `Join(errs ...error) error`: Wraps one or more source errors with the plugin's `new_errors_func` constructor (default `NewError` from `github.com/go-sphere/errors/sphere/errors`). This is the recommended way to return an error while preserving the original cause.
 - `JoinWithMessage(msg string, errs ...error) error`: Similar to `Join`, but allows you to provide a custom, dynamic message at runtime.
 
 There is no generated `GetReason()` method. The enum itself implements `httpx.StatusError`, `httpx.CodeError`, and `httpx.MessageError`, so returning it from a service method is enough for `httpz` to set status, code, and message.
@@ -91,7 +91,7 @@ When this error is handled by `httpz.WithJson`, it is converted into an HTTP res
 
 `ErrorResponse.Error` is populated with `err.Error()` only when `httpz.SetDebugMode(true)`. Unclassified errors (a plain `error` that does not implement `httpx.CodeError` / `httpx.MessageError`) report `code: 0` and the generic HTTP status text, so driver and database strings are not leaked to clients.
 
-Use `httpz.SetDefaultErrorParser` in the template (see `internal/pkg/render/errors.go`) to map validation and persistence errors before the default `httpx.ParseError` fallback.
+Use `httpz.SetDefaultErrorParser` in the template (see `internal/pkg/render/errors.go`) to map validation and persistence errors, then fall back to `httpz.ParseError` (the default parser). Do not fall back to `httpx.ParseError`: storage sentinels such as `storageerr.ErrNotFound` carry no HTTP status, and only `httpz.ParseError` maps them to 404/400, so they would render as 500.
 
 ## Error Composition
 

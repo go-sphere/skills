@@ -177,6 +177,21 @@ $hits"
 done
 pass "no stale skill names remain"
 
+# 8a. APIs removed or whose use is now wrong at the current sphere / plugin HEAD
+# must not be taught to agents.
+STALE_API_PATTERNS=(
+  'WithLoggerInit'
+  'return httpx.ParseError('
+  'default `httpx.ParseError` fallback'
+  'with `httpx.NewError`'
+)
+for pattern in "${STALE_API_PATTERNS[@]}"; do
+  hits="$(grep -rnF -- "$pattern" "$SKILLS_DIR" "$ROOT_DIR/references" 2>/dev/null || true)"
+  [ -z "$hits" ] || fail "stale API '$pattern' is still referenced:
+$hits"
+done
+pass "no stale API references remain"
+
 # 9. Every reference link inside a SKILL.md must resolve to an existing file.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
