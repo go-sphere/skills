@@ -60,6 +60,11 @@ Apply in order. The first rule that matches decides.
 - `go-simplify` — audit and safely simplify Go code for over-design, over-optimization, and over-defensive checks, with a green test baseline as the safety net.
 - `go-sphere-makefiles` — standardize or repair Make targets, root batch orchestration, and Make-driven CI.
 
+### Agent Orchestration
+
+- `delegate` — hand one bounded task to another coding agent (claude, codex, kimi, agy, pi) headless and resume its session.
+- `rex-desktop` — run and coordinate several live coding agents as workers in Rex tabs, on top of `delegate`.
+
 ## Stage Handoffs
 
 Every stage skill ends with a `## Related Skills` block naming its upstream, downstream, boundary,

@@ -20,7 +20,7 @@ display_path() {
 }
 
 # Names that may appear in backticks inside a Related Skills block without being skills.
-NON_SKILL_REFERENCES=" vueuse-functions sphere-workflow go-sphere "
+NON_SKILL_REFERENCES=" vueuse-functions sphere-workflow go-sphere rex "
 STALE_NAMES=(ent-schema-generator pure-admin-crud-generator)
 
 # Print the lines of a `## Heading` section, stopping at the next `## ` heading.
@@ -49,7 +49,7 @@ while IFS= read -r dir; do
   skill_dirs+=("$(basename "$dir")")
 done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
-[ "${#skill_dirs[@]}" -eq 20 ] || fail "expected 20 skill directories, found ${#skill_dirs[@]}"
+[ "${#skill_dirs[@]}" -eq 22 ] || fail "expected 22 skill directories, found ${#skill_dirs[@]}"
 
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"

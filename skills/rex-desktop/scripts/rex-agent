@@ -1,28 +1,53 @@
 #!/usr/bin/env bash
 # rex-agent: spawn and steer interactive coding agents in Rex tabs.
-# Part of the rex-desktop skill. Requires rex and jq.
+# Part of the rex-desktop skill. Requires rex, jq, python3 and the delegate skill,
+# which owns every agent-specific flag and finds the agent executables.
 set -euo pipefail
 
 STATE_DIR="${REX_AGENT_HOME:-$HOME/.rex-agent}"
 REGISTRY="$STATE_DIR/agents.json"
+# An idle agent that never reported "working" is treated as finished after this many seconds.
+IDLE_GRACE=20
+# An agent that reports no state at all counts as quiet once its screen stops changing this long.
+QUIET_GRACE=15
 
 die() { printf 'rex-agent: %s\n' "$*" >&2; exit 1; }
 
 command -v rex >/dev/null || die "rex not found"
 command -v jq >/dev/null || die "jq not found"
+command -v python3 >/dev/null || die "python3 not found"
+
+# delegate.py: $DELEGATE_PY, the sibling skill directory, then the usual skill install dirs.
+find_delegate() {
+  local here cand
+  if [ -n "${DELEGATE_PY:-}" ]; then echo "$DELEGATE_PY"; return; fi
+  here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+  for cand in "$here/../../delegate/scripts/delegate.py" \
+              "$HOME/.claude/skills/delegate/scripts/delegate.py" \
+              "$HOME/.agents/skills/delegate/scripts/delegate.py" \
+              "$HOME/.codex/skills/delegate/scripts/delegate.py"; do
+    if [ -f "$cand" ]; then echo "$cand"; return; fi
+  done
+  die "delegate skill not found; install it next to rex-desktop or set DELEGATE_PY"
+}
+DELEGATE_PY=$(find_delegate)
+delegate() { python3 "$DELEGATE_PY" "$@"; }
+
 mkdir -p "$STATE_DIR"
 [ -f "$REGISTRY" ] || echo '{}' >"$REGISTRY"
 
 usage() {
   cat <<'EOF'
 Usage:
-  rex-agent spawn   --name SLUG --agent claude|codex|pi --cwd DIR
-                    [--mode readonly|write] [--model MODEL] [--prompt TEXT]
-  rex-agent wait    --name SLUG [--for SECONDS]   exit 0 done, 3 blocked, 4 error, 5 exited, 6 timeout
+  rex-agent spawn   --name SLUG --agent claude|codex|kimi|agy|pi --cwd DIR
+                    [--mode read|write|full] [--model MODEL] [--prompt TEXT]
+  rex-agent wait    --name SLUG [--for SECONDS]   exit 0 done, 3 blocked, 4 error, 5 exited, 6 timeout, 7 quiet
   rex-agent send    --name SLUG TEXT              follow-up prompt to a live worker
   rex-agent capture --name SLUG                   print the worker's screen and scrollback
   rex-agent status                                list workers and their reported state
   rex-agent close   --name SLUG                   close the worker's tab and forget it
+Modes (default read): read = no edits; write = edits in --cwd, risky commands still ask;
+full = no sandbox, no approvals (disposable worktrees only). "readonly" is accepted for read.
 EOF
 }
 
@@ -46,7 +71,7 @@ status_of() { # block
 require_name() { [ -n "${NAME:-}" ] || die "--name is required"; [ -n "$(get "$NAME" block)" ] || die "unknown worker: $NAME"; }
 
 parse() {
-  NAME="" AGENT="" CWD="" MODE="readonly" MODEL="" PROMPT="" FOR=1800 REST=()
+  NAME="" AGENT="" CWD="" MODE="read" MODEL="" PROMPT="" FOR=1800 REST=()
   while [ $# -gt 0 ]; do
     case "$1" in
       --name) NAME="$2"; shift 2 ;;
@@ -59,29 +84,32 @@ parse() {
       *) REST+=("$1"); shift ;;
     esac
   done
+  [ "$MODE" != readonly ] || MODE=read
+}
+
+# send_text BLOCK TEXT: type TEXT into the worker and press enter, recording the state
+# it was in so `wait` only reacts to what happens afterwards.
+send_text() {
+  local blk="$1" text="$2" cur
+  cur=$(status_of "$blk" || true)
+  put "$NAME" baseline "$(cut -d'|' -f3 <<<"$cur")"
+  rex send -s "$(session)" -b "$blk" "$text"
+  sleep 0.3
+  rex send-key -s "$(session)" -b "$blk" enter
 }
 
 cmd_spawn() {
   [ -n "$NAME" ] && [ -n "$AGENT" ] && [ -n "$CWD" ] || die "spawn needs --name, --agent, --cwd"
   [ -d "$CWD" ] || die "cwd not found: $CWD"
   [ -z "$(get "$NAME" block)" ] || die "worker already exists: $NAME"
-  local argv
-  case "$AGENT" in
-    claude)
-      argv=(claude)
-      [ -n "$MODEL" ] && argv+=(--model "$MODEL")
-      if [ "$MODE" = readonly ]; then argv+=(--permission-mode plan); else argv+=(--permission-mode acceptEdits); fi ;;
-    codex)
-      argv=(codex --no-alt-screen)
-      [ -n "$MODEL" ] && argv+=(-m "$MODEL")
-      if [ "$MODE" = readonly ]; then argv+=(-s read-only -a on-request); else argv+=(-s workspace-write -a on-request); fi ;;
-    pi)
-      argv=(pi)
-      [ -n "$MODEL" ] && argv+=(--model "$MODEL")
-      [ "$MODE" = readonly ] && argv+=(--tools read,grep,find,ls) ;;
-    *) die "unknown agent: $AGENT (claude, codex, pi)" ;;
-  esac
-  [ -n "$PROMPT" ] && argv+=("$PROMPT")
+
+  local launch_args=(launch --agent "$AGENT" --mode "$MODE") launch argv via first_prompt
+  [ -z "$MODEL" ] || launch_args+=(--model "$MODEL")
+  [ -z "$PROMPT" ] || launch_args+=(--prompt "$PROMPT")
+  launch=$(delegate "${launch_args[@]}") || die "$(jq -r '.error // "delegate launch failed"' <<<"$launch")"
+  AGENT=$(jq -r .agent <<<"$launch"); via=$(jq -r .prompt_via <<<"$launch")
+  first_prompt=$(jq -r '.prompt // empty' <<<"$launch")
+  eval "argv=($(jq -r '.argv | map(@sh) | join(" ")' <<<"$launch"))"
   # Workers must not inherit the coordinator's Rex identity, or they may act on its session.
   argv=(env -u REX_SESSION -u REX_BLOCK "${argv[@]}")
 
@@ -92,11 +120,20 @@ cmd_spawn() {
   put "$NAME" agent "$AGENT"; put "$NAME" cwd "$CWD"; put "$NAME" mode "$MODE"
   put "$NAME" baseline ""
   echo "spawned $NAME ($AGENT, $MODE) block=$blk"
+
+  if [ "$via" = send ]; then
+    # The agent has no startup-prompt argument: type it once the TUI reports its first state.
+    local i
+    for i in $(seq 30); do [ -z "$(status_of "$blk" || true)" ] || break; sleep 1; done
+    sleep 1
+    send_text "$blk" "$first_prompt"
+  fi
 }
 
 cmd_wait() {
   require_name
-  local blk base deadline cur state kind upd msg exit_code
+  local blk base deadline cur state="" kind upd msg exit_code now
+  local seen_working=0 idle_upd="" idle_since=0 shot last_shot="" quiet_since=0
   blk=$(get "$NAME" block); base=$(get "$NAME" baseline)
   deadline=$(( $(date +%s) + FOR ))
   while :; do
@@ -104,11 +141,28 @@ cmd_wait() {
     if [ -n "$cur" ]; then
       IFS='|' read -r state kind upd msg <<<"$cur"
       if [ "$upd" != "$base" ]; then
+        now=$(date +%s)
         case "$state" in
+          working) seen_working=1 ;;
           done) echo "done: $msg"; return 0 ;;
           blocked) echo "blocked${kind:+ ($kind)}: $msg"; return 3 ;;
           error) echo "error: $msg"; return 4 ;;
+          idle)
+            # agy and kimi sit at idle before and after a turn, so idle means finished
+            # only once work was seen, or after it has stayed idle for IDLE_GRACE seconds.
+            if [ "$seen_working" = 1 ]; then echo "done (idle)"; return 0; fi
+            [ "$idle_upd" = "$upd" ] || { idle_upd="$upd"; idle_since=$now; }
+            if [ $((now - idle_since)) -ge "$IDLE_GRACE" ]; then echo "done (idle, no work observed)"; return 0; fi ;;
         esac
+      fi
+    else
+      # Nothing reported: this agent has no Rex integration here, so judge by the screen.
+      now=$(date +%s)
+      shot=$(rex capture -s "$(session)" -b "$blk" --trim 2>/dev/null | cksum || true)
+      [ "$shot" != "$last_shot" ] && { last_shot="$shot"; quiet_since=$now; }
+      if [ $((now - quiet_since)) -ge "$QUIET_GRACE" ]; then
+        echo "quiet: screen unchanged for ${QUIET_GRACE}s and no state reported; capture to see whether it finished or is waiting on a prompt"
+        return 7
       fi
     fi
     exit_code=$(rex block call -s "$(session)" -b "$blk" process 2>/dev/null | jq -r '.last_exit.exit_code // empty' || true)
@@ -122,13 +176,7 @@ cmd_send() {
   require_name
   local text="${REST[*]:-}"
   [ -n "$text" ] || die "send needs TEXT"
-  local blk cur upd
-  blk=$(get "$NAME" block)
-  cur=$(status_of "$blk" || true); upd=$(cut -d'|' -f3 <<<"$cur")
-  put "$NAME" baseline "$upd"
-  rex send -s "$(session)" -b "$blk" "$text"
-  sleep 0.3
-  rex send-key -s "$(session)" -b "$blk" enter
+  send_text "$(get "$NAME" block)" "$text"
 }
 
 cmd_capture() { require_name; rex capture -s "$(session)" -b "$(get "$NAME" block)" --trim --unwrap; }

@@ -1,73 +1,105 @@
 ---
 name: rex-desktop
-description: Coordinate coding agents (Claude Code, Codex, pi) as workers in Rex tabs. Use when the user wants to delegate implementation, review, or investigation to other coding agents, run several agents in parallel, route tasks to codex/pi/claude, or "orchestrate"/"dispatch"/"fan out" work across Rex panes, even if they don't name this skill. You plan and review; workers implement.
+description: Coordinate coding agents (claude, codex, kimi, agy, pi) as live workers in Rex tabs. Use when the user wants to dispatch, fan out, or orchestrate implementation, review, or investigation across several agents and watch them in Rex. Not for one headless task with a structured result — that is `delegate`.
 ---
 
 # rex-desktop
 
-You are the coordinator. Workers are interactive coding agents, each in its own Rex tab. You plan, split work, dispatch, verify, and integrate; workers write the code. Use `scripts/rex-agent` (next to this file) for all worker control. It sits on top of the `rex` skill's primitives and adds what Rex lacks: wait-until-done.
+You are the coordinator. Workers are interactive coding agents, each in its own Rex tab. You plan, split work, dispatch, verify, and integrate; workers write the code. `scripts/rex-agent` (next to this file) controls workers. It adds wait-until-done on top of the `rex` CLI, and it asks the `delegate` skill for every agent-specific flag and executable path, so this skill holds no agent knowledge.
 
-Workers must be interactive TUIs, not `claude -p` / `codex exec` / `pi -p`. Only interactive agents report their state (Rex OSC 7501: working, done, blocked, error), which is what `wait` listens to. Headless runs never report, so waiting on them would hang.
+Workers are interactive TUIs because Rex reports their state (working, done, blocked, error), which is what `wait` listens to. A headless run reports nothing to Rex.
 
-## Loop
+## Steps
 
-```sh
-R=~/.claude/skills/rex-desktop/scripts/rex-agent
-$R spawn --name auth-fix --agent codex --cwd "$WORKTREE" --mode write --prompt "$(cat brief.md)"
-$R wait  --name auth-fix --for 1800     # blocks until the worker settles
-$R capture --name auth-fix              # read what it said
-$R send  --name auth-fix "Also cover the empty-token case"   # follow-up, same context
-$R close --name auth-fix                # when finished; records stay in git, not the tab
-```
+1. Run `python3 <delegate skill>/scripts/delegate.py agents`. Use only installed agents. `rex-agent` finds `delegate.py` in the sibling `delegate` skill directory; set `DELEGATE_PY` if it lives elsewhere.
+2. Choose agents with the routing table and modes with the mode table.
+3. Create one git worktree and branch per writing worker (see Isolation).
+4. Spawn one worker at a time: `R=<this skill's directory>/scripts/rex-agent`, then `$R spawn --name auth-fix --agent codex --cwd "$WORKTREE" --mode write --prompt "$(cat brief.md)"`.
+5. Wait: `$R wait --name auth-fix --for 1800`. For several workers, run one `wait` per worker in parallel background shells.
+6. Read the result with `$R capture --name auth-fix`. Ask workers for a compact fixed-format final report; the capture is a screen, not a transcript.
+7. Follow up on the same worker with `$R send --name auth-fix "Also cover the empty-token case"`. It already holds the context.
+8. Verify every result yourself (see Verify), then `$R close --name auth-fix`.
 
-`wait` exit codes: 0 done, 3 blocked, 4 error, 5 process exited, 6 timeout. Blocked means the worker is asking something (permission, question, login): `capture` to see it, then `send` an answer, or tell the user if it needs credentials or a judgment call. Use the same worker for follow-ups instead of spawning a new one; it already holds the context.
+`wait` exit codes:
 
-Run several workers by spawning each, then waiting on them in turn (or in parallel background shells). `rex-agent status` lists all workers and their last reported state.
+| Code | Meaning | Do |
+|---|---|---|
+| 0 | done | capture and verify |
+| 3 | blocked: a permission, question, or login | capture, then `send` an answer or ask the user; credentials and judgment calls go to the user |
+| 4 | error | capture and read the error |
+| 5 | process exited | capture; respawn if needed |
+| 6 | timeout | capture; if the state was `none`, look for a startup prompt |
+| 7 | quiet: no state reported and the screen stopped changing | capture; the agent either finished or waits on a prompt |
 
-## Writing the task brief
+`$R status` lists workers with their last reported state.
 
-A worker knows nothing you know. Each prompt needs: the objective, the paths it owns, paths it must not touch, the acceptance command(s) to run, and what to report back (files changed, commands run, anything unresolved). Vague briefs return vague work, and the worker's "done" is a claim, not evidence.
+## Writing the Brief
+
+A worker knows nothing you know. Each prompt needs the objective, the paths it owns, the paths it must not touch, the acceptance commands to run, and what to report (files changed, commands run, anything unresolved). A vague brief returns vague work.
 
 ## Isolation
 
-Parallel workers that write code each get their own git worktree and branch, otherwise they overwrite each other:
+Parallel workers that write code each get their own worktree and branch, otherwise they overwrite each other:
 
 ```sh
 git worktree add ../wt-auth-fix -b task/auth-fix
 ```
 
-Give workers disjoint file ownership where possible, and merge branches one at a time. Read-only workers (review, investigation) can share the main checkout. A worktree isolates files, not the machine: it is not a security sandbox.
+Give workers disjoint file ownership and merge branches one at a time. Read-only workers share the main checkout. A worktree isolates files, not the machine; it is not a security sandbox.
 
-## Routing: which agent and model
-
-Decide per task, and keep it simple:
+## Routing
 
 | Task | Agent | Why |
 |---|---|---|
-| Multi-file implementation, debugging, test fixes | `claude` (opus) or `codex` | strongest at sustained edits |
-| Independent review of someone else's change | a different agent than the author, `--mode readonly` | avoids self-confirmation |
-| Cheap bulk work: small edits, summaries, greps, drafts | `pi` with a fast model (e.g. `deepseek/deepseek-flash`) | low cost |
+| Multi-file implementation, debugging, test fixes | `claude` or `codex` | strongest at sustained edits |
+| Independent review of someone else's change | a different agent than the author, `--mode read` | avoids self-confirmation |
+| Cheap bulk work: small edits, summaries, greps, drafts | `pi` or `kimi` | low cost |
 
-Pass `--model` only when the user asked for one or the task needs it; otherwise the agent's own default applies. List pi models with `pi --list-models`. Do not silently substitute a model if the requested one fails: report it.
+Pass `--model` only when the user asked for one or the task needs it. Do not substitute a model silently when the requested one fails; report it.
 
-## Modes and permissions
+## Modes
 
-`--mode readonly` (default) maps to plan mode for claude, `-s read-only` for codex, and a read-only tool allowlist for pi. `--mode write` allows edits in the worker's `--cwd`: claude uses acceptEdits, codex uses workspace-write. Both still ask for approval on riskier commands, which shows up as `blocked`. Do not add dangerous skip-permission flags unless the user explicitly asks and the worktree is disposable.
+| Mode | Meaning |
+|---|---|
+| `read` (default) | no edits: plan mode, read-only sandbox, or a read-only tool list |
+| `write` | edits in `--cwd`; riskier commands ask and show up as `blocked` |
+| `full` | no sandbox, no approvals; only in a disposable worktree and only when the user asked |
 
-Start new setups with one read-only worker to confirm the loop works before dispatching writers.
+`pi` has no permission system: its `write` and `full` never ask. Per-agent flags live in the `delegate` skill's `references/agents.md`. Start a new setup with one `read` worker to confirm the loop works before dispatching writers.
 
-## Verify before reporting
+## Verify
 
-Never relay a worker's "done" as fact. Inspect the diff (`git -C "$WORKTREE" diff`), run the acceptance commands yourself, and have a different agent review risky changes. Finish with: what changed, how you verified it, what is unresolved. Close workers you no longer need.
+Never relay a worker's "done" as fact. Inspect the diff (`git -C "$WORKTREE" diff`), run the acceptance commands yourself, and have a different agent review risky changes. Finish with what changed, how you verified it, and what is unresolved.
 
 ## Troubleshooting
 
-- `wait` returns immediately with `done` from an old run: it compares against the state captured at the last `send`/`spawn`, so make sure you send follow-ups through `rex-agent send`, not by typing in the pane.
-- First launch in a new directory shows a folder-trust prompt. Codex does not report it as `blocked`, so `wait` just times out with state `none` (exit 6): `capture`, and if it is a trust prompt for a directory the user would trust, press enter with `rex send-key -b <block> enter`. Ask the user first for directories you did not create.
-- Codex runs with `--no-alt-screen` so `capture` includes scrollback. Without it, only the visible screen is captured and long reports lose their first findings. Ask workers for a compact fixed-format final report.
-- To wait on many workers, run one `rex-agent wait` per worker in parallel background subshells, then `capture` each. Spawn workers one at a time: the registry has no lock yet.
-- `--mode write` (codex workspace-write) was verified on two parallel workers editing disjoint files in one checkout: no collisions, no commits. Codex's sandbox cannot bind localhost sockets or write the Go build cache, so tell Go workers to use `GOCACHE=/tmp/...`; they may retry network-bound tests with escalated permission on their own, so re-run tests yourself.
-- Reviewer output varies between runs of the same prompt (a finding can appear in one run and not the next). Verify findings in the code before relaying them.
-- Workers are launched without `REX_SESSION`/`REX_BLOCK`. Codex otherwise inherited them, read the rex skill, and tried to rename the coordinator's session. If a worker blocks on a `rex ...` command, decline it (escape) and tell it to stop using rex.
-- A tab opened with `--focus=false`, so the user's current tab is undisturbed; the user can watch workers in Rex's tab list.
-- Registry lives in `~/.rex-agent/agents.json`; set `REX_AGENT_HOME` to relocate it.
+| Symptom | Cause and fix |
+|---|---|
+| `wait` returns at once with an old `done` | `wait` compares against the state recorded at the last `spawn` or `send`; send follow-ups through `rex-agent send`, never by typing in the pane |
+| `wait` times out with state `none` | First launch in a new directory may show a folder-trust prompt. `capture`; if the user would trust the directory, press enter with `rex send-key -b <block> enter`. Ask first for directories you did not create. agy reports this as `blocked` |
+| `wait` returns exit 7 | The agent reports no state to Rex. In testing `claude` reported none; `codex`, `kimi`, `agy`, and `pi` did |
+| agy or kimi finishes with `done (idle)` | They report `idle` between turns. `wait` accepts it after seeing `working`, or after 20 idle seconds |
+| `blocked (auth)` right after spawn | May be transient when several workers start together; `capture` before acting |
+| kimi's first prompt is missing | kimi has no startup-prompt argument, so `rex-agent` types it after the TUI reports a state; `capture` to confirm, then `send` it |
+| A worker runs `rex ...` commands | Workers start without `REX_SESSION` and `REX_BLOCK`. If one still blocks on a `rex` command, decline it and tell it to stop using rex |
+| Codex report loses its first findings | `rex-agent` starts codex with `--no-alt-screen` so `capture` includes scrollback; keep reports compact |
+| Reviewer findings differ between runs | Verify each finding in the code before relaying it |
+| Go tests fail in codex `write` | Its sandbox cannot bind localhost sockets or write the Go build cache; tell Go workers to set `GOCACHE=/tmp/...` and rerun the tests yourself |
+
+Tabs open with `--focus=false`, so the user's current tab stays put and workers appear in Rex's tab list. The registry is `~/.rex-agent/agents.json`; set `REX_AGENT_HOME` to move it. It has no lock, so spawn workers one at a time.
+
+## Rules
+
+1. Dispatch one worker per bounded task and one worktree per writer.
+2. Never add `full` mode on your own judgment.
+3. Never answer a worker's credential or login prompt yourself.
+4. Close workers you no longer need.
+5. If the task needs no watching or steering, use `delegate` directly instead of a tab.
+
+## Related Skills
+
+- Upstream — none. The user supplies the task list; without one, plan the split yourself.
+- Downstream — none; the coordinator verifies and reports.
+- Boundary — `delegate` owns a single headless run and every agent flag; this skill owns live tabs, waiting, and integration.
+- Companion — `delegate` is required for `rex-agent spawn`; the `rex` skill documents the underlying CLI.
+- If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

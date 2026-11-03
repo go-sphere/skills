@@ -172,6 +172,10 @@ Go code leanness audit and safe simplification
   -> go-simplify
 Makefile and Make-driven CI standardization
   -> go-sphere-makefiles
+One headless task for another coding agent
+  -> delegate
+Several live coding agents in Rex tabs
+  -> rex-desktop
 ```
 
 The bootstrap rule is simple:
@@ -228,6 +232,11 @@ The bootstrap rule is simple:
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
+
+### Agent Orchestration
+
+- `delegate` runs one task headless in claude, codex, kimi, agy, or pi, returns a structured result, resumes the session, and owns every agent-specific flag and executable lookup.
+- `rex-desktop` coordinates several live agents as workers in Rex tabs: spawn, wait until done, follow up, and verify. It launches agents through `delegate`.
 
 ## Legacy Direct Install
 
