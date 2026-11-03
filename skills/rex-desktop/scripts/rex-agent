@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# rex-agent: spawn and steer interactive coding agents in Rex tabs.
+# Part of the rex-desktop skill. Requires rex and jq.
+set -euo pipefail
+
+STATE_DIR="${REX_AGENT_HOME:-$HOME/.rex-agent}"
+REGISTRY="$STATE_DIR/agents.json"
+
+die() { printf 'rex-agent: %s\n' "$*" >&2; exit 1; }
+
+command -v rex >/dev/null || die "rex not found"
+command -v jq >/dev/null || die "jq not found"
+mkdir -p "$STATE_DIR"
+[ -f "$REGISTRY" ] || echo '{}' >"$REGISTRY"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  rex-agent spawn   --name SLUG --agent claude|codex|pi --cwd DIR
+                    [--mode readonly|write] [--model MODEL] [--prompt TEXT]
+  rex-agent wait    --name SLUG [--for SECONDS]   exit 0 done, 3 blocked, 4 error, 5 exited, 6 timeout
+  rex-agent send    --name SLUG TEXT              follow-up prompt to a live worker
+  rex-agent capture --name SLUG                   print the worker's screen and scrollback
+  rex-agent status                                list workers and their reported state
+  rex-agent close   --name SLUG                   close the worker's tab and forget it
+EOF
+}
+
+session() { echo "${REX_SESSION:-$(rex whoami --json | jq -r .session_id)}"; }
+
+get() { jq -r --arg n "$1" --arg k "$2" '.[$n][$k] // empty' "$REGISTRY"; }
+
+put() { # name key value
+  local tmp; tmp=$(mktemp "$STATE_DIR/reg.XXXXXX")
+  jq --arg n "$1" --arg k "$2" --arg v "$3" '.[$n][$k] = $v' "$REGISTRY" >"$tmp" && mv "$tmp" "$REGISTRY"
+}
+
+# Latest terminal record: prints "state|kind|updated_at|msg" for the root record,
+# falling back to the newest record. Empty output means nothing reported yet.
+status_of() { # block
+  rex block call -s "$(session)" -b "$1" program_status 2>/dev/null |
+    jq -r '(.records | map(select(.id == null)) | .[0]) // (.records | sort_by(.updated_at) | last) // empty
+           | [.state, (.kind // ""), .updated_at, (.msg // "")] | join("|")'
+}
+
+require_name() { [ -n "${NAME:-}" ] || die "--name is required"; [ -n "$(get "$NAME" block)" ] || die "unknown worker: $NAME"; }
+
+parse() {
+  NAME="" AGENT="" CWD="" MODE="readonly" MODEL="" PROMPT="" FOR=1800 REST=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --name) NAME="$2"; shift 2 ;;
+      --agent) AGENT="$2"; shift 2 ;;
+      --cwd) CWD="$2"; shift 2 ;;
+      --mode) MODE="$2"; shift 2 ;;
+      --model) MODEL="$2"; shift 2 ;;
+      --prompt) PROMPT="$2"; shift 2 ;;
+      --for) FOR="$2"; shift 2 ;;
+      *) REST+=("$1"); shift ;;
+    esac
+  done
+}
+
+cmd_spawn() {
+  [ -n "$NAME" ] && [ -n "$AGENT" ] && [ -n "$CWD" ] || die "spawn needs --name, --agent, --cwd"
+  [ -d "$CWD" ] || die "cwd not found: $CWD"
+  [ -z "$(get "$NAME" block)" ] || die "worker already exists: $NAME"
+  local argv
+  case "$AGENT" in
+    claude)
+      argv=(claude)
+      [ -n "$MODEL" ] && argv+=(--model "$MODEL")
+      if [ "$MODE" = readonly ]; then argv+=(--permission-mode plan); else argv+=(--permission-mode acceptEdits); fi ;;
+    codex)
+      argv=(codex --no-alt-screen)
+      [ -n "$MODEL" ] && argv+=(-m "$MODEL")
+      if [ "$MODE" = readonly ]; then argv+=(-s read-only -a on-request); else argv+=(-s workspace-write -a on-request); fi ;;
+    pi)
+      argv=(pi)
+      [ -n "$MODEL" ] && argv+=(--model "$MODEL")
+      [ "$MODE" = readonly ] && argv+=(--tools read,grep,find,ls) ;;
+    *) die "unknown agent: $AGENT (claude, codex, pi)" ;;
+  esac
+  [ -n "$PROMPT" ] && argv+=("$PROMPT")
+  # Workers must not inherit the coordinator's Rex identity, or they may act on its session.
+  argv=(env -u REX_SESSION -u REX_BLOCK "${argv[@]}")
+
+  local out win blk
+  out=$(rex window new -s "$(session)" "$AGENT:$NAME" -c "$CWD" --focus=false --keep-open --json -- "${argv[@]}")
+  win=$(jq -r .window_id <<<"$out"); blk=$(jq -r '.block_ids[0]' <<<"$out")
+  put "$NAME" window "$win"; put "$NAME" block "$blk"
+  put "$NAME" agent "$AGENT"; put "$NAME" cwd "$CWD"; put "$NAME" mode "$MODE"
+  put "$NAME" baseline ""
+  echo "spawned $NAME ($AGENT, $MODE) block=$blk"
+}
+
+cmd_wait() {
+  require_name
+  local blk base deadline cur state kind upd msg exit_code
+  blk=$(get "$NAME" block); base=$(get "$NAME" baseline)
+  deadline=$(( $(date +%s) + FOR ))
+  while :; do
+    cur=$(status_of "$blk" || true)
+    if [ -n "$cur" ]; then
+      IFS='|' read -r state kind upd msg <<<"$cur"
+      if [ "$upd" != "$base" ]; then
+        case "$state" in
+          done) echo "done: $msg"; return 0 ;;
+          blocked) echo "blocked${kind:+ ($kind)}: $msg"; return 3 ;;
+          error) echo "error: $msg"; return 4 ;;
+        esac
+      fi
+    fi
+    exit_code=$(rex block call -s "$(session)" -b "$blk" process 2>/dev/null | jq -r '.last_exit.exit_code // empty' || true)
+    [ -z "$exit_code" ] || { echo "exited with code $exit_code"; return 5; }
+    [ "$(date +%s)" -lt "$deadline" ] || { echo "timeout after ${FOR}s (last state: ${state:-none}); if none, capture and check for a startup prompt"; return 6; }
+    sleep 2
+  done
+}
+
+cmd_send() {
+  require_name
+  local text="${REST[*]:-}"
+  [ -n "$text" ] || die "send needs TEXT"
+  local blk cur upd
+  blk=$(get "$NAME" block)
+  cur=$(status_of "$blk" || true); upd=$(cut -d'|' -f3 <<<"$cur")
+  put "$NAME" baseline "$upd"
+  rex send -s "$(session)" -b "$blk" "$text"
+  sleep 0.3
+  rex send-key -s "$(session)" -b "$blk" enter
+}
+
+cmd_capture() { require_name; rex capture -s "$(session)" -b "$(get "$NAME" block)" --trim --unwrap; }
+
+cmd_status() {
+  local n blk cur
+  for n in $(jq -r 'keys[]' "$REGISTRY"); do
+    blk=$(get "$n" block); cur=$(status_of "$blk" || true)
+    printf '%-20s %-7s %-9s %s\n' "$n" "$(get "$n" agent)" "$(cut -d'|' -f1 <<<"${cur:-none}")" "$(get "$n" cwd)"
+  done
+}
+
+cmd_close() {
+  require_name
+  rex window close -s "$(session)" "$(get "$NAME" window)" || true
+  local tmp; tmp=$(mktemp "$STATE_DIR/reg.XXXXXX")
+  jq --arg n "$NAME" 'del(.[$n])' "$REGISTRY" >"$tmp" && mv "$tmp" "$REGISTRY"
+  echo "closed $NAME"
+}
+
+[ $# -ge 1 ] || { usage; exit 1; }
+sub="$1"; shift
+parse "$@"
+case "$sub" in
+  spawn) cmd_spawn ;; wait) cmd_wait ;; send) cmd_send ;; capture) cmd_capture ;;
+  status) cmd_status ;; close) cmd_close ;; -h|--help|help) usage ;;
+  *) usage; exit 1 ;;
+esac
