@@ -1,11 +1,11 @@
 ---
 name: rex-desktop
-description: Coordinate coding agents (claude, codex, kimi, agy, pi) as live workers in Rex tabs. Use when the user wants to dispatch, fan out, or orchestrate implementation, review, or investigation across several agents and watch them in Rex. Not for one headless task with a structured result — that is `delegate`.
+description: Coordinate coding agents (claude, codex, kimi, agy, pi) as live workers in Rex floating panes. Use when the user wants to dispatch, fan out, or orchestrate implementation, review, or investigation across several agents and watch them in Rex. Not for one headless task with a structured result — that is `delegate`.
 ---
 
 # rex-desktop
 
-You are the coordinator. Workers are interactive coding agents, each in its own Rex tab. You plan, split work, dispatch, verify, and integrate; workers write the code. `scripts/rex-agent` (next to this file) controls workers. It adds wait-until-done on top of the `rex` CLI, and it asks the `delegate` skill for every agent-specific flag and executable path, so this skill holds no agent knowledge.
+You are the coordinator. Workers are interactive coding agents, each in its own floating pane over your Rex window. You plan, split work, dispatch, verify, and integrate; workers write the code. `scripts/rex-agent` (next to this file) controls workers. It adds wait-until-done on top of the `rex` CLI, and it asks the `delegate` skill for every agent-specific flag and executable path, so this skill holds no agent knowledge.
 
 Workers are interactive TUIs because Rex reports their state (working, done, blocked, error), which is what `wait` listens to. A headless run reports nothing to Rex.
 
@@ -86,7 +86,7 @@ Never relay a worker's "done" as fact. Inspect the diff (`git -C "$WORKTREE" dif
 | Reviewer findings differ between runs | Verify each finding in the code before relaying it |
 | Go tests fail in codex `write` | Its sandbox cannot bind localhost sockets or write the Go build cache; tell Go workers to set `GOCACHE=/tmp/...` and rerun the tests yourself |
 
-Tabs open with `--focus=false`, so the user's current tab stays put and workers appear in Rex's tab list. The registry is `~/.rex-agent/agents.json`; set `REX_AGENT_HOME` to move it. It has no lock, so spawn workers one at a time.
+Every worker runs in a floating pane (a Rex floating layer) over the window that holds the coordinator, never in a new tab. Panes open unfocused and cascade by worker count, so none hides another completely. `close` removes the pane with its worker. The registry is `~/.rex-agent/agents.json`; set `REX_AGENT_HOME` to move it. It has no lock, so spawn workers one at a time.
 
 ## Rules
 
@@ -94,12 +94,12 @@ Tabs open with `--focus=false`, so the user's current tab stays put and workers 
 2. Never add `full` mode on your own judgment.
 3. Never answer a worker's credential or login prompt yourself.
 4. Close workers you no longer need.
-5. If the task needs no watching or steering, use `delegate` directly instead of a tab.
+5. If the task needs no watching or steering, use `delegate` directly instead of a floating pane.
 
 ## Related Skills
 
 - Upstream — none. The user supplies the task list; without one, plan the split yourself.
 - Downstream — none; the coordinator verifies and reports.
-- Boundary — `delegate` owns a single headless run and every agent flag; this skill owns live tabs, waiting, and integration.
+- Boundary — `delegate` owns a single headless run and every agent flag; this skill owns live panes, waiting, and integration.
 - Companion — `delegate` is required for `rex-agent spawn`; the `rex` skill documents the underlying CLI.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

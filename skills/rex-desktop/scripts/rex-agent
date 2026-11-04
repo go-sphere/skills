@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rex-agent: spawn and steer interactive coding agents in Rex tabs.
+# rex-agent: spawn and steer interactive coding agents in Rex floating panes.
 # Part of the rex-desktop skill. Requires rex, jq, python3 and the delegate skill,
 # which owns every agent-specific flag and finds the agent executables.
 set -euo pipefail
@@ -45,7 +45,7 @@ Usage:
   rex-agent send    --name SLUG TEXT              follow-up prompt to a live worker
   rex-agent capture --name SLUG                   print the worker's screen and scrollback
   rex-agent status                                list workers and their reported state
-  rex-agent close   --name SLUG                   close the worker's tab and forget it
+  rex-agent close   --name SLUG                   close the worker's floating pane and forget it
 Modes (default read): read = no edits; write = edits in --cwd, risky commands still ask;
 full = no sandbox, no approvals (disposable worktrees only). "readonly" is accepted for read.
 EOF
@@ -98,6 +98,22 @@ send_text() {
   rex send-key -s "$(session)" -b "$blk" enter
 }
 
+# float_new NAME AGENT CWD ARGV...: run ARGV in a floating pane over the coordinator's window.
+# Floats are cascaded by the number of live workers so they never hide each other completely.
+float_new() {
+  local name="$1" agent="$2" cwd="$3" win n i args cmd; shift 3
+  cmd=$(printf '%s\0' "$@" | jq -Rs 'split("\u0000")[:-1]')
+  win=$(rex whoami --json | jq -r '.window_id // empty')
+  n=$(jq 'length' "$REGISTRY"); i=$((n % 6))
+  args=$(jq -n --arg s "$(session)" --arg w "$win" --arg l "$agent:$name" --arg c "$cwd" --argjson i "$i" --argjson cmd "$cmd" \
+    '{session_id: $s, focus: false,
+             bounds: [(0.08 + 0.04 * $i), (0.06 + 0.05 * $i), 0.7, 0.65],
+             layout: {block: {flavor: "com.superlogical.terminal.shell", label: $l,
+                              options: {command: $cmd, cwd: $c, exit: {on_completion: false}}}}}
+            | if $w != "" then .window_id = $w else . end')
+  rex api call session.new_layer "$args"
+}
+
 cmd_spawn() {
   [ -n "$NAME" ] && [ -n "$AGENT" ] && [ -n "$CWD" ] || die "spawn needs --name, --agent, --cwd"
   [ -d "$CWD" ] || die "cwd not found: $CWD"
@@ -113,10 +129,10 @@ cmd_spawn() {
   # Workers must not inherit the coordinator's Rex identity, or they may act on its session.
   argv=(env -u REX_SESSION -u REX_BLOCK "${argv[@]}")
 
-  local out win blk
-  out=$(rex window new -s "$(session)" "$AGENT:$NAME" -c "$CWD" --focus=false --keep-open --json -- "${argv[@]}")
-  win=$(jq -r .window_id <<<"$out"); blk=$(jq -r '.block_ids[0]' <<<"$out")
-  put "$NAME" window "$win"; put "$NAME" block "$blk"
+  local out layer blk
+  out=$(float_new "$NAME" "$AGENT" "$CWD" "${argv[@]}")
+  layer=$(jq -r .layer_id <<<"$out"); blk=$(jq -r '.block_ids[0]' <<<"$out")
+  put "$NAME" layer "$layer"; put "$NAME" block "$blk"
   put "$NAME" agent "$AGENT"; put "$NAME" cwd "$CWD"; put "$NAME" mode "$MODE"
   put "$NAME" baseline ""
   echo "spawned $NAME ($AGENT, $MODE) block=$blk"
@@ -191,7 +207,12 @@ cmd_status() {
 
 cmd_close() {
   require_name
-  rex window close -s "$(session)" "$(get "$NAME" window)" || true
+  local layer; layer=$(get "$NAME" layer)
+  if [ -n "$layer" ]; then
+    rex api call session.close_layer "$(jq -n --arg s "$(session)" --arg l "$layer" '{session_id: $s, layer_id: $l}')" >/dev/null || true
+  else
+    rex window close -s "$(session)" "$(get "$NAME" window)" || true # worker registered before floats
+  fi
   local tmp; tmp=$(mktemp "$STATE_DIR/reg.XXXXXX")
   jq --arg n "$NAME" 'del(.[$n])' "$REGISTRY" >"$tmp" && mv "$tmp" "$REGISTRY"
   echo "closed $NAME"
