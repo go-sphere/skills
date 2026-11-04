@@ -19,7 +19,8 @@ Apply in order. The first rule that matches decides.
 5. The task is about the `protoc-gen-*` plugins themselves rather than the `.proto` files they consume — `protoc-plugin-engineering`, not `proto-api-generator`.
 6. The work is only filling in missing methods in one service file from an existing generated interface — `proto-service-generator`, not `sphere-feature-workflow`.
 7. The task is auditing or simplifying existing Go code for over-design, over-optimization, or over-defensive checks rather than adding a feature — `go-simplify`, not `sphere-feature-workflow`.
-8. The task will modify go-sphere scaffold contracts, schemas, services, or generation commands — `sphere-feature-workflow`.
+8. The task is migrating or porting a codebase written in another language (or an old Go toolchain era) to idiomatic Go on the latest release — `migrate-to-golang`, not `sphere-feature-workflow`.
+9. The task will modify go-sphere scaffold contracts, schemas, services, or generation commands — `sphere-feature-workflow`.
 
 ## Workflow Map
 
@@ -59,6 +60,10 @@ Apply in order. The first rule that matches decides.
 - `go-test-engineering` — audit, repair, or write Go tests, including interface contract suites and justified golden tests.
 - `go-simplify` — audit and safely simplify Go code for over-design, over-optimization, and over-defensive checks, with a green test baseline as the safety net.
 - `go-sphere-makefiles` — standardize or repair Make targets, root batch orchestration, and Make-driven CI.
+
+### Migration
+
+- `migrate-to-golang` — migrate or port a legacy codebase (C, C++, Java, Python, Node, Rust, and others) to idiomatic Go on the latest release, with differential parity checks, telemetry, and PGO.
 
 ### Agent Orchestration
 

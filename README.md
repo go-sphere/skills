@@ -170,6 +170,8 @@ Go API documentation and verified usage examples for agents
   -> godoc
 Go code leanness audit and safe simplification
   -> go-simplify
+Migrating a non-Go codebase to Go
+  -> migrate-to-golang
 Makefile and Make-driven CI standardization
   -> go-sphere-makefiles
 One headless task for another coding agent
@@ -191,6 +193,8 @@ The bootstrap rule is simple:
 - If the task is auditing or simplifying existing Go code for over-design,
   over-optimization, or over-defensive checks rather than adding a feature,
   route into `go-simplify`.
+- If the task is migrating or porting a codebase in another language to Go,
+  route into `migrate-to-golang`.
 - After a stage skill finishes, honor the handoff in its `## Related Skills` block
   before starting a new classification pass.
 
@@ -230,6 +234,7 @@ The bootstrap rule is simple:
 
 - `godoc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
+- `migrate-to-golang` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
@@ -262,6 +267,12 @@ You can also invoke a specific skill directly after installation, for example:
 ```text
 Use the proto-api-generator skill to generate API definitions
 ```
+
+## Default CLAUDE.md
+
+[CLAUDE.TEMPLATE.md](CLAUDE.TEMPLATE.md) is a starting `CLAUDE.md` for a go-sphere
+project: general coding-behavior guidelines plus go-sphere conventions. Copy it to the
+project root as `CLAUDE.md` (or `AGENTS.md`) and fill in the project-specific section.
 
 ## Updating
 
