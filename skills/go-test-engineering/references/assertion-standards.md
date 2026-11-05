@@ -30,6 +30,8 @@ Remove or repair tests that match any of these:
 - They lock around a test-owned map, exercising the test's lock instead of production synchronization.
 - They are skipped by default or hidden behind a flag, leaving the normal suite with no relevant assertion.
 - They duplicate a golden file through numerous weak `contains` checks.
+- They use a golden file for output a plain unit test could assert, with no external process or
+  environment forcing it.
 - They assert a private field, a helper call count, or an internal sequence that can change
   without changing behavior.
 - Their name describes the function being called rather than the behavior being guaranteed.

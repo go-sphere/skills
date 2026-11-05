@@ -31,20 +31,46 @@ Never copy the same contract cases into every driver package.
 
 ## Golden Tests
 
-Use golden files only when the exact output is itself a reviewed contract: generated source,
-serialization, formatted documents, or stable CLI output.
+A golden test is the last resort, not a convenient way to assert a lot at once. Default to a unit
+test. Admit a golden test only when **both** gates pass:
+
+1. **Environment gate.** Producing the output requires something a unit test cannot construct or
+   control in-process: an external process or toolchain (`protoc`, `buf`, `wire`, `go generate`,
+   `go build`/`go list`, a CLI binary run as a subprocess), a loaded Go package graph, compiled
+   descriptors, or a filesystem tree written by such a tool. Typical qualifying cases:
+   `google/wire` injector generation, a protoc plugin run through `protoc`/`buf`, ent codegen that
+   loads packages, a scaffolder that emits a multi-file project.
+2. **Contract gate.** The exact bytes of the whole output are a reviewed contract: generated source
+   or files that users commit, or a stable on-disk or wire format that other tools consume.
+
+If either gate fails, write unit tests instead. These never justify a golden file:
+
+- Pure functions, parsers, formatters, validators, and string builders.
+- `json.Marshal`/`proto.Marshal` of a struct, response bodies from `httptest` handlers, error
+  messages, log lines, SQL strings, and config rendering that can be built from in-memory input.
+- Template rendering or code generation that can be driven in-process from a small literal input —
+  assert the specific fragments, ordering, or compile-ability that matter.
+- Any output whose shape is incidental, or that changes whenever unrelated code changes.
+
+Before adding or keeping a golden file, state in one line which external dependency forces it. If
+you cannot name one, convert it to a unit test. A golden file is also wrong when a table-driven
+test with explicit expected values would be just as readable.
 
 A sound golden test:
 
-- makes inputs deterministic;
-- normalizes only genuinely irrelevant variability;
+- keeps the external-dependency part minimal: a few small fixtures, each isolating one feature,
+  rather than one large kitchen-sink fixture;
+- makes inputs deterministic and pins tool versions, or skips with an explicit reason when the tool
+  is unavailable — never silently passes;
+- normalizes only genuinely irrelevant variability (paths, versions, timestamps);
 - shows a useful first difference on failure;
-- provides an explicit, opt-in update mechanism;
+- provides an explicit, opt-in update mechanism (flag or Make target), never auto-updating;
 - requires humans to review golden changes as contract changes.
 
-Do not use a golden file for an opaque snapshot whose exact shape has no contractual value. Do not
-duplicate a full golden comparison with many substring assertions, unless a substring checks an
-independent semantic boundary or produces a materially clearer failure.
+Do not duplicate a full golden comparison with many substring assertions, unless a substring checks
+an independent semantic boundary or produces a materially clearer failure. Logic that surrounds the
+external call (option parsing, error branches, name mapping) stays in ordinary unit tests; only the
+end-to-end output belongs in the golden.
 
 ## Integration Tests
 

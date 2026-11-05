@@ -1,6 +1,6 @@
 ---
 name: go-test-engineering
-description: Audit, repair, or write Go tests so they enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, deleting duplicate tests, strengthening weak assertions, designing interface contract suites, judging when a golden test is justified, or fixing implementation bugs that valid tests expose. Not for Make targets or Make-driven CI — that is `go-sphere-makefiles`.
+description: Audit, repair, or write Go tests so they enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, deleting duplicate tests, strengthening weak assertions, designing interface contract suites, judging whether a golden test is justified (only for output that depends on an external process or environment, such as protoc or wire; otherwise a unit test), or fixing implementation bugs that valid tests expose. Not for Make targets or Make-driven CI — that is `go-sphere-makefiles`.
 ---
 
 # Go Test Engineering
@@ -18,6 +18,7 @@ constraints — not for test count, coverage percentage, or a green `go test ./.
 6. Test observable behavior and owned contracts, not incidental implementation details.
 7. Prefer the standard `testing` package and the smallest useful test design.
 8. Never add a test solely to increase coverage.
+9. Use a plain unit test whenever one can constrain the behavior. A golden test is admitted only when the output depends on an external process or environment (`protoc`, `buf`, `wire`, `go generate`, loaded packages) and its exact bytes are a reviewed contract.
 
 ## Operating Mode
 
@@ -37,7 +38,7 @@ A request to review or diagnose does not by itself authorize edits.
 2. Inventory `*_test.go` files, shared test packages, fixtures, golden data, build tags, test flags, Make targets, and CI commands. Locate interfaces with multiple implementations and duplicated driver tests.
 3. Run the repository's baseline test command before editing, when practical.
 4. Establish the contract for the area under review (see below).
-5. Read each test file together with its source file. Ordinary unit tests should be co-located and named after the source module: `name.go` and `name_test.go`. Classify every test as **keep**, **rewrite**, **move or consolidate**, or **delete**.
+5. Read each test file together with its source file. Ordinary unit tests should be co-located and named after the source module: `name.go` and `name_test.go`. Classify every test as **keep**, **rewrite**, **move or consolidate**, or **delete**. Challenge every golden file: if no external process or environment forces it, rewrite it as a unit test.
 6. Classify every failure separately as a test defect, a production defect, a stale or ambiguous contract, or an environment/fixture defect.
 7. Make surgical changes in the right test form.
 8. Walk the verification ladder, then report using the Deliverable section.
@@ -65,7 +66,7 @@ behavior-preserving refactor? With no convincing answers, rewrite or remove the 
 
 | Read | When |
 |------|------|
-| [references/test-forms.md](references/test-forms.md) | At step 7, to choose between unit, contract-suite, golden, integration, and concurrency forms |
+| [references/test-forms.md](references/test-forms.md) | At step 7, to choose between unit, contract-suite, golden, integration, and concurrency forms; golden has strict admission gates |
 | [references/assertion-standards.md](references/assertion-standards.md) | While judging or writing any assertion, and when classifying a weak test |
 | [references/domain-guidance.md](references/domain-guidance.md) | When the code under test is generated protobuf, a code generator, a server, or a background task |
 
