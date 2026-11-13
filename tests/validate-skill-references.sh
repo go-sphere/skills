@@ -3,7 +3,6 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SKILLS_DIR="$ROOT_DIR/skills"
-ROUTER="$SKILLS_DIR/using-sphere-workflow/SKILL.md"
 
 fail() {
   echo "[FAIL] $1" >&2
@@ -20,7 +19,7 @@ display_path() {
 }
 
 # Names that may appear in backticks inside a Related Skills block without being skills.
-NON_SKILL_REFERENCES=" vueuse-functions sphere-workflow go-sphere rex "
+NON_SKILL_REFERENCES=" vueuse-functions go-sphere rex "
 STALE_NAMES=(ent-schema-generator pure-admin-crud-generator)
 
 # Print the lines of a `## Heading` section, stopping at the next `## ` heading.
@@ -49,7 +48,7 @@ while IFS= read -r dir; do
   skill_dirs+=("$(basename "$dir")")
 done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
-[ "${#skill_dirs[@]}" -eq 24 ] || fail "expected 24 skill directories, found ${#skill_dirs[@]}"
+[ "${#skill_dirs[@]}" -eq 23 ] || fail "expected 23 skill directories, found ${#skill_dirs[@]}"
 
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
@@ -59,31 +58,8 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "found ${#skill_dirs[@]} skills, each with a matching frontmatter name"
 
-# 2. The router Workflow Map must cover every stage skill and name only real ones.
-map_names="$(section "$ROUTER" "## Workflow Map" | grep -oE '^- `[a-z0-9-]+`' | sed -E 's/^- `(.*)`$/\1/' | sort -u)"
-[ -n "$map_names" ] || fail "router Workflow Map lists no skills"
-
-while IFS= read -r name; do
-  [ -n "$name" ] || continue
-  if [ "$name" = "using-sphere-workflow" ]; then
-    fail "router Workflow Map must not list the router itself"
-  fi
-  resolve_token "$name" || fail "router Workflow Map names an unknown skill: $name"
-done <<<"$map_names"
-
+# 3. Every skill carries a complete Related Skills block.
 for name in "${skill_dirs[@]}"; do
-  if [ "$name" = "using-sphere-workflow" ]; then
-    continue
-  fi
-  printf '%s\n' "$map_names" | grep -Fxq "$name" || fail "router Workflow Map omits skill: $name"
-done
-pass "router Workflow Map covers all $((${#skill_dirs[@]} - 1)) stage skills and names only real ones"
-
-# 3. Every stage skill carries a complete Related Skills block.
-for name in "${skill_dirs[@]}"; do
-  if [ "$name" = "using-sphere-workflow" ]; then
-    continue
-  fi
   file="$SKILLS_DIR/$name/SKILL.md"
   block="$(section "$file" "## Related Skills")"
   [ -n "$block" ] || fail "missing '## Related Skills' section: $(display_path "$file")"
@@ -94,18 +70,10 @@ for name in "${skill_dirs[@]}"; do
   printf '%s\n' "$block" | grep -q "not installed" ||
     fail "Related Skills block is missing the not-installed fallback: $(display_path "$file")"
 done
-pass "every stage skill has a Related Skills block with Upstream, Downstream, Boundary, Companion, and a fallback"
-
-grep -q '^## Stage Handoffs$' "$ROUTER" || fail "router is missing the '## Stage Handoffs' section"
-section "$ROUTER" "## Stage Handoffs" | grep -q "do not stall" ||
-  fail "router Stage Handoffs section is missing the do-not-stall rule"
-pass "router carries the Stage Handoffs contract"
+pass "every skill has a Related Skills block with Upstream, Downstream, Boundary, Companion, and a fallback"
 
 # 4. Every skill named inside a Related Skills block must exist.
 for name in "${skill_dirs[@]}"; do
-  if [ "$name" = "using-sphere-workflow" ]; then
-    continue
-  fi
   file="$SKILLS_DIR/$name/SKILL.md"
   while IFS= read -r token; do
     [ -n "$token" ] || continue

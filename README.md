@@ -1,137 +1,39 @@
-# sphere-workflow
+# go-sphere skills
 
-`sphere-workflow` is a plugin-style workflow bundle for coding agents working in the
-go-sphere ecosystem. It packages the repository's bundled skills behind a single
-bootstrap entrypoint so agents can discover the right go-sphere workflow stage
-first, instead of treating the repo as a loose collection of unrelated skills.
+Agent skills for the go-sphere ecosystem: requirement and spec writing, go-sphere
+scaffold delivery, Go test and documentation engineering, and multi-agent
+orchestration. Each skill is a directory under `skills/` with a `SKILL.md` that
+coding agents can load on demand.
 
-The repository URL stays the same: `https://github.com/go-sphere/skills`.
-
-## What the Plugin Does
-
-- Boots the agent into the go-sphere workflow through `using-sphere-workflow`
-- Routes requirement shaping, specification, schema, API, and implementation work
-  to the smallest relevant bundled skill
-- Carries stage handoffs: every bundled skill names its upstream, downstream,
-  boundary, and companion skills, so finished work moves to the next stage
-  without re-routing from scratch
-- Preserves direct skill usage for advanced users and existing installs
-- Adds thin platform adapters for Claude Code, Cursor, Codex, and OpenCode
+The repository URL is `https://github.com/go-sphere/skills`.
 
 ## Installation
 
-Choose the path that matches your agent. The README keeps the shortest working
-install flow here; platform-specific details stay in the linked docs.
+```bash
+# Install every skill
+npx skills add https://github.com/go-sphere/skills
 
-### Claude Code
+# Install selected skills
+npx skills add https://github.com/go-sphere/skills \
+  --skill db-schema-designer \
+  --skill ent-schema-implementer \
+  --skill proto-api-generator \
+  --skill sphere-feature-workflow
+```
 
-Bootstrap Claude Code into the go-sphere workflow instead of manually picking
-between PRD, spec, schema, proto, and service skills. The plugin loads
-`using-sphere-workflow` first, then routes into the smallest relevant next step.
+Re-run the command to refresh installed skills from this repository.
 
-Marketplace install:
+Invoke a skill by name, for example:
 
 ```text
-/plugin marketplace add go-sphere/skills
-/plugin install sphere-workflow@sphere-workflow-marketplace
+Use the proto-api-generator skill to generate API definitions
 ```
 
-Or clone locally:
-
-```bash
-git clone https://github.com/go-sphere/skills.git ~/src/sphere-workflow
-```
-
-Then register the repository root in Claude Code using one of these entrypoints:
-
-- `.claude-plugin/plugin.json`
-- `.claude-plugin/marketplace.json`
-
-Start a fresh Claude Code session after install or registration.
-
-Detailed docs: [docs/README.claude.md](docs/README.claude.md)
-
-### Cursor
-
-Quick start:
-
-```bash
-git clone https://github.com/go-sphere/skills.git ~/src/sphere-workflow
-```
-
-Then register the repository root with your normal Cursor local plugin flow
-using:
-
-- `.cursor-plugin/plugin.json`
-
-Start a fresh Cursor session after registration.
-
-Detailed docs: [docs/README.cursor.md](docs/README.cursor.md)
-
-### Codex
-
-Quick install:
-
-Tell Codex:
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.codex/INSTALL.md
-```
-
-Manual install:
-
-```bash
-git clone https://github.com/go-sphere/skills.git ~/.codex/sphere-workflow
-mkdir -p ~/.agents/skills
-rm -f ~/.agents/skills/sphere-workflow
-ln -s ~/.codex/sphere-workflow/skills ~/.agents/skills/sphere-workflow
-```
-
-Restart Codex after creating or updating the symlink.
-
-Verify:
-
-```bash
-ls -la ~/.agents/skills/sphere-workflow
-```
-
-Detailed docs: [docs/README.codex.md](docs/README.codex.md)
-
-### OpenCode
-
-Quick install:
-
-Tell OpenCode:
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/go-sphere/skills/refs/heads/master/.opencode/INSTALL.md
-```
-
-Manual install:
-
-```bash
-git clone https://github.com/go-sphere/skills.git ~/.config/opencode/sphere-workflow
-mkdir -p ~/.config/opencode/plugins ~/.config/opencode/skills
-rm -f ~/.config/opencode/plugins/sphere-workflow.js
-rm -rf ~/.config/opencode/skills/sphere-workflow
-ln -s ~/.config/opencode/sphere-workflow/.opencode/plugins/sphere-workflow.js ~/.config/opencode/plugins/sphere-workflow.js
-ln -s ~/.config/opencode/sphere-workflow/skills ~/.config/opencode/skills/sphere-workflow
-```
-
-Restart OpenCode after creating or updating the symlinks.
-
-Verify:
-
-```bash
-ls -l ~/.config/opencode/plugins/sphere-workflow.js
-ls -l ~/.config/opencode/skills/sphere-workflow
-```
-
-Detailed docs: [docs/README.opencode.md](docs/README.opencode.md)
+or with `/<skill-name>` where the agent supports slash invocation.
 
 ## Workflow Map
 
-The plugin is meant to move work through the go-sphere lifecycle in order.
+The skills move work through the go-sphere lifecycle in order.
 
 ```text
 Interactive requirement interview & alignment
@@ -182,25 +84,9 @@ Several live coding agents in Rex tabs
   -> rex-desktop
 ```
 
-The bootstrap rule is simple:
-
-- If the user explicitly names a skill, use it.
-- If the task spans multiple stages, start at the earliest missing artifact.
-- If the task touches proto, schema, service, or generation boundaries, route into
-  `sphere-feature-workflow`.
-- If the task is about updating a project to a newer layout revision, route into
-  `sphere-layout-sync`.
-- If the task is about the `protoc-gen-*` plugins themselves rather than the
-  `.proto` files they consume, route into `protoc-plugin-engineering`.
-- If the task is auditing or simplifying existing Go code for over-design,
-  over-optimization, or over-defensive checks rather than adding a feature,
-  route into `go-simplify`.
-- If the task is migrating or porting a codebase in another language to Go,
-  route into `migrate-to-golang`.
-- If the task is auditing a repository to decide what to improve, or writing plans
-  that other agents will execute, route into `improve`.
-- After a stage skill finishes, honor the handoff in its `## Related Skills` block
-  before starting a new classification pass.
+Each skill's `## Related Skills` block names its upstream, downstream, boundary, and
+companion skills, so finished work moves to the next stage without re-classifying
+from scratch.
 
 ## Bundled Skills
 
@@ -248,122 +134,11 @@ The bootstrap rule is simple:
 - `delegate` runs one task headless in claude, codex, kimi, agy, or pi, returns a structured result, resumes the session, and owns every agent-specific flag and executable lookup.
 - `rex-desktop` coordinates several live agents as workers in Rex tabs: spawn, wait until done, follow up, and verify. It launches agents through `delegate`.
 
-## Legacy Direct Install
-
-The repository still works as a direct skill source for compatibility:
-
-```bash
-# Install a single skill
-npx skills add https://github.com/go-sphere/skills --skill db-schema-designer
-
-# Install multiple skills
-npx skills add https://github.com/go-sphere/skills \
-  --skill db-schema-designer \
-  --skill ent-schema-implementer \
-  --skill proto-api-generator \
-  --skill sphere-feature-workflow
-
-# Install all bundled skills
-npx skills add https://github.com/go-sphere/skills
-```
-
-You can also invoke a specific skill directly after installation, for example:
-
-```text
-Use the proto-api-generator skill to generate API definitions
-```
-
 ## Default CLAUDE.md
 
 [CLAUDE.TEMPLATE.md](CLAUDE.TEMPLATE.md) is a starting `CLAUDE.md` for a go-sphere
 project: general coding-behavior guidelines plus go-sphere conventions. Copy it to the
 project root as `CLAUDE.md` (or `AGENTS.md`) and fill in the project-specific section.
-
-## Updating
-
-### Codex
-
-```bash
-cd ~/.codex/sphere-workflow && git pull
-```
-
-### OpenCode
-
-```bash
-cd ~/.config/opencode/sphere-workflow && git pull
-```
-
-### Claude Code / Cursor Local Plugin
-
-```bash
-cd /path/to/your/sphere-workflow-clone && git pull
-```
-
-### Direct Skill Install
-
-Re-run your `npx skills add ...` command when you want to refresh the installed
-skills from this repository.
-
-## Uninstalling
-
-### Codex
-
-```bash
-rm ~/.agents/skills/sphere-workflow
-rm -rf ~/.codex/sphere-workflow
-```
-
-### OpenCode
-
-```bash
-rm ~/.config/opencode/plugins/sphere-workflow.js
-rm -rf ~/.config/opencode/skills/sphere-workflow
-rm -rf ~/.config/opencode/sphere-workflow
-```
-
-### Claude Code Local Plugin
-
-Remove the local plugin or local marketplace registration that points at this
-repository clone, then delete the clone if you no longer need it.
-
-### Cursor Local Plugin
-
-Remove the local Cursor plugin registration that points at this repository
-clone, then delete the clone if you no longer need it.
-
-## Troubleshooting
-
-### Codex cannot see the plugin
-
-- Verify `~/.agents/skills/sphere-workflow` exists and points to the cloned `skills/` directory.
-- Restart Codex after creating or updating the symlink.
-- Check that `skills/using-sphere-workflow/SKILL.md` exists in the clone.
-
-### OpenCode plugin does not load
-
-- Verify `~/.config/opencode/plugins/sphere-workflow.js` points to `.opencode/plugins/sphere-workflow.js`.
-- Verify `~/.config/opencode/skills/sphere-workflow` points to the cloned `skills/` directory.
-- Restart OpenCode after creating or updating the symlinks.
-
-### Claude Code does not inject the bootstrap
-
-- Verify `.claude-plugin/plugin.json` exists in the clone.
-- Verify `.claude-plugin/marketplace.json` exists in the clone if you use a local marketplace flow.
-- Verify the repository is registered as a local plugin root.
-- Check that `hooks/hooks.json` and `hooks/session-start` are present in the clone.
-- Confirm the plugin root still points at the same repository checkout.
-
-### Cursor does not inject the bootstrap
-
-- Verify `.cursor-plugin/plugin.json` exists in the clone.
-- Verify the repository is registered as a local Cursor plugin root.
-- Check that `hooks/hooks.json` and `hooks/session-start` are present in the clone.
-- Confirm the plugin root still points at the same repository checkout.
-
-### I still want a single skill directly
-
-Use the compatibility install path with `npx skills add https://github.com/go-sphere/skills`
-and install only the skills you need.
 
 ## Tech Stack
 
@@ -401,9 +176,8 @@ from its skill's Reference Map.
 
 ## Contributing
 
-Issues and pull requests are welcome. The plugin shell lives beside the bundled
-skills, so changes may affect both platform adapters and the skills themselves.
-Run `bash tests/run-tests.sh` before opening a pull request.
+Issues and pull requests are welcome. Run `bash tests/run-tests.sh` before opening a
+pull request.
 
 ## License
 

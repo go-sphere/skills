@@ -9,7 +9,7 @@ Three audiences read a skill, and they read different amounts of it:
 
 | Audience | What it sees | What it needs |
 |----------|--------------|---------------|
-| The router (always loaded) | only `description` | enough to pick the right skill and reject the wrong one |
+| The skill picker (every description is always loaded) | only `description` | enough to pick the right skill and reject the wrong one |
 | A strong model | `SKILL.md` plus the references it decides it needs | a decision path, not prose |
 | A weak model | `SKILL.md` plus whatever it is told to load | explicit, numbered, unconditional instructions |
 
@@ -108,7 +108,7 @@ it first and saying so ("Always, before step 2").
 
 ## Related Skills Block
 
-Required on every skill except the router. Exact bullet labels, because the test greps them:
+Required on every skill. Exact bullet labels, because the test greps them:
 
 ```markdown
 ## Related Skills
@@ -127,4 +127,4 @@ Required on every skill except the router. Exact bullet labels, because the test
 3. `SKILL.md` is under 150 lines and follows the section order.
 4. Every reference file is linked from the Reference Map with a load-when condition.
 5. No reference file exceeds 200 lines.
-6. The router's Workflow Map and `README.md` still describe the skill correctly.
+6. `README.md` still describes the skill correctly.
