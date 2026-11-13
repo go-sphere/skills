@@ -1,6 +1,6 @@
 ---
-name: sphere-layout-sync
-description: Update a generated go-sphere project to a newer layout revision, or adopt a legacy project into the layout contract. Use to pull upstream layout changes into a project, resolve layout drift, set up `.sphere/layout.lock.json` for a pre-contract project, or diagnose why a layout upgrade conflicts. Not for ordinary feature work — that is `sphere-feature-workflow`.
+name: sphere-sync
+description: Update a generated go-sphere project to a newer layout revision, or adopt a legacy project into the layout contract. Use to pull upstream layout changes into a project, resolve layout drift, set up `.sphere/layout.lock.json` for a pre-contract project, or diagnose why a layout upgrade conflicts. Not for ordinary feature work — that is `sphere-feature`.
 ---
 
 # Sphere Layout Sync
@@ -86,7 +86,7 @@ State all of these:
 ## Related Skills
 
 - Upstream — none; this skill is event-driven, triggered by layout drift, a new layout revision, or adopting a project that predates the lock contract.
-- Downstream — `sphere-feature-workflow` once the lock has advanced and the project is back inside the contract; `go-sphere-makefiles` when the layout-repository checklist is in scope. Hand off after reporting the per-class summary and verification results.
-- Boundary — use `sphere-feature-workflow` for ordinary feature work inside a project; this skill owns layout revision movement, drift resolution, and legacy adoption.
-- Companion — `go-sphere-makefiles` for Make and CI correctness across layout repositories; if it is unavailable, report the Makefile concerns instead of editing them here.
+- Downstream — `sphere-feature` once the lock has advanced and the project is back inside the contract; `sphere-make` when the layout-repository checklist is in scope. Hand off after reporting the per-class summary and verification results.
+- Boundary — use `sphere-feature` for ordinary feature work inside a project; this skill owns layout revision movement, drift resolution, and legacy adoption.
+- Companion — `sphere-make` for Make and CI correctness across layout repositories; if it is unavailable, report the Makefile concerns instead of editing them here.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

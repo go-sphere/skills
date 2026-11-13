@@ -1,6 +1,6 @@
 ---
-name: go-sphere-makefiles
-description: Standardize, review, or repair Makefiles and Make-driven CI across go-sphere repositories. Use when adding common dependency, formatting, test, lint, check, build, generation, or root batch targets while preserving repository-specific workflows, including multi-module and layout repositories. Do not use for test design, assertions, or test-value review — that is `go-test-engineering`.
+name: sphere-make
+description: Standardize, review, or repair Makefiles and Make-driven CI across go-sphere repositories. Use when adding common dependency, formatting, test, lint, check, build, generation, or root batch targets while preserving repository-specific workflows, including multi-module and layout repositories. Do not use for test design, assertions, or test-value review — that is `go-test`.
 ---
 
 # Go-Sphere Makefiles
@@ -104,6 +104,6 @@ Do not commit, push, tag, publish, or rerun remote workflows unless the user ask
 
 - Upstream — none; Make targets and CI can be standardized independently of any feature stage.
 - Downstream — none; the Make contract and verification report are the deliverable.
-- Boundary — use `go-test-engineering` for test content, assertions, and test value, and `sphere-feature-workflow` for the Make contract inside feature work.
+- Boundary — use `go-test` for test content, assertions, and test value, and `sphere-feature` for the Make contract inside feature work.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

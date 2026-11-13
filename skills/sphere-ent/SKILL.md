@@ -1,5 +1,5 @@
 ---
-name: ent-schema-implementer
+name: sphere-ent
 description: Implement an approved database design as Go Ent schemas in a go-sphere project. Use when the data model is already settled and the next step is writing or updating Ent schema code, entproto annotations, generation steps, and bind/render/service integration notes. Not for early-stage modeling or open design questions — that is `interview-me`.
 ---
 
@@ -111,12 +111,12 @@ Then close with:
 > **Manual follow-up needed:**
 > - `...`
 >
-> **Next skill:** use `sphere-feature-workflow` if you need service implementations from the generated interfaces.
+> **Next skill:** use `sphere-feature` if you need service implementations from the generated interfaces.
 
 ## Related Skills
 
-- Upstream — `spec-writer` supplies entity definitions; use `interview-me` when the data model is still fluid. When neither exists, work from the entities the user provides directly.
-- Downstream — `sphere-feature-workflow` for service implementations of the generated interfaces (see the handoff message above). Hand off after the listed generation and verification commands pass.
-- Boundary — use `spec-writer` for entity and state definitions and `interview-me` for open data-model decisions; this skill owns Ent schema files and entproto annotations.
-- Companion — `sphere-feature-workflow` when integration spills past schema files into bind, render, or service layers; if it is unavailable, report those touchpoints as manual follow-up instead.
+- Upstream — `spec` supplies entity definitions; use `interview-me` when the data model is still fluid. When neither exists, work from the entities the user provides directly.
+- Downstream — `sphere-feature` for service implementations of the generated interfaces (see the handoff message above). Hand off after the listed generation and verification commands pass.
+- Boundary — use `spec` for entity and state definitions and `interview-me` for open data-model decisions; this skill owns Ent schema files and entproto annotations.
+- Companion — `sphere-feature` when integration spills past schema files into bind, render, or service layers; if it is unavailable, report those touchpoints as manual follow-up instead.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

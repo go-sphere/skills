@@ -16,6 +16,27 @@ Three audiences read a skill, and they read different amounts of it:
 Progressive disclosure is the budget that makes this work: descriptions stay cheap,
 `SKILL.md` stays skimmable, and detail waits in references until a named condition is true.
 
+## Skill Names
+
+Agents let you invoke a skill as `/<name>`, so names are short and follow one pattern:
+
+| Pattern | Use for |
+|---------|---------|
+| `sphere-<topic>` | a skill that assumes a go-sphere scaffold project or its layout contract |
+| `go-<topic>`, `godoc` | a skill that works on any Go repository |
+| `<topic>` | everything else |
+
+Rules:
+
+1. One or two words, under 14 characters where possible. Name the thing worked on, not the
+   role: `sphere-api`, not `sphere-api-generator`.
+2. No role suffixes such as `-generator`, `-implementer`, `-designer`, `-engineering`,
+   `-pipeline`, or `-workflow`.
+3. Do not reuse the name of an agent's built-in slash command (for example `simplify`, `init`,
+   `loop`). Add the family prefix instead: `go-simplify`.
+4. The directory name, the frontmatter `name`, and every reference must match. When a skill is
+   renamed, add its old name to `STALE_NAMES` in `tests/validate-skill-references.sh`.
+
 ## Size Budgets
 
 | File | Budget | Why |
@@ -128,3 +149,4 @@ Required on every skill. Exact bullet labels, because the test greps them:
 4. Every reference file is linked from the Reference Map with a load-when condition.
 5. No reference file exceeds 200 lines.
 6. `README.md` still describes the skill correctly.
+7. The name follows the pattern in Skill Names.

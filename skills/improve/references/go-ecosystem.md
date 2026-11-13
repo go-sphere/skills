@@ -29,7 +29,7 @@ A Go file is generated when a line before its first code matches `^// Code gener
 
 `.sphere/layout.json` classifies every path as `generated`, `layout_owned`, `mixed`, or the default `project_owned`; the first matching pattern wins. Product code lives in `project_owned` paths: `proto/<domain>/v1`, `internal/biz/<domain>`, `internal/service/<domain>`, and in Ent layouts `internal/pkg/database/schema`. A project without `.sphere/` predates the contract: treat every path as `project_owned` except generated outputs, and say ownership could not be verified.
 
-Read `name` in `.sphere/layout.json` for the layout variant. The variants (`standard`, `simple`, `bun`, `telegram`) have different capabilities, so never plan Ent work for a layout without Ent. The `sphere-feature-workflow` skill documents each.
+Read `name` in `.sphere/layout.json` for the layout variant. The variants (`standard`, `simple`, `bun`, `telegram`) have different capabilities, so never plan Ent work for a layout without Ent. The `sphere-feature` skill documents each.
 
 ## 3. Several repositories
 
@@ -48,7 +48,7 @@ These are signals, not verdicts. Read the code before reporting.
 | Correctness | Ignored `error` results; `defer` inside loops; `err` shadowed in an inner scope; writes to a nil map; a typed nil returned as an interface; `context.Background()` in a request path instead of the caller's context; goroutines with no stop signal; `sync.WaitGroup` or channel misuse; unsynchronized shared state; `rows.Err()` unchecked or `Rows` and `resp.Body` never closed; loop variables captured by closures when `go.mod` says a version before 1.22; errors compared as strings instead of `errors.Is` or `errors.As`; a `recover` that hides a panic. |
 | Security | SQL built by concatenation or `fmt.Sprintf`; `os/exec` arguments or file paths built from request data (look for `filepath.IsLocal`, and `os.Root` on Go 1.24 or later); `math/rand` used for tokens; `InsecureSkipVerify: true`; JWT validation that does not pin the algorithm or check expiry; outbound requests to user-supplied URLs without an allowlist; request bodies read without `http.MaxBytesReader`; an `http.Server` without timeouts; secrets in logs. |
 | Performance | Ent or SQL queries inside loops (eager loading with `With<Edge>()` or batching with `IDIn` instead); `regexp.MustCompile` inside a hot function; unbounded goroutine fan-out; list endpoints without pagination; an `http.Client` or `sql.DB` built per request. A micro-optimization without a benchmark or profile is not a finding. |
-| Tests | Tests that use the network or the wall clock, order-dependent tests, a golden file no external process justifies, interface drivers without a shared contract suite. Plans for these hand the work to `go-test-engineering`. |
+| Tests | Tests that use the network or the wall clock, order-dependent tests, a golden file no external process justifies, interface drivers without a shared contract suite. Plans for these hand the work to `go-test`. |
 | Tech debt | Over-design, over-optimization, and over-defensive checks belong to `go-simplify`. Report them as one finding that names that skill. Do not list them one by one. |
 | Dependencies | An old `go` directive, leftover `replace` directives, deprecated APIs such as `io/ioutil`, and `govulncheck` results that reach called code. Report only reachable vulnerabilities. |
 | DX | A missing single-command gate, no linter config, CI without a module cache, no agent guide. |
@@ -71,15 +71,15 @@ The executor may not have these skills, so the plan must stand alone. A toolkit 
 
 | The plan touches | Name this skill |
 |------------------|-----------------|
-| Go tests or test strategy | `go-test-engineering` |
+| Go tests or test strategy | `go-test` |
 | Dead code, defensive checks, over-design in Go | `go-simplify` |
 | Doc comments and examples for exported Go API | `godoc` |
-| Makefile targets or Make-driven CI | `go-sphere-makefiles` |
-| `.proto` contracts or HTTP API shape | `proto-api-generator` |
-| Ent schema | `ent-schema-implementer` |
-| Proto, schema, service, and generation across layers | `sphere-feature-workflow` |
-| Pulling layout changes into a project | `sphere-layout-sync` |
-| Porting another language to Go | `migrate-to-golang` |
-| A direction plan that needs a spec first | `spec-writer` or `prd` |
+| Makefile targets or Make-driven CI | `sphere-make` |
+| `.proto` contracts or HTTP API shape | `sphere-api` |
+| Ent schema | `sphere-ent` |
+| Proto, schema, service, and generation across layers | `sphere-feature` |
+| Pulling layout changes into a project | `sphere-sync` |
+| Porting another language to Go | `go-migrate` |
+| A direction plan that needs a spec first | `spec` or `prd` |
 
 For a missing agent guide in a go-sphere project, point the executor at `CLAUDE.TEMPLATE.md` in `https://github.com/go-sphere/skills`.

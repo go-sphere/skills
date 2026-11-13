@@ -64,7 +64,7 @@ func Load() (*Config, error) {
 
 ## Suggested executor toolkit
 
-- `go-test-engineering`, when available, for the table cases in step 1.
+- `go-test`, when available, for the table cases in step 1.
 
 ## Scope
 

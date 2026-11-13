@@ -1,6 +1,6 @@
 ---
-name: sphere-feature-workflow
-description: Implement end-to-end feature changes in go-sphere scaffold projects under the layout ownership contract. Use for any task touching proto files, Ent schemas, bind/map registration, service methods and stubs, cross-layer refactors, or `make gen/*` commands, so edits stay protocol-first and never land in generated files. Not for layout upgrades or drift — that is `sphere-layout-sync`.
+name: sphere-feature
+description: Implement end-to-end feature changes in go-sphere scaffold projects under the layout ownership contract. Use for any task touching proto files, Ent schemas, bind/map registration, service methods and stubs, cross-layer refactors, or `make gen/*` commands, so edits stay protocol-first and never land in generated files. Not for layout upgrades or drift — that is `sphere-sync`.
 ---
 
 # Sphere Feature Workflow
@@ -103,8 +103,8 @@ Report completion in this exact section order:
 
 ## Related Skills
 
-- Upstream — `spec-writer` supplies intended behavior; `proto-api-generator` and `ent-schema-implementer` supply the contracts and schemas that must exist before generation. When the project has no `.sphere/layout.json`, run `sphere-layout-sync` first instead of guessing ownership.
-- Downstream — `go-test-engineering` when `make test` coverage does not prove the behavior; `go-simplify` for an optional behavior-neutral leanness pass once validation is green; and `go-sphere-makefiles` when the `make check` delivery gate is missing or broken. Hand off after the final output contract is reported with validation results.
-- Boundary — use `sphere-layout-sync` for layout drift and upgrades and `frontend-crud-generator` for frontend pages and routes.
+- Upstream — `spec` supplies intended behavior; `sphere-api` and `sphere-ent` supply the contracts and schemas that must exist before generation. When the project has no `.sphere/layout.json`, run `sphere-sync` first instead of guessing ownership.
+- Downstream — `go-test` when `make test` coverage does not prove the behavior; `go-simplify` for an optional behavior-neutral leanness pass once validation is green; and `sphere-make` when the `make check` delivery gate is missing or broken. Hand off after the final output contract is reported with validation results.
+- Boundary — use `sphere-sync` for layout drift and upgrades and `sphere-crud` for frontend pages and routes.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

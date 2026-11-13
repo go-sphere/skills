@@ -172,7 +172,7 @@ class LintPlan(TempCase):
         self.assertIn("missing section '## Report back'", errors)
 
     def test_toolkit_section_is_optional_but_allowed(self):
-        with_toolkit = plan_text().replace("## Scope", "## Suggested executor toolkit\n\n- `go-test-engineering`\n\n## Scope", 1)
+        with_toolkit = plan_text().replace("## Scope", "## Suggested executor toolkit\n\n- `go-test`\n\n## Scope", 1)
         self.assertEqual(self.lint(with_toolkit), [])
 
     def test_sections_out_of_order_warn(self):

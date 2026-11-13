@@ -1,6 +1,6 @@
 ---
 name: prd
-description: "Write a Product Requirements Document: problem framing, personas, business processes, module boundaries, page inventory, measurable success criteria, scope, and risks. Use when the user wants a PRD, requirements documented, or a business idea turned into a product plan — 写 PRD, 整理需求, 需求文档. Not for API contracts, schemas, or implementation detail — that is `spec-writer`."
+description: "Write a Product Requirements Document: problem framing, personas, business processes, module boundaries, page inventory, measurable success criteria, scope, and risks. Use when the user wants a PRD, requirements documented, or a business idea turned into a product plan — 写 PRD, 整理需求, 需求文档. Not for API contracts, schemas, or implementation detail — that is `spec`."
 ---
 
 # Product Requirements Document (PRD)
@@ -61,7 +61,7 @@ Before finishing, confirm every item:
 ## Related Skills
 
 - Upstream — none required; run `interview-me` first when the business direction is still unresolved.
-- Downstream — `spec-writer` is always the next stage. Hand off once the PRD completion criteria are met and no implementation details leaked in.
-- Boundary — use `spec-writer` for engineering contracts, state machines, and API or schema detail; this skill owns problem framing, personas, scope, and success metrics.
+- Downstream — `spec` is always the next stage. Hand off once the PRD completion criteria are met and no implementation details leaked in.
+- Boundary — use `spec` for engineering contracts, state machines, and API or schema detail; this skill owns problem framing, personas, scope, and success metrics.
 - Companion — `interview-me` when discovery answers stay vague; if it is unavailable, list the open questions under risks and dependencies instead.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

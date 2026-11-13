@@ -15,9 +15,9 @@ npx skills add https://github.com/go-sphere/skills
 
 # Install selected skills
 npx skills add https://github.com/go-sphere/skills \
-  --skill ent-schema-implementer \
-  --skill proto-api-generator \
-  --skill sphere-feature-workflow
+  --skill sphere-ent \
+  --skill sphere-api \
+  --skill sphere-feature
 ```
 
 Re-run the command to refresh installed skills from this repository.
@@ -25,47 +25,59 @@ Re-run the command to refresh installed skills from this repository.
 Invoke a skill by name, for example:
 
 ```text
-Use the proto-api-generator skill to generate API definitions
+Use the sphere-api skill to generate API definitions
 ```
 
 or with `/<skill-name>` where the agent supports slash invocation.
 
+## Skill Names
+
+Names are short so they are quick to type as `/<name>`. The prefix tells you what a skill
+assumes:
+
+| Pattern | Assumes | Skills |
+|---------|---------|--------|
+| `sphere-*` | a go-sphere scaffold project | `sphere-feature`, `sphere-api`, `sphere-ent`, `sphere-crud`, `sphere-sync`, `sphere-make` |
+| `go-*`, `godoc` | any Go repository | `go-test`, `go-simplify`, `go-migrate`, `godoc` |
+| no prefix | nothing; general purpose | `interview-me`, `prd`, `spec`, `improve`, `delegate`, `rex-desktop` |
+
 ## Workflow Map
 
-The skills move work through the go-sphere lifecycle in order.
+The go-sphere delivery lifecycle runs from `interview-me` to `sphere-feature`. The rest are
+maintenance, quality, and orchestration skills you can call at any point.
 
 ```text
-Interactive requirement interview & alignment
+Settle ambiguous decisions by interview
   -> interview-me
 PRD / product framing
   -> prd
 Implementation-ready specification
-  -> spec-writer
+  -> spec
 Ent schema implementation
-  -> ent-schema-implementer
+  -> sphere-ent
 Proto + HTTP contract design
-  -> proto-api-generator
-Scaffold features across proto, schema, and service layers
-  -> sphere-feature-workflow
+  -> sphere-api
+Features across proto, schema, and service layers
+  -> sphere-feature
 Frontend pages and routes
-  -> frontend-crud-generator
+  -> sphere-crud
 Layout upgrade, drift, or legacy adoption
-  -> sphere-layout-sync
+  -> sphere-sync
+Makefile and Make-driven CI standardization
+  -> sphere-make
 Go test review, repair, and authoring
-  -> go-test-engineering
+  -> go-test
 Go API documentation and verified usage examples for agents
   -> godoc
 Go code leanness audit and safe simplification
   -> go-simplify
+Migrating a non-Go codebase to Go
+  -> go-migrate
 Codebase audit and self-contained plans for other agents
   -> improve
-Migrating a non-Go codebase to Go
-  -> migrate-to-golang
-Makefile and Make-driven CI standardization
-  -> go-sphere-makefiles
 One headless task for another coding agent
   -> delegate
-Several live coding agents in Rex tabs
+Several live coding agents in Rex floating panes
   -> rex-desktop
 ```
 
@@ -75,42 +87,33 @@ from scratch.
 
 ## Bundled Skills
 
-### Discovery and Requirements
+### go-sphere projects (`sphere-*`)
+
+- `sphere-feature` handles end-to-end scaffold feature delivery across proto, schema, bind/map, and service layers, including completing service methods and SSE producers from generated interfaces.
+- `sphere-api` designs scaffold-safe proto3 + HTTP contracts.
+- `sphere-ent` converts approved designs into Ent schema files.
+- `sphere-crud` generates admin pages and route registration from a sphere-generated TypeScript swagger client, following the project's own framework conventions.
+- `sphere-sync` updates a generated project to a newer layout revision, resolves layout drift, and adopts pre-contract projects into the `.sphere/layout.lock.json` model.
+- `sphere-make` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
+
+### Go engineering (`go-*`, `godoc`)
+
+- `go-test` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
+- `godoc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
+- `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
+- `go-migrate` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
+
+### Requirements and planning
 
 - `interview-me` deeply interviews the user through a decision tree until reaching shared technical and product consensus.
 - `prd` turns agreed direction into a high-quality PRD.
-
-### Specification and Planning
-
-- `spec-writer` produces implementation-ready specifications.
-
-### Data and Contract Design
-
-- `ent-schema-implementer` converts approved designs into Ent schema files.
-- `proto-api-generator` designs scaffold-safe proto3 + HTTP contracts.
-
-### Implementation and Surfaces
-
-- `sphere-feature-workflow` handles end-to-end scaffold feature delivery across proto, schema, bind/map, and service layers, including completing service methods and SSE producers from generated interfaces.
-- `frontend-crud-generator` generates admin pages and route registration from a sphere-generated TypeScript swagger client, following the project's own framework conventions.
-
-### Layout and Toolchain Maintenance
-
-- `sphere-layout-sync` updates a generated project to a newer layout revision, resolves layout drift, and adopts pre-contract projects into the `.sphere/layout.lock.json` model.
-
-### Quality and Verification
-
-- `godoc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
-- `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
-- `migrate-to-golang` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
-- `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
+- `spec` produces implementation-ready specifications.
 - `improve` audits a codebase read-only and writes self-contained implementation plans with verification gates for cheaper agents to execute. It can dispatch an executor through `delegate`, review the diff, and keep the plan backlog current. Adapted from [shadcn/improve](https://github.com/shadcn/improve) (MIT).
-- `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
-### Agent Orchestration
+### Agent orchestration
 
 - `delegate` runs one task headless in claude, codex, kimi, agy, or pi, returns a structured result, resumes the session, and owns every agent-specific flag and executable lookup.
-- `rex-desktop` coordinates several live agents as workers in Rex tabs: spawn, wait until done, follow up, and verify. It launches agents through `delegate`.
+- `rex-desktop` coordinates several live agents as workers in Rex floating panes: spawn, wait until done, follow up, and verify. It launches agents through `delegate`.
 
 ## Default CLAUDE.md
 

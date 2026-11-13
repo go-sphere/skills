@@ -78,7 +78,7 @@ Once all critical branches of the decision tree have converged:
 ## Related Skills
 
 - Upstream — none; this skill can run before any stage and explores the codebase before asking anything.
-- Downstream — `spec-writer` for technical decisions or `prd` for business direction; hand off once the decision tree converges and the alignment summary is complete.
-- Boundary — `prd` and `spec-writer` write the documents; this skill owns interactive, one-question-at-a-time decision resolution and writes none of them.
+- Downstream — `spec` for technical decisions or `prd` for business direction; hand off once the decision tree converges and the alignment summary is complete.
+- Boundary — `prd` and `spec` write the documents; this skill owns interactive, one-question-at-a-time decision resolution and writes none of them.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

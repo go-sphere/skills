@@ -1,6 +1,6 @@
 ---
-name: proto-api-generator
-description: Design proto3 and HTTP API contracts for go-sphere scaffold projects, including server-streaming SSE endpoints. Use when defining service APIs, choosing between entpb, shared, and custom messages, or enforcing scaffold conventions, route-safety rules, and service-local error placement. Not for landing the contract or running generation — that is `sphere-feature-workflow`.
+name: sphere-api
+description: Design proto3 and HTTP API contracts for go-sphere scaffold projects, including server-streaming SSE endpoints. Use when defining service APIs, choosing between entpb, shared, and custom messages, or enforcing scaffold conventions, route-safety rules, and service-local error placement. Not for landing the contract or running generation — that is `sphere-feature`.
 ---
 
 # Proto API Generator
@@ -91,8 +91,8 @@ not replace local references with external links in final outputs.
 
 ## Related Skills
 
-- Upstream — `spec-writer` supplies service boundaries, entities, and states; `prd` supplies scope.
-- Downstream — `sphere-feature-workflow` lands the `.proto`, runs generation, and completes the generated service interfaces; `frontend-crud-generator` builds the frontend pages and routes once the swagger client is regenerated. Hand off when the final-gate checklist passes.
-- Boundary — this skill owns the `.proto` contracts; `sphere-feature-workflow` owns landing them and running generation. Changes to the `protoc-gen-*` plugins themselves are out of scope.
-- Companion — `sphere-feature-workflow` when the contract change must land together with schema, service, or generation changes; if it is unavailable, finish the contract and list the integration steps as follow-up.
+- Upstream — `spec` supplies service boundaries, entities, and states; `prd` supplies scope.
+- Downstream — `sphere-feature` lands the `.proto`, runs generation, and completes the generated service interfaces; `sphere-crud` builds the frontend pages and routes once the swagger client is regenerated. Hand off when the final-gate checklist passes.
+- Boundary — this skill owns the `.proto` contracts; `sphere-feature` owns landing them and running generation. Changes to the `protoc-gen-*` plugins themselves are out of scope.
+- Companion — `sphere-feature` when the contract change must land together with schema, service, or generation changes; if it is unavailable, finish the contract and list the integration steps as follow-up.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

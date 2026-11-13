@@ -38,7 +38,7 @@ Suggest where to take the project. Run recon, then audit only `## 9. Direction` 
 1. Produce 4 to 6 grounded suggestions. Each has cited evidence, trade-offs in two or three sentences, and a coarse effort.
 2. Present them as options, not as a ranked to-do list.
 3. A selected suggestion becomes a design or spike plan with category `direction`. Its steps investigate, prototype, define the API, and list open questions. Its done criteria are artifacts such as a design note or a prototype behind a flag. They are never "feature shipped".
-4. When the choice needs product judgment, hand to `interview-me`. When the user commits to a direction, the next stage is `prd` or `spec-writer`, not a build plan.
+4. When the choice needs product judgment, hand to `interview-me`. When the user commits to a direction, the next stage is `prd` or `spec`, not a build plan.
 
 ## `plan <description>`
 

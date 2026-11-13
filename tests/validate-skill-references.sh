@@ -24,6 +24,8 @@ STALE_NAMES=(
   ent-schema-generator pure-admin-crud-generator
   using-sphere-workflow project-intake ux-analyst spec-diff-pipeline db-schema-designer
   ent-seed-sql-generator protoc-plugin-engineering proto-service-generator
+  go-test-engineering migrate-to-golang spec-writer sphere-feature-workflow sphere-layout-sync
+  ent-schema-implementer proto-api-generator frontend-crud-generator go-sphere-makefiles
 )
 
 # Print the lines of a `## Heading` section, stopping at the next `## ` heading.

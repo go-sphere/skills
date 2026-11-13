@@ -105,9 +105,9 @@ Generate only operations the client supports and report the gaps explicitly.
 | no delete endpoint | omit delete action |
 | no list endpoint | do not fabricate one; report and stop |
 | update without detail | edit prefills from the row data the project passes to the form; never call a detail endpoint that does not exist |
-| requested field or filter absent from the API | omit the control; report it as a contract gap for `proto-api-generator` |
+| requested field or filter absent from the API | omit the control; report it as a contract gap for `sphere-api` |
 
-Partial CRUD must still run. Unavailable operations are named in the report, never silently omitted. Capabilities the user explicitly asked for that the client cannot support are listed as contract gaps, each with the proto change or endpoint it would need, and handed to `proto-api-generator` rather than faked.
+Partial CRUD must still run. Unavailable operations are named in the report, never silently omitted. Capabilities the user explicitly asked for that the client cannot support are listed as contract gaps, each with the proto change or endpoint it would need, and handed to `sphere-api` rather than faked.
 
 ## 7. Dashboard Variant
 

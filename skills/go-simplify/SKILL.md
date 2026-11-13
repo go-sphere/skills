@@ -1,6 +1,6 @@
 ---
 name: go-simplify
-description: Audit and safely simplify Go code for over-design, over-optimization, and over-defensive coding, then apply behavior-neutral cleanups that never break the exported API or the tests. Use when asked to simplify, slim down, or review Go code for leanness, over-engineering, or dead defensive checks — including 精简, 过度设计, 过度优化, 过度防御, 死代码清理. Not for test content — that is `go-test-engineering`.
+description: Audit and safely simplify Go code for over-design, over-optimization, and over-defensive coding, then apply behavior-neutral cleanups that never break the exported API or the tests. Use when asked to simplify, slim down, or review Go code for leanness, over-engineering, or dead defensive checks — including 精简, 过度设计, 过度优化, 过度防御, 死代码清理. Not for test content — that is `go-test`.
 ---
 
 # Go Simplify
@@ -91,8 +91,8 @@ The report must contain all three parts:
 
 ## Related Skills
 
-- Upstream — none; this skill applies after any implementation, or directly to an existing Go module. The test suite is the safety net, so run `go-test-engineering` first when that suite is unreliable or AI-generated.
+- Upstream — none; this skill applies after any implementation, or directly to an existing Go module. The test suite is the safety net, so run `go-test` first when that suite is unreliable or AI-generated.
 - Downstream — none; the applied cleanups and the three-part report are the deliverable.
-- Boundary — use `go-test-engineering` for test content, assertions, and coverage; this skill owns production-code simplification and never edits tests to make a cleanup pass. Use `sphere-feature-workflow` for feature delivery and `go-sphere-makefiles` for the Make targets it gates on.
-- Companion — `go-test-engineering` when a "dead code" finding needs a pinning test before removal; if it is unavailable, record the finding under "report only" instead of deleting.
+- Boundary — use `go-test` for test content, assertions, and coverage; this skill owns production-code simplification and never edits tests to make a cleanup pass. Use `sphere-feature` for feature delivery and `sphere-make` for the Make targets it gates on.
+- Companion — `go-test` when a "dead code" finding needs a pinning test before removal; if it is unavailable, record the finding under "report only" instead of deleting.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

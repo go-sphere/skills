@@ -87,7 +87,7 @@ The plan files and the index live in the plans directory. Their shapes are in `p
 ## Related Skills
 
 - Upstream — `interview-me` when a planning request leaves a decision that only the user can make. Otherwise none; start from a repository.
-- Downstream — `delegate` to run one plan headless in another agent; `rex-desktop` to run several plans as live workers; `sphere-feature-workflow` when a plan changes proto, Ent, service, or generation code; `spec-writer` or `prd` when a direction finding needs a spec before any plan.
-- Boundary — `go-simplify` audits Go for excess and edits in place, while this skill never edits. `go-test-engineering` owns test content; this skill only plans test work.
-- Companion — `go-test-engineering`, `godoc`, and `go-sphere-makefiles`, named in a plan's executor toolkit when the plan's category matches.
+- Downstream — `delegate` to run one plan headless in another agent; `rex-desktop` to run several plans as live workers; `sphere-feature` when a plan changes proto, Ent, service, or generation code; `spec` or `prd` when a direction finding needs a spec before any plan.
+- Boundary — `go-simplify` audits Go for excess and edits in place, while this skill never edits. `go-test` owns test content; this skill only plans test work.
+- Companion — `go-test`, `godoc`, and `sphere-make`, named in a plan's executor toolkit when the plan's category matches.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

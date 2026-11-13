@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Hand one bounded task to another coding agent (claude, codex, kimi, agy, pi) headless, get a structured result, and resume its session. Use when the user says delegate, 交给 codex/kimi/pi 做, 让另一个 agent 评审, or wants a second opinion. Not for coordinating several live agents in Rex tabs — that is `rex-desktop`.
+description: Hand one bounded task to another coding agent (claude, codex, kimi, agy, pi) headless, get a structured result, and resume its session. Use when the user says delegate, 交给 codex/kimi/pi 做, 让另一个 agent 评审, or wants a second opinion. Not for coordinating several live agents in Rex floating panes — that is `rex-desktop`.
 ---
 
 # Delegate
@@ -66,6 +66,6 @@ Default output is `status=`, `agent=`, `session_id=`, `run_dir=`, `elapsed_secon
 
 - Upstream — none. Any skill may hand a bounded task to this one.
 - Downstream — none; the caller verifies the result itself.
-- Boundary — `rex-desktop` owns live, parallel agents in Rex tabs; this skill owns one headless run.
+- Boundary — `rex-desktop` owns live, parallel agents in Rex floating panes; this skill owns one headless run.
 - Companion — `rex-desktop` calls the launch subcommand of this skill to open agents without knowing their flags.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

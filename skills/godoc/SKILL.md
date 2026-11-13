@@ -1,6 +1,6 @@
 ---
 name: godoc
-description: Write Go doc comments and verified examples that let AI agents use a module through go doc. Use when documenting Go packages, 补充 Go 文档, 写给 AI agent 的 API 文档, or adding usage examples. Not for general test-suite review — that is `go-test-engineering`.
+description: Write Go doc comments and verified examples that let AI agents use a module through go doc. Use when documenting Go packages, 补充 Go 文档, 写给 AI agent 的 API 文档, or adding usage examples. Not for general test-suite review — that is `go-test`.
 ---
 
 # Go Doc for Agents
@@ -62,6 +62,6 @@ Provide a concrete package or symbol `go doc` command the consumer can use.
 
 - Upstream — none; use the existing exported API and established behavior as inputs.
 - Downstream — none; self-contained API documentation and verified recipes are the deliverable.
-- Boundary — `go-test-engineering` owns general suite audits and contract-test design; this skill owns documentation and usage examples.
+- Boundary — `go-test` owns general suite audits and contract-test design; this skill owns documentation and usage examples.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

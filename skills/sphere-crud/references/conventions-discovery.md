@@ -92,7 +92,7 @@ On the bootstrap path:
 
 ### Step E — Generated client absent
 
-Stop and report. Offer either to run the sphere generation commands through `sphere-feature-workflow` (`make gen/docs`, `make gen/dts`), or an explicitly degraded run against the project's existing transport. Mark the degraded run in Blocking Issues; never invent endpoints from memory.
+Stop and report. Offer either to run the sphere generation commands through `sphere-feature` (`make gen/docs`, `make gen/dts`), or an explicitly degraded run against the project's existing transport. Mark the degraded run in Blocking Issues; never invent endpoints from memory.
 
 ### Step F — Never
 

@@ -94,7 +94,7 @@ A project created before the ownership contract has no `.sphere/`. Then:
 - Say explicitly in your report that ownership could not be verified.
 - Do not fabricate a lock file to make the project look current. Adopting a
   legacy project into the contract is a separate, deliberate operation — see
-  the `sphere-layout-sync` skill.
+  the `sphere-sync` skill.
 
 ## 5. Reporting
 

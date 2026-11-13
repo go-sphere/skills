@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Telemetry & Executive Infographic Generator for the migrate-to-golang Skill.
+"""Telemetry & Executive Infographic Generator for the go-migrate Skill.
 
 Tracks real wall-clock time across migration task buckets, performs automated
 Before/After codebase censuses (LOC, modularity, comment/doc density, cognitive
@@ -1136,7 +1136,7 @@ def cmd_render_infographic(args: argparse.Namespace) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
   p = argparse.ArgumentParser(
-      description="migrate-to-golang Migration Telemetry & Infographic CLI"
+      description="go-migrate Telemetry & Infographic CLI"
   )
   sub = p.add_subparsers(dest="cmd", required=True)
 
