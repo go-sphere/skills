@@ -79,7 +79,7 @@ State any item that is not met, with the reason, in the final summary.
 ## Related Skills
 
 - Upstream — none; start here with a legacy or foreign-language codebase. Use `interview-me` first when the migration scope or success criteria are vague.
-- Downstream — `go-simplify` for a leanness pass over the finished port, `godoc` to add verified usage examples to exported APIs, and `go-test` to harden the generated tests.
+- Downstream — `go-simplify` for a leanness pass over the finished port, `go-doc` to add verified usage examples to exported APIs, and `go-test` to harden the generated tests.
 - Boundary — this skill owns translating a non-Go codebase into Go and proving parity. Use `go-simplify` for existing Go, `go-test` for test content alone, and `sphere-feature` when the target is a go-sphere project with proto, Ent, and layout contracts.
 - Companion — `delegate` to hand independent modules to parallel headless agents once the blueprint fixes the package boundaries.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

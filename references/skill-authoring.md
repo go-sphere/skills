@@ -23,7 +23,7 @@ Agents let you invoke a skill as `/<name>`, so names are short and follow one pa
 | Pattern | Use for |
 |---------|---------|
 | `sphere-<topic>` | a skill that assumes a go-sphere scaffold project or its layout contract |
-| `go-<topic>`, `godoc` | a skill that works on any Go repository |
+| `go-<topic>` | a skill that works on any Go repository |
 | `<topic>` | everything else |
 
 Rules:

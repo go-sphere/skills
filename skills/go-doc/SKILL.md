@@ -1,5 +1,5 @@
 ---
-name: godoc
+name: go-doc
 description: Write Go doc comments and verified examples that let AI agents use a module through go doc. Use when documenting Go packages, 补充 Go 文档, 写给 AI agent 的 API 文档, or adding usage examples. Not for general test-suite review — that is `go-test`.
 ---
 

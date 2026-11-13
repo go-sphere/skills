@@ -38,7 +38,7 @@ assumes:
 | Pattern | Assumes | Skills |
 |---------|---------|--------|
 | `sphere-*` | a go-sphere scaffold project | `sphere-feature`, `sphere-api`, `sphere-ent`, `sphere-crud`, `sphere-sync`, `sphere-make` |
-| `go-*`, `godoc` | any Go repository | `go-test`, `go-simplify`, `go-migrate`, `godoc` |
+| `go-*` | any Go repository | `go-test`, `go-doc`, `go-simplify`, `go-migrate` |
 | no prefix | nothing; general purpose | `interview-me`, `prd`, `spec`, `improve`, `delegate`, `rex-desktop` |
 
 ## Workflow Map
@@ -68,7 +68,7 @@ Makefile and Make-driven CI standardization
 Go test review, repair, and authoring
   -> go-test
 Go API documentation and verified usage examples for agents
-  -> godoc
+  -> go-doc
 Go code leanness audit and safe simplification
   -> go-simplify
 Migrating a non-Go codebase to Go
@@ -96,10 +96,10 @@ from scratch.
 - `sphere-sync` updates a generated project to a newer layout revision, resolves layout drift, and adopts pre-contract projects into the `.sphere/layout.lock.json` model.
 - `sphere-make` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
-### Go engineering (`go-*`, `godoc`)
+### Go engineering (`go-*`)
 
 - `go-test` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
-- `godoc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
+- `go-doc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-migrate` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
 

@@ -52,7 +52,7 @@ These are signals, not verdicts. Read the code before reporting.
 | Tech debt | Over-design, over-optimization, and over-defensive checks belong to `go-simplify`. Report them as one finding that names that skill. Do not list them one by one. |
 | Dependencies | An old `go` directive, leftover `replace` directives, deprecated APIs such as `io/ioutil`, and `govulncheck` results that reach called code. Report only reachable vulnerabilities. |
 | DX | A missing single-command gate, no linter config, CI without a module cache, no agent guide. |
-| Docs | Exported API without doc comments, or examples that no longer compile. Plans for these hand the work to `godoc`. |
+| Docs | Exported API without doc comments, or examples that no longer compile. Plans for these hand the work to `go-doc`. |
 
 ## 5. Plans for Go repositories
 
@@ -73,7 +73,7 @@ The executor may not have these skills, so the plan must stand alone. A toolkit 
 |------------------|-----------------|
 | Go tests or test strategy | `go-test` |
 | Dead code, defensive checks, over-design in Go | `go-simplify` |
-| Doc comments and examples for exported Go API | `godoc` |
+| Doc comments and examples for exported Go API | `go-doc` |
 | Makefile targets or Make-driven CI | `sphere-make` |
 | `.proto` contracts or HTTP API shape | `sphere-api` |
 | Ent schema | `sphere-ent` |

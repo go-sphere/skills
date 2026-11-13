@@ -26,6 +26,8 @@ STALE_NAMES=(
   ent-seed-sql-generator protoc-plugin-engineering proto-service-generator
   go-test-engineering migrate-to-golang spec-writer sphere-feature-workflow sphere-layout-sync
   ent-schema-implementer proto-api-generator frontend-crud-generator go-sphere-makefiles
+  # A bare "godoc" is also the Go documentation convention, so only the backticked skill name is stale.
+  '`godoc`'
 )
 
 # Print the lines of a `## Heading` section, stopping at the next `## ` heading.
