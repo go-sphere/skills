@@ -101,6 +101,6 @@ report format, and the quality gates. Run every quality gate before reporting.
 
 - Upstream — `proto-api-generator` defines the HTTP contract, and `sphere-feature-workflow` runs the generation commands (`make gen/docs`, `make gen/dts`) that produce the TypeScript swagger client; generation cannot start before that client exists in the project.
 - Downstream — none; generated pages, route registration, and permission wiring are the deliverable. When the UI needs a field or endpoint the client does not expose, hand back to `proto-api-generator` instead of faking it.
-- Boundary — use `proto-api-generator` for contract changes and `sphere-feature-workflow` for backend, schema, or scaffold work; this skill owns only frontend pages and route registration, in whatever framework the project already uses. `prd` and `ux-analyst` own page intent when they exist.
+- Boundary — use `proto-api-generator` for contract changes and `sphere-feature-workflow` for backend, schema, or scaffold work; this skill owns only frontend pages and route registration, in whatever framework the project already uses. `prd` owns page intent when it exists.
 - Companion — none bundled; the framework packs under `references/frameworks/` carry stack conventions, and `vueuse-functions` may be used for composable selection when the project already depends on VueUse.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

@@ -1,6 +1,6 @@
 # Ent Schema Examples — JSON, Extensions, Deprecation
 
-Examples for the shapes `db-schema-designer` only approves with a reason: typed JSON fields,
+Examples for the shapes that need a stated reason before use: typed JSON fields,
 extension entities, staged field deprecation, and runtime-defined custom fields. Baseline entity,
 manual ID, and enum examples live in `ent-schema-examples.md`.
 

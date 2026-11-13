@@ -1,6 +1,6 @@
 ---
 name: sphere-feature-workflow
-description: Implement end-to-end feature changes in go-sphere scaffold projects under the layout ownership contract. Use for any task touching go-sphere proto files, Ent schemas, bind/map registration, service logic, cross-layer refactors, or the `make gen/*` commands, so edits stay protocol-first and never land in generated files. Not for layout upgrades or drift — that is `sphere-layout-sync`.
+description: Implement end-to-end feature changes in go-sphere scaffold projects under the layout ownership contract. Use for any task touching proto files, Ent schemas, bind/map registration, service methods and stubs, cross-layer refactors, or `make gen/*` commands, so edits stay protocol-first and never land in generated files. Not for layout upgrades or drift — that is `sphere-layout-sync`.
 ---
 
 # Sphere Feature Workflow
@@ -29,7 +29,7 @@ as `project_owned` except the generated outputs listed in
 1. Classify the change type, then state it out loud before editing. Use the question list below.
 2. Classify every path you intend to touch against `.sphere/layout.json`.
 3. Check the reuse catalog before writing new capability. Record the reuse decision.
-4. Run the execution sequence for the classified workflow from `references/workflow-matrix.md`.
+4. Run the execution sequence for the classified workflow from `references/workflow-matrix.md`. Complete methods of a generated `*ServiceHTTPServer` interface with `references/service-completion.md`.
 5. Run the required generation commands for what you changed. Never hand-edit their output.
 6. Consume every generated diff in `internal/service/**`, `internal/pkg/dao/**`, and non-generated `internal/pkg/render/**`.
 7. Run `make test`, then `make check` as the delivery gate.
@@ -53,6 +53,10 @@ Cross-layer.
 | [references/workflow-matrix.md](references/workflow-matrix.md) | Always, at step 4 — preflight checks, execution sequence, delivery gate |
 | [references/source-of-truth-and-generated-boundaries.md](references/source-of-truth-and-generated-boundaries.md) | Before the first edit, to separate what you edit from what you regenerate |
 | [references/commands-and-codegen.md](references/commands-and-codegen.md) | Before running a generation command, picking a reuse package, or touching an HTTP handler |
+| [references/service-completion.md](references/service-completion.md) | When methods of a generated `*ServiceHTTPServer` interface must be created or completed — procedure, strategy table, and report additions |
+| [references/service-implementation-best-practices.md](references/service-implementation-best-practices.md) | Before editing a service file — interface assertion, file mapping, append-only procedure, stub template |
+| [references/implementation-templates.md](references/implementation-templates.md) | Writing a CRUD method, an append-only update, or a usecase split |
+| [references/wiring-and-streaming.md](references/wiring-and-streaming.md) | Wire injection, import and naming checks, reuse lookups, or a server-streaming method |
 | [references/change-checklist.md](references/change-checklist.md) | At step 8, to verify coverage before delivery |
 
 ## Rules
@@ -101,6 +105,6 @@ Report completion in this exact section order:
 
 - Upstream — `spec-writer` supplies intended behavior; `proto-api-generator` and `ent-schema-implementer` supply the contracts and schemas that must exist before generation. When the project has no `.sphere/layout.json`, run `sphere-layout-sync` first instead of guessing ownership.
 - Downstream — `go-test-engineering` when `make test` coverage does not prove the behavior; `go-simplify` for an optional behavior-neutral leanness pass once validation is green; and `go-sphere-makefiles` when the `make check` delivery gate is missing or broken. Hand off after the final output contract is reported with validation results.
-- Boundary — use `sphere-layout-sync` for layout drift and upgrades, `proto-service-generator` for filling in one service file from an existing generated interface, and `frontend-crud-generator` for frontend pages and routes.
-- Companion — `proto-service-generator` covers per-service file completion while this skill owns cross-layer integration; if it is unavailable, complete the service files here and say so in the validation section.
+- Boundary — use `sphere-layout-sync` for layout drift and upgrades and `frontend-crud-generator` for frontend pages and routes.
+- Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

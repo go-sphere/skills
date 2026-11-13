@@ -1,6 +1,6 @@
 ---
 name: interview-me
-description: Interview the user one question at a time, down a decision tree, until technical and product decisions are actually settled. Use when planning a complex feature, an architecture change, an API design, or a UX refactor, or when a decision is ambiguous — 需求访谈, 方案对齐, 帮我确认设计. Not for organizing scattered inputs into a kickoff document — that is `project-intake`.
+description: Interview the user one question at a time, down a decision tree, until technical and product decisions are actually settled. Use when planning a complex feature, an architecture change, an API design, or a UX refactor, or when a decision is ambiguous — 需求访谈, 方案对齐, 帮我确认设计. Not for writing the PRD itself — that is `prd`.
 ---
 
 # Interview Me (Interactive Requirements & Design Alignment)
@@ -79,6 +79,6 @@ Once all critical branches of the decision tree have converged:
 
 - Upstream — none; this skill can run before any stage and explores the codebase before asking anything.
 - Downstream — `spec-writer` for technical decisions or `prd` for business direction; hand off once the decision tree converges and the alignment summary is complete.
-- Boundary — use `project-intake` instead to organize scattered inputs into one structured kickoff document; this skill owns interactive, one-question-at-a-time decision resolution.
+- Boundary — `prd` and `spec-writer` write the documents; this skill owns interactive, one-question-at-a-time decision resolution and writes none of them.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

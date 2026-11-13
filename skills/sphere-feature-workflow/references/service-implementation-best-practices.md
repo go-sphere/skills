@@ -1,6 +1,6 @@
 # Service Implementation Best Practices
 
-Reference for `proto-service-generator`. Load sections as needed.
+Reference for completing service implementations from generated interfaces. Load sections as needed.
 
 ## Quick Reference
 

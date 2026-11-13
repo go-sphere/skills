@@ -103,6 +103,6 @@ of editing.
 
 - Upstream — none; this skill applies after any implementation, or directly to existing suites.
 - Downstream — none; the verification result and remaining-risk report are the deliverable.
-- Boundary — use `go-sphere-makefiles` for Make targets and Make-driven CI, `protoc-plugin-engineering` for plugin golden-test infrastructure, `go-simplify` for behavior-neutral production-code simplification where the existing suite is the safety net, and `sphere-feature-workflow` for implementation work with no test scope.
+- Boundary — use `go-sphere-makefiles` for Make targets and Make-driven CI, `go-simplify` for behavior-neutral production-code simplification where the existing suite is the safety net, and `sphere-feature-workflow` for implementation work with no test scope.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

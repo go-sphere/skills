@@ -104,6 +104,6 @@ Do not commit, push, tag, publish, or rerun remote workflows unless the user ask
 
 - Upstream — none; Make targets and CI can be standardized independently of any feature stage.
 - Downstream — none; the Make contract and verification report are the deliverable.
-- Boundary — use `go-test-engineering` for test content, assertions, and test value; `protoc-plugin-engineering` for plugin quality-gate semantics; and `sphere-feature-workflow` for the Make contract inside feature work.
+- Boundary — use `go-test-engineering` for test content, assertions, and test value, and `sphere-feature-workflow` for the Make contract inside feature work.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

@@ -1,6 +1,6 @@
 ---
 name: ent-schema-implementer
-description: Implement an approved database design as Go Ent schemas in a go-sphere project. Use when the data model is already settled and the next step is writing or updating Ent schema code, entproto annotations, generation steps, and bind/render/service integration notes. Not for early-stage modeling or review-first discussion — that is `db-schema-designer`.
+description: Implement an approved database design as Go Ent schemas in a go-sphere project. Use when the data model is already settled and the next step is writing or updating Ent schema code, entproto annotations, generation steps, and bind/render/service integration notes. Not for early-stage modeling or open design questions — that is `interview-me`.
 ---
 
 # Ent Schema Implementer
@@ -19,7 +19,7 @@ Use this skill only when at least one is true:
 
 Do not write Ent schema code, modify any file, or run any generation command until you have
 presented an implementation plan and the user has confirmed it. If requirements are still fluid or
-ambiguous, stop and return to `db-schema-designer`.
+ambiguous, stop and use `interview-me` to settle the data model first.
 
 ## Steps
 
@@ -111,12 +111,12 @@ Then close with:
 > **Manual follow-up needed:**
 > - `...`
 >
-> **Next skill:** use `proto-service-generator` if you need service implementations from the generated interfaces.
+> **Next skill:** use `sphere-feature-workflow` if you need service implementations from the generated interfaces.
 
 ## Related Skills
 
-- Upstream — `db-schema-designer` owns the approved design; return there when requirements are still fluid. `spec-writer` supplies entity definitions when no schema design exists yet.
-- Downstream — `proto-service-generator` for implementations of the generated interfaces (see the handoff message above); `ent-seed-sql-generator` when the new schemas need deterministic seed data. Hand off after the listed generation and verification commands pass.
-- Boundary — use `db-schema-designer` for entity, field, relationship, and index design; this skill owns Ent schema files and entproto annotations.
+- Upstream — `spec-writer` supplies entity definitions; use `interview-me` when the data model is still fluid. When neither exists, work from the entities the user provides directly.
+- Downstream — `sphere-feature-workflow` for service implementations of the generated interfaces (see the handoff message above). Hand off after the listed generation and verification commands pass.
+- Boundary — use `spec-writer` for entity and state definitions and `interview-me` for open data-model decisions; this skill owns Ent schema files and entproto annotations.
 - Companion — `sphere-feature-workflow` when integration spills past schema files into bind, render, or service layers; if it is unavailable, report those touchpoints as manual follow-up instead.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

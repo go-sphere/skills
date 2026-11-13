@@ -1,6 +1,6 @@
 ---
 name: spec-writer
-description: "Write or revise implementation-ready specifications for systems, APIs, workflows, and runtime services. Use to turn requirements or a vague PRD into an executable SPEC.md, to deepen a spec that reads too thin, or to revise one without leaving contradictions — including 写技术规格, 改 SPEC, 修改规范, 补技术细节, 整理实现方案. Not for tracing downstream proto or schema impact — that is `spec-diff-pipeline`."
+description: "Write or revise implementation-ready specifications for systems, APIs, workflows, and runtime services. Use to turn requirements or a vague PRD into an executable SPEC.md, to deepen a spec that reads too thin, or to revise one without leaving contradictions — including 写技术规格, 改 SPEC, 修改规范, 补技术细节, 整理实现方案. Not for product framing or success metrics — that is `prd`."
 ---
 
 # Spec Writer
@@ -106,8 +106,8 @@ local edit, keep the existing document shape and append a short change summary.
 
 ## Related Skills
 
-- Upstream — `prd` and `ux-analyst` supply product and behavior context; use `interview-me` when key decisions are still unresolved. When those artifacts are missing, write from what the user provides and record assumptions rather than inventing context.
-- Downstream — `db-schema-designer` for the data model and `proto-api-generator` for contracts; hand off once the spec tells one coherent story from goals through conformance. Use `spec-diff-pipeline` after the spec is edited again.
-- Boundary — use `prd` for product framing and success metrics; this skill owns the engineering contract. Use `spec-diff-pipeline` to analyze downstream impact; this skill performs the edit.
+- Upstream — `prd` supplies product context; use `interview-me` when key decisions are still unresolved. When those artifacts are missing, write from what the user provides and record assumptions rather than inventing context.
+- Downstream — `ent-schema-implementer` for the data model and `proto-api-generator` for contracts; hand off once the spec tells one coherent story from goals through conformance.
+- Boundary — use `prd` for product framing and success metrics; this skill owns the engineering contract.
 - Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.

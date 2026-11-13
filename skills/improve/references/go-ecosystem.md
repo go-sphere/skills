@@ -79,7 +79,6 @@ The executor may not have these skills, so the plan must stand alone. A toolkit 
 | Ent schema | `ent-schema-implementer` |
 | Proto, schema, service, and generation across layers | `sphere-feature-workflow` |
 | Pulling layout changes into a project | `sphere-layout-sync` |
-| `protoc-gen-*` plugin code | `protoc-plugin-engineering` |
 | Porting another language to Go | `migrate-to-golang` |
 | A direction plan that needs a spec first | `spec-writer` or `prd` |
 

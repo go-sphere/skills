@@ -15,7 +15,6 @@ npx skills add https://github.com/go-sphere/skills
 
 # Install selected skills
 npx skills add https://github.com/go-sphere/skills \
-  --skill db-schema-designer \
   --skill ent-schema-implementer \
   --skill proto-api-generator \
   --skill sphere-feature-workflow
@@ -38,34 +37,20 @@ The skills move work through the go-sphere lifecycle in order.
 ```text
 Interactive requirement interview & alignment
   -> interview-me
-Scattered inputs / kickoff
-  -> project-intake
 PRD / product framing
   -> prd
-Prototype behavior / UX semantics
-  -> ux-analyst
 Implementation-ready specification
   -> spec-writer
-Changed spec impact analysis
-  -> spec-diff-pipeline
-Schema design
-  -> db-schema-designer
 Ent schema implementation
   -> ent-schema-implementer
-Seed / fixture SQL
-  -> ent-seed-sql-generator
 Proto + HTTP contract design
   -> proto-api-generator
-Generated service skeletons
-  -> proto-service-generator
-Cross-layer scaffold implementation
+Scaffold features across proto, schema, and service layers
   -> sphere-feature-workflow
 Frontend pages and routes
   -> frontend-crud-generator
 Layout upgrade, drift, or legacy adoption
   -> sphere-layout-sync
-protoc-gen-* plugin authoring and review
-  -> protoc-plugin-engineering
 Go test review, repair, and authoring
   -> go-test-engineering
 Go API documentation and verified usage examples for agents
@@ -93,32 +78,25 @@ from scratch.
 ### Discovery and Requirements
 
 - `interview-me` deeply interviews the user through a decision tree until reaching shared technical and product consensus.
-- `project-intake` organizes rough inputs into a structured kickoff document.
 - `prd` turns agreed direction into a high-quality PRD.
-- `ux-analyst` translates demos and mockups into behavioral UX flows.
 
 ### Specification and Planning
 
 - `spec-writer` produces implementation-ready specifications.
-- `spec-diff-pipeline` traces downstream impact after spec changes.
 
 ### Data and Contract Design
 
-- `db-schema-designer` designs review-ready schemas before coding.
 - `ent-schema-implementer` converts approved designs into Ent schema files.
-- `ent-seed-sql-generator` creates deterministic seed SQL for development and test.
 - `proto-api-generator` designs scaffold-safe proto3 + HTTP contracts.
-- `proto-service-generator` generates or completes service skeletons.
 
 ### Implementation and Surfaces
 
-- `sphere-feature-workflow` handles end-to-end scaffold feature delivery.
+- `sphere-feature-workflow` handles end-to-end scaffold feature delivery across proto, schema, bind/map, and service layers, including completing service methods and SSE producers from generated interfaces.
 - `frontend-crud-generator` generates admin pages and route registration from a sphere-generated TypeScript swagger client, following the project's own framework conventions.
 
 ### Layout and Toolchain Maintenance
 
 - `sphere-layout-sync` updates a generated project to a newer layout revision, resolves layout drift, and adopts pre-contract projects into the `.sphere/layout.lock.json` model.
-- `protoc-plugin-engineering` covers authoring, refactoring, and reviewing the `protoc-gen-*` plugins themselves, including config immutability, read-only templates, output determinism, and golden-file discipline.
 
 ### Quality and Verification
 

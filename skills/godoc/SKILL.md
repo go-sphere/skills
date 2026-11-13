@@ -63,5 +63,5 @@ Provide a concrete package or symbol `go doc` command the consumer can use.
 - Upstream — none; use the existing exported API and established behavior as inputs.
 - Downstream — none; self-contained API documentation and verified recipes are the deliverable.
 - Boundary — `go-test-engineering` owns general suite audits and contract-test design; this skill owns documentation and usage examples.
-- Companion — `protoc-plugin-engineering` when documenting a generator's own Go API; preserve generated-file ownership rules.
+- Companion — none.
 - If a referenced skill is not installed in this session, name it in the handoff message and continue with the current artifact; do not stall.
