@@ -1,6 +1,6 @@
 ---
 name: go-test-engineering
-description: Audit, repair, or write Go tests so they enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, deleting duplicate tests, strengthening weak assertions, designing interface contract suites, judging whether a golden test is justified (only for output that depends on an external process or environment, such as protoc or wire; otherwise a unit test), or fixing implementation bugs that valid tests expose. Not for Make targets or Make-driven CI — that is `go-sphere-makefiles`.
+description: Audit, repair, or write Go tests that enforce real API and behavior contracts. Use for reviewing unreliable or AI-generated tests, removing duplicates, tightening weak assertions, designing interface contract suites, or judging if a golden test is justified (only for external-process output such as protoc or wire). Not for Make targets or CI — that is `go-sphere-makefiles`.
 ---
 
 # Go Test Engineering
