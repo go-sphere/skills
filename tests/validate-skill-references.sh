@@ -58,7 +58,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "found ${#skill_dirs[@]} skills, each with a matching frontmatter name"
 
-# 3. Every skill carries a complete Related Skills block.
+# 2. Every skill carries a complete Related Skills block.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   block="$(section "$file" "## Related Skills")"
@@ -72,7 +72,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every skill has a Related Skills block with Upstream, Downstream, Boundary, Companion, and a fallback"
 
-# 4. Every skill named inside a Related Skills block must exist.
+# 3. Every skill named inside a Related Skills block must exist.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   while IFS= read -r token; do
@@ -82,50 +82,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every skill named in a Related Skills block resolves to a real skill"
 
-# 5. Slash commands in the prompt guide must resolve to real skills.
-prompt_doc="$ROOT_DIR/references/prompt.md"
-[ -f "$prompt_doc" ] || fail "missing references/prompt.md"
-while IFS= read -r token; do
-  [ -n "$token" ] || continue
-  resolve_token "$token" || fail "references/prompt.md invokes an unknown skill: /$token"
-done < <(grep -rhoE '`/[a-z0-9-]+`' "$prompt_doc" "$ROOT_DIR/references/prompt" | tr -d '`/' | sort -u)
-pass "every slash command in the prompt guide resolves to a real skill"
-
-# 5a. Every prompt-guide chapter must be reachable from references/prompt.md.
-prompt_chapters=0
-while IFS= read -r chapter; do
-  prompt_chapters=$((prompt_chapters + 1))
-  grep -q "](prompt/$(basename "$chapter"))" "$prompt_doc" ||
-    fail "prompt guide chapter is not linked from references/prompt.md: $(display_path "$chapter")"
-done < <(find "$ROOT_DIR/references/prompt" -type f -name '*.md' | sort)
-[ "$prompt_chapters" -gt 0 ] || fail "references/prompt/ contains no chapters"
-pass "all $prompt_chapters prompt-guide chapters are linked from references/prompt.md"
-
-# 6. Role-to-skill mappings in the dev guide must resolve to real skills.
-dev_doc="$ROOT_DIR/references/dev.md"
-[ -f "$dev_doc" ] || fail "missing references/dev.md"
-while IFS= read -r token; do
-  [ -n "$token" ] || continue
-  resolve_token "$token" || fail "the dev guide maps a role to an unknown skill: $token"
-done < <(grep -rhoE '已有 `[a-z0-9-]+` skill' "$ROOT_DIR/references" | grep -oE '`[a-z0-9-]+`' | tr -d '`' | sort -u)
-pass "the dev guide role table maps only real skills"
-
-# 6a. Every dev-guide chapter must be reachable from references/dev.md, and its links must resolve.
-dev_chapters=0
-while IFS= read -r chapter; do
-  dev_chapters=$((dev_chapters + 1))
-  grep -q "](dev/$(basename "$chapter"))" "$dev_doc" ||
-    fail "dev guide chapter is not linked from references/dev.md: $(display_path "$chapter")"
-done < <(find "$ROOT_DIR/references/dev" -type f -name '*.md' | sort)
-[ "$dev_chapters" -gt 0 ] || fail "references/dev/ contains no chapters"
-while IFS= read -r link; do
-  [ -n "$link" ] || continue
-  [ -f "$ROOT_DIR/references/$link" ] ||
-    fail "references/dev.md links a missing chapter: $link"
-done < <(grep -oE '\]\(dev/[^)#]+\.md' "$dev_doc" | sed -E 's/^\]\(//')
-pass "all $dev_chapters dev-guide chapters are linked from references/dev.md"
-
-# 7. Description boundary clauses must point at real skills.
+# 4. Description boundary clauses must point at real skills.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   while IFS= read -r token; do
@@ -135,17 +92,17 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every description boundary clause points at a real skill"
 
-# 8. Known-renamed skill names must not survive anywhere.
+# 5. Known-renamed skill names must not survive anywhere.
 for stale in "${STALE_NAMES[@]}"; do
-  hits="$(grep -rn --exclude="$(basename "$0")" "$stale" \
+  hits="$(grep -rn --exclude="$(basename "$0")" --exclude-dir=archive "$stale" \
     "$SKILLS_DIR" "$ROOT_DIR/references" "$ROOT_DIR/docs" \
-    "$ROOT_DIR/README.md" "$ROOT_DIR/hooks" "$ROOT_DIR/tests" 2>/dev/null || true)"
+    "$ROOT_DIR/README.md" "$ROOT_DIR/tests" 2>/dev/null || true)"
   [ -z "$hits" ] || fail "stale skill name '$stale' is still referenced:
 $hits"
 done
 pass "no stale skill names remain"
 
-# 8a. APIs removed or whose use is now wrong at the current sphere / plugin HEAD
+# 5a. APIs removed or whose use is now wrong at the current sphere / plugin HEAD
 # must not be taught to agents.
 STALE_API_PATTERNS=(
   'WithLoggerInit'
@@ -160,7 +117,7 @@ $hits"
 done
 pass "no stale API references remain"
 
-# 9. Every reference link inside a SKILL.md must resolve to an existing file.
+# 6. Every reference link inside a SKILL.md must resolve to an existing file.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   while IFS= read -r link; do
@@ -172,7 +129,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every SKILL.md reference link resolves to a file"
 
-# 10. Framework packs must be linked from their skill's SKILL.md, and linked packs must exist.
+# 7. Framework packs must be linked from their skill's SKILL.md, and linked packs must exist.
 pack_count=0
 for name in "${skill_dirs[@]}"; do
   pack_dir="$SKILLS_DIR/$name/references/frameworks"
@@ -190,7 +147,7 @@ done
 [ "$pack_count" -gt 0 ] || fail "no framework packs found under any skill"
 pass "framework packs and their SKILL.md links stay in sync ($pack_count packs)"
 
-# 11. SKILL.md stays within the progressive-disclosure size budget.
+# 8. SKILL.md stays within the progressive-disclosure size budget.
 # Budgets are documented in references/skill-authoring.md.
 SKILL_LINE_BUDGET=150
 REFERENCE_LINE_BUDGET=200
@@ -204,7 +161,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every SKILL.md is within the $SKILL_LINE_BUDGET-line budget"
 
-# 12. Reference files stay small enough to load one at a time.
+# 9. Reference files stay small enough to load one at a time.
 for name in "${skill_dirs[@]}"; do
   ref_dir="$SKILLS_DIR/$name/references"
   [ -d "$ref_dir" ] || continue
@@ -216,7 +173,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every reference file is within the $REFERENCE_LINE_BUDGET-line budget"
 
-# 13. Descriptions stay cheap: one line, under budget, and they say when to use the skill.
+# 10. Descriptions stay cheap: one line, under budget, and they say when to use the skill.
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
   desc_lines="$(grep -c '^description:' "$file")"
@@ -236,7 +193,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every description is one line, within $DESCRIPTION_CHAR_BUDGET characters, and states when to use the skill"
 
-# 14. Progressive disclosure: every reference file is reachable from its SKILL.md.
+# 11. Progressive disclosure: every reference file is reachable from its SKILL.md.
 for name in "${skill_dirs[@]}"; do
   ref_dir="$SKILLS_DIR/$name/references"
   [ -d "$ref_dir" ] || continue
@@ -251,7 +208,7 @@ for name in "${skill_dirs[@]}"; do
 done
 pass "every reference file is linked from its skill's Reference Map"
 
-# 15. Reference files must not dangle: relative links between them have to resolve.
+# 12. Reference files must not dangle: relative links between them have to resolve.
 for name in "${skill_dirs[@]}"; do
   ref_dir="$SKILLS_DIR/$name/references"
   [ -d "$ref_dir" ] || continue

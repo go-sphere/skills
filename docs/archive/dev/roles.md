@@ -4,7 +4,7 @@
 
 
 > **重要说明**：本节的 `*-agent` 名称代表”逻辑角色/职责分工”，不代表 Codex、Claude 或其他平台内置的固定 agent。
-> - **真实可直接落地的 skill**：请参考 [README.md](../../README.md) 中列出的 skills
+> - **真实可直接落地的 skill**：请参考 [README.md](../../../README.md) 中列出的 skills
 > - **通用 AI 能力**：部分角色可由 Codex、Claude Code 的内置功能实现，无需创建 skill
 
 ### 角色与 Skill 对照表

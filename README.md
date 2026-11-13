@@ -169,10 +169,8 @@ from its skill's Reference Map.
 - [references/skill-authoring.md](references/skill-authoring.md) — the authoring contract for
   skills in this repository: size budgets, description formula, section order, and the
   plain-language rules that keep skills readable for smaller models.
-- [references/dev.md](references/dev.md) — the AI-agent collaboration workflow guide (indexed,
-  with per-stage chapters under `references/dev/`).
-- [references/prompt.md](references/prompt.md) — per-round prompt templates (indexed, with
-  chapters under `references/prompt/`).
+- [docs/archive/](docs/archive/README.md) — historical workflow and prompt guides written for
+  an earlier, larger skill pipeline. Not maintained.
 
 ## Contributing
 
