@@ -20,7 +20,7 @@ Progressive disclosure is the budget that makes this work: descriptions stay che
 
 | File | Budget | Why |
 |------|--------|-----|
-| `description` | 400 characters, one line | all 22 descriptions load in every session |
+| `description` | 400 characters, one line | every description loads in every session |
 | `SKILL.md` | 150 lines | a skill the model must read end to end before acting |
 | `references/*.md` | 200 lines | one loadable unit; split by topic, not by length |
 

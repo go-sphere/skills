@@ -170,6 +170,8 @@ Go API documentation and verified usage examples for agents
   -> godoc
 Go code leanness audit and safe simplification
   -> go-simplify
+Codebase audit and self-contained plans for other agents
+  -> improve
 Migrating a non-Go codebase to Go
   -> migrate-to-golang
 Makefile and Make-driven CI standardization
@@ -195,6 +197,8 @@ The bootstrap rule is simple:
   route into `go-simplify`.
 - If the task is migrating or porting a codebase in another language to Go,
   route into `migrate-to-golang`.
+- If the task is auditing a repository to decide what to improve, or writing plans
+  that other agents will execute, route into `improve`.
 - After a stage skill finishes, honor the handoff in its `## Related Skills` block
   before starting a new classification pass.
 
@@ -236,6 +240,7 @@ The bootstrap rule is simple:
 - `go-test-engineering` audits, repairs, and writes behavior-focused Go tests, reusable interface contract suites, and justified golden tests.
 - `migrate-to-golang` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
+- `improve` audits a codebase read-only and writes self-contained implementation plans with verification gates for cheaper agents to execute. It can dispatch an executor through `delegate`, review the diff, and keep the plan backlog current. Adapted from [shadcn/improve](https://github.com/shadcn/improve) (MIT).
 - `go-sphere-makefiles` standardizes common Make targets, root batch orchestration, and Make-driven CI without flattening multi-module, generator, or layout-specific behavior.
 
 ### Agent Orchestration

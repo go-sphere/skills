@@ -20,7 +20,8 @@ Apply in order. The first rule that matches decides.
 6. The work is only filling in missing methods in one service file from an existing generated interface — `proto-service-generator`, not `sphere-feature-workflow`.
 7. The task is auditing or simplifying existing Go code for over-design, over-optimization, or over-defensive checks rather than adding a feature — `go-simplify`, not `sphere-feature-workflow`.
 8. The task is migrating or porting a codebase written in another language (or an old Go toolchain era) to idiomatic Go on the latest release — `migrate-to-golang`, not `sphere-feature-workflow`.
-9. The task will modify go-sphere scaffold contracts, schemas, services, or generation commands — `sphere-feature-workflow`.
+9. The task is auditing a repository to decide what to improve, or writing plans that other agents will execute, without editing code yourself — `improve`, not `go-simplify` or `sphere-feature-workflow`.
+10. The task will modify go-sphere scaffold contracts, schemas, services, or generation commands — `sphere-feature-workflow`.
 
 ## Workflow Map
 
@@ -59,6 +60,7 @@ Apply in order. The first rule that matches decides.
 - `godoc` — write self-contained Go API comments and verified usage examples for consumers and AI agents.
 - `go-test-engineering` — audit, repair, or write Go tests, including interface contract suites and justified golden tests.
 - `go-simplify` — audit and safely simplify Go code for over-design, over-optimization, and over-defensive checks, with a green test baseline as the safety net.
+- `improve` — audit a codebase read-only and write self-contained plans with verification gates for other agents to execute, then review the executor's work.
 - `go-sphere-makefiles` — standardize or repair Make targets, root batch orchestration, and Make-driven CI.
 
 ### Migration
