@@ -56,7 +56,7 @@ while IFS= read -r dir; do
   skill_dirs+=("$(basename "$dir")")
 done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
-[ "${#skill_dirs[@]}" -eq 16 ] || fail "expected 16 skill directories, found ${#skill_dirs[@]}"
+[ "${#skill_dirs[@]}" -eq 17 ] || fail "expected 17 skill directories, found ${#skill_dirs[@]}"
 
 for name in "${skill_dirs[@]}"; do
   file="$SKILLS_DIR/$name/SKILL.md"
@@ -65,6 +65,33 @@ for name in "${skill_dirs[@]}"; do
     fail "frontmatter name does not match directory name: $(display_path "$file")"
 done
 pass "found ${#skill_dirs[@]} skills, each with a matching frontmatter name"
+
+# 1a. The sphere router's Workflow Map must cover every other skill and name only real ones.
+ROUTER="$SKILLS_DIR/sphere/SKILL.md"
+map_names="$(section "$ROUTER" "## Workflow Map" | grep -oE '^- `[a-z0-9-]+`' | sed -E 's/^- `(.*)`$/\1/' | sort -u)"
+[ -n "$map_names" ] || fail "router Workflow Map lists no skills"
+
+while IFS= read -r name; do
+  [ -n "$name" ] || continue
+  if [ "$name" = "sphere" ]; then
+    fail "router Workflow Map must not list the router itself"
+  fi
+  resolve_token "$name" || fail "router Workflow Map names an unknown skill: $name"
+done <<<"$map_names"
+
+for name in "${skill_dirs[@]}"; do
+  if [ "$name" = "sphere" ]; then
+    continue
+  fi
+  printf '%s\n' "$map_names" | grep -Fxq "$name" || fail "router Workflow Map omits skill: $name"
+done
+pass "router Workflow Map covers all $((${#skill_dirs[@]} - 1)) other skills and names only real ones"
+
+# 1b. The router carries the stage-handoff contract that every Related Skills block relies on.
+grep -q '^## Stage Handoffs$' "$ROUTER" || fail "router is missing the '## Stage Handoffs' section"
+section "$ROUTER" "## Stage Handoffs" | grep -q "do not stall" ||
+  fail "router Stage Handoffs section is missing the do-not-stall rule"
+pass "router carries the Stage Handoffs contract"
 
 # 2. Every skill carries a complete Related Skills block.
 for name in "${skill_dirs[@]}"; do

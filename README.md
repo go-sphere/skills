@@ -39,53 +39,25 @@ assumes:
 |---------|---------|--------|
 | `sphere-*` | a go-sphere scaffold project | `sphere-feature`, `sphere-api`, `sphere-ent`, `sphere-crud`, `sphere-sync`, `sphere-make` |
 | `go-*` | any Go repository | `go-test`, `go-doc`, `go-simplify`, `go-migrate` |
-| no prefix | nothing; general purpose | `interview-me`, `prd`, `spec`, `improve`, `delegate`, `rex-desktop` |
+| no prefix | nothing; general purpose | `sphere`, `interview-me`, `prd`, `spec`, `improve`, `delegate`, `rex-desktop` |
 
-## Workflow Map
+## Choosing a Skill
 
-The go-sphere delivery lifecycle runs from `interview-me` to `sphere-feature`. The rest are
-maintenance, quality, and orchestration skills you can call at any point.
+Not sure which skill to use? Run `/sphere`, or ask the agent to use the `sphere` skill. It routes
+the task to one skill and names the next one when that skill finishes. The stage order and the
+full map live in [skills/sphere/SKILL.md](skills/sphere/SKILL.md), and `tests/run-tests.sh`
+keeps that map in sync with the skills in this repository.
 
-```text
-Settle ambiguous decisions by interview
-  -> interview-me
-PRD / product framing
-  -> prd
-Implementation-ready specification
-  -> spec
-Ent schema implementation
-  -> sphere-ent
-Proto + HTTP contract design
-  -> sphere-api
-Features across proto, schema, and service layers
-  -> sphere-feature
-Frontend pages and routes
-  -> sphere-crud
-Layout upgrade, drift, or legacy adoption
-  -> sphere-sync
-Makefile and Make-driven CI standardization
-  -> sphere-make
-Go test review, repair, and authoring
-  -> go-test
-Go API documentation and verified usage examples for agents
-  -> go-doc
-Go code leanness audit and safe simplification
-  -> go-simplify
-Migrating a non-Go codebase to Go
-  -> go-migrate
-Codebase audit and self-contained plans for other agents
-  -> improve
-One headless task for another coding agent
-  -> delegate
-Several live coding agents in Rex floating panes
-  -> rex-desktop
-```
-
-Each skill's `## Related Skills` block names its upstream, downstream, boundary, and
-companion skills, so finished work moves to the next stage without re-classifying
-from scratch.
+The go-sphere delivery lifecycle runs `interview-me` → `prd` → `spec` → `sphere-ent` /
+`sphere-api` → `sphere-feature` → `sphere-crud`. Each skill's `## Related Skills` block names its
+upstream, downstream, boundary, and companion skills, so finished work moves to the next stage
+without re-classifying from scratch.
 
 ## Bundled Skills
+
+### Entry point
+
+- `sphere` routes a task to the right skill in lifecycle order and carries the stage-handoff rules.
 
 ### go-sphere projects (`sphere-*`)
 

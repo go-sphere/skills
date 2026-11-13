@@ -148,5 +148,5 @@ Required on every skill. Exact bullet labels, because the test greps them:
 3. `SKILL.md` is under 150 lines and follows the section order.
 4. Every reference file is linked from the Reference Map with a load-when condition.
 5. No reference file exceeds 200 lines.
-6. `README.md` still describes the skill correctly.
+6. `README.md` still describes the skill correctly, and the Workflow Map in `skills/sphere/SKILL.md` lists it.
 7. The name follows the pattern in Skill Names.
