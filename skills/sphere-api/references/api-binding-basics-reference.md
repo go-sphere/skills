@@ -92,8 +92,8 @@ Different HTTP methods have different default binding behaviors:
 
 #### GET, HEAD, DELETE, and OPTIONS Requests
 - Path parameters must be top-level fields marked with `BINDING_LOCATION_URI`. Nested templates such as `{user.id}` are not supported.
-- Remaining fields must be marked `BINDING_LOCATION_QUERY`, `BINDING_LOCATION_HEADER`, or `BINDING_LOCATION_FORM` (or the message `default_location`). Unmarked fields fail generation.
-- No request body is expected. JSON-bound fields on these methods fail generation.
+- Remaining fields must be marked `BINDING_LOCATION_QUERY` or `BINDING_LOCATION_HEADER` (or the message `default_location`). Unmarked fields fail generation.
+- No request body is expected. Both `BINDING_LOCATION_JSON` and `BINDING_LOCATION_FORM` fields on these methods fail generation (bind form-like parameters to `QUERY` instead).
 - If `google.api.http` still declares `body`, `protoc-gen-sphere` warns (or fails with `fail_on_warn`) and generates the handler **without** `BindJSON`
 
 #### POST, PUT, and PATCH Requests
@@ -104,8 +104,7 @@ Different HTTP methods have different default binding behaviors:
 
 #### Methods With Form Parameters
 
-A method that has **any** `BINDING_LOCATION_FORM` field is treated as body-less,
-regardless of HTTP method. This is a hard rule in `buildHTTPRule`:
+A body-capable method (`POST`, `PUT`, `PATCH`) that has **any** `BINDING_LOCATION_FORM` field is treated as body-less (`GET`/`HEAD`/`DELETE`/`OPTIONS` reject `BINDING_LOCATION_FORM` outright). This is a hard rule in `buildHTTPRule`:
 
 - Declaring `body:` on such a method emits `body should not be declared when form
   parameters are present` — a warning normally, a **hard generation failure**

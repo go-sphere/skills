@@ -132,9 +132,10 @@ Official templates serve on `httpx/stdx` (net/http), but generated code talks to
 For `returns (stream Reply)` methods, the generated handler instead prepares an
 `httpz.SSEStream[*Reply]`, then calls the service with a `send` callback. Binding
 errors remain ordinary JSON errors; once the SSE response is committed, later
-failures are terminal `error` events. The producer must not call `send` after it
-returned: such a `send` blocks until teardown and returns the cancellation cause.
-See the official
+failures are terminal `error` events. The producer must not retain `send` or call it
+after returning: wait for any helper goroutines to finish before returning, because
+a late `send` cannot deliver a frame and may panic on a closed channel or fail
+during teardown. See the official
 [Server Streaming](https://go-sphere.github.io/docs/guides/server-streaming/) guide.
 
 ### Example Handler

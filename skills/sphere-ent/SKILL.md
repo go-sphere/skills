@@ -45,7 +45,7 @@ Scale it to the work — brief for one entity with a few fields. Include:
 - **JSON field plan** — per approved JSON field: the canonical name (`extra`, `metadata`, `settings`, `payload`, `attrs`), typed struct or `json.RawMessage`, and the domain package that will hold the struct.
 - **Deprecation plan** — per deprecated field: which stage to implement now, and which proto field number stays reserved.
 - **Integration scope** — which bind, render, or service files need manual follow-up.
-- **Migration plan** — the versioned migration command to run after `go generate`, and whether any large-table change needs online DDL.
+- **Migration plan** — the versioned migration command to run after `make gen/db` (and `make gen/proto`), and whether any large-table change needs online DDL.
 - **Assumptions** — every design gap you filled with a default.
 
 Then ask: "Does this plan look right before I start writing?"
@@ -94,8 +94,8 @@ Mark each item as handled by generation, requiring manual follow-up, or requirin
 List the generation and verification commands in run order, adapted to the actual project setup:
 
 ```
-go generate ./ent/...
-buf generate
+make gen/db
+make gen/proto
 # When the change is destined for a real database, generate a versioned migration:
 atlas migrate diff <name> --env local
 go build ./...

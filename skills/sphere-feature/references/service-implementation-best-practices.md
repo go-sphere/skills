@@ -14,14 +14,6 @@ Reference for completing service implementations from generated interfaces. Load
 | Wire injection, imports, reuse lookups | `wiring-and-streaming.md` |
 | Server-streaming SSE method | `wiring-and-streaming.md` |
 
-------|--------------|
-| Interface assertion + file mapping | Section 1 |
-| Append-only update | Section 4 |
-| Simple CRUD template | Section 3 |
-| Stub for unknown logic | Section 2 |
-| Complex logic + DI | Sections 5, 6 |
-| Server-streaming SSE method | Section 9 |
-
 ---
 
 ## Interface Assertion & File Mapping

@@ -7,7 +7,7 @@ Code examples with entproto annotations. Use these patterns when implementing En
 | Component | Required Pattern |
 |-----------|------------------|
 | Schema | `entproto.Message()` in `Annotations()` |
-| Primary Key | `field.Int64("id").Annotations(entproto.Field(1))` |
+| Primary Key | `field.Int64("id").Unique().Immutable().DefaultFunc(idgenerator.NextId).Annotations(entproto.Field(1))` |
 | Regular Field | `entproto.Field(n)` with sequential numbers |
 | Enum Field | `entproto.Field(n)` + `entproto.Enum(map[string]int32{...})` |
 | Enum Values | Start from `1` |
@@ -22,11 +22,12 @@ package schema
 import (
     "time"
 
-    "entgo.io/contrib/entproto"
     "entgo.io/ent"
     "entgo.io/ent/schema"
     "entgo.io/ent/schema/field"
     "entgo.io/ent/schema/index"
+    "github.com/go-sphere/entc-extensions/entproto"
+    "github.com/go-sphere/sphere/utils/idgenerator"
 )
 
 type Order struct{ ent.Schema }
@@ -37,7 +38,11 @@ func (Order) Annotations() []schema.Annotation {
 
 func (Order) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("id").Annotations(entproto.Field(1)),
+        field.Int64("id").
+            Unique().
+            Immutable().
+            DefaultFunc(idgenerator.NextId).
+            Annotations(entproto.Field(1)),
         field.Int64("user_id").
             Comment("Owner user ID").
             Annotations(entproto.Field(2)),

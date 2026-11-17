@@ -67,17 +67,16 @@ Do not duplicate behavior from this list. Document the reuse decision in the fin
 | Lifecycle/bootstrapping | `core/boot`, `core/task` |
 | HTTP transport | `server/httpz`, `httpx` |
 | Auth/authorization | `server/auth/*`, `server/middleware/auth` |
-| Middleware | `server/middleware/*` (cors, ratelimiter, selector, online) |
+| Middleware | `server/middleware/*` (`cors`, `logger`, `online`, `ratelimiter`, `requestid`, `selector`) |
 | Caching | `cache/*` (Redis, Memory, BadgerDB) |
-| Storage | `storage/*` (S3, Qiniu, Local) |
+| Storage | `storage/*` (`s3`, `qiniu`, `local`, `fileserver`, `kvcache`) |
 | Logging | `log/*` |
 | Message queue | `mq/*` (Redis, in-memory) |
-| Search | `search/*` (Meilisearch) |
-| Scheduling | `scheduler/*` (cron and periodic jobs) |
+| Search | `search`, `search/meilisearch` |
+| Scheduling | `scheduler/*` (`cron`, `asynq`) |
 | Infrastructure | `infra/*` (Redis client, SQLite) |
 | Utilities | `utils/*`, `test/*` |
 | Core helpers | `core/pool`, `core/safe` |
-| Compatibility shims | `compat/*` |
 
 Placement rule: a helper that is useful across unrelated projects and imports nothing from the
 project module belongs in a versioned go-sphere library, not copied into the project. Conversely,

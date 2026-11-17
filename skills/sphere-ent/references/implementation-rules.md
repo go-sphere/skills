@@ -78,8 +78,8 @@ One name per purpose per table — do not mix `extra` and `metadata` for the sam
 The JSON struct is **business code**, not schema code. Put it in a domain package:
 
 ```
-internal/domain/order/extra.go     // type OrderExtra struct { ... }
-ent/schema/order.go                 // field.JSON("extra", order.OrderExtra{})
+internal/domain/order/extra.go            // type OrderExtra struct { ... }
+internal/pkg/database/schema/order.go     // field.JSON("extra", order.OrderExtra{})
 ```
 
 This keeps the ent schema free of business-shaped types and lets domain code evolve the struct without touching generated code unnecessarily.
@@ -168,8 +168,8 @@ Generated `ent` code can auto-migrate via `client.Schema.Create(ctx)`. That is f
 Production migrations are versioned: each schema change produces a reviewable SQL file (Atlas, Bytebase, Flyway, or the project's equivalent). The usual loop is:
 
 ```
-edit ent/schema/*.go
-↓ go generate ./ent/...
+edit internal/pkg/database/schema/*.go
+↓ make gen/db && make gen/proto
 ↓ generate migration diff (atlas migrate diff / equivalent)
 ↓ review the SQL
 ↓ apply in staging
@@ -185,6 +185,7 @@ If the project still relies on `client.Schema.Create` in production code paths, 
 After schema changes, plan or run:
 
 ```bash
+make gen/db
 make gen/proto
 go test ./...
 ```

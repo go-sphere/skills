@@ -69,9 +69,10 @@ Load this reference at final validation time after drafting contracts. Use it as
 - [ ] Use query binding for list filters and pagination.
 - [ ] Use explicit `body` rules for write APIs (`"*"` or specific field).
 - [ ] Ensure no method declares `body:` while also having `BINDING_LOCATION_FORM` fields — form parameters force the method body-less; declaring a body warns and hard-fails under `fail_on_warn`, and Swagger emits `@Accept mpfd`.
-- [ ] Ensure GET/HEAD/DELETE/OPTIONS declare no `body:` and no JSON-bound fields.
+- [ ] Ensure GET/HEAD/DELETE/OPTIONS declare no `body:`, no JSON-bound fields, and no `BINDING_LOCATION_FORM` fields.
 - [ ] Ensure URI path parameters are top-level fields; nested templates like `{user.id}` are rejected.
-- [ ] Prefer not to use `oneof` in HTTP-exposed request/response messages (handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled; JSON codecs also handle oneof poorly).
+- [ ] Reject any real `oneof` anywhere in an HTTP request message tree — it fails `protoc-gen-sphere` generation; use proto3 `optional` fields instead (and avoid `oneof` in response messages too).
+- [ ] Ensure `QUERY`, `URI`, and `HEADER` fields are scalars or enums only — maps, `bytes`, and message types (including `Timestamp`, `Duration`, and `wrapperspb.*Value` WKTs) fail `protoc-gen-sphere` generation there.
 - [ ] For each streaming HTTP RPC, allow only a server stream (`returns (stream Reply)`); reject client-streaming and bidirectional shapes.
 - [ ] Ensure server-streaming RPCs do not declare `response_body`; each SSE event carries the whole reply message.
 - [ ] Define client-visible stream termination: successful `done`, terminal `error`, and interruption without either event.

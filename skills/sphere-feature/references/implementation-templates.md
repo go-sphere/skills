@@ -5,11 +5,11 @@ stub live in `service-implementation-best-practices.md`.
 
 ## Simple CRUD Template
 
-Direct Ent call, no DAO layer:
+Direct Ent call, no DAO layer (`<entity>` is the generated `ent/<entity>` subpackage, e.g. `xxx.FieldID` and `xxx.ByID`):
 ```go
 // Create
 func (s *Service) CreateXxx(ctx context.Context, req *v1.CreateXxxRequest) (*v1.CreateXxxResponse, error) {
-    item, err := entbind.CreateXxx(s.db.Xxx.Create(), req.Xxx).Save(ctx)
+    item, err := entbind.CreateXxx(s.db.Xxx.Create(), req.Xxx, entbind.IgnoreField(xxx.FieldID)).Save(ctx)
     if err != nil {
         return nil, err
     }
@@ -28,9 +28,15 @@ func (s *Service) GetXxx(ctx context.Context, req *v1.GetXxxRequest) (*v1.GetXxx
 // List (with pagination)
 func (s *Service) ListXxx(ctx context.Context, req *v1.ListXxxRequest) (*v1.ListXxxResponse, error) {
     query := s.db.Xxx.Query()
-    count, _ := query.Clone().Count(ctx)
+    count, err := query.Clone().Count(ctx)
+    if err != nil {
+        return nil, err
+    }
     totalPage, pageSize := conv.Page(count, int(req.PageSize))
-    rows, _ := query.Clone().Limit(pageSize).Order(ByID(sql.OrderDesc())).Offset(pageSize * int(req.Page)).All(ctx)
+    rows, err := query.Clone().Limit(pageSize).Order(xxx.ByID(sql.OrderDesc())).Offset(pageSize * int(req.Page)).All(ctx)
+    if err != nil {
+        return nil, err
+    }
     return &v1.ListXxxResponse{
         XxxList: conv.Map(rows, s.render.Xxx),
         TotalSize: int64(count),
@@ -75,7 +81,7 @@ func (s *Service) DeleteXxx(ctx context.Context, req *v1.DeleteXxxRequest) (*v1.
 
 For cross-entity transactions or complex flows:
 ```
-internal/usecase/<module>/<service>/
+internal/biz/<domain>/
 ```
 
 ```go

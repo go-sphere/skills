@@ -1,3 +1,6 @@
 **/evals/**
 skills-evaluation
 .claude/settings.json
+__pycache__/
+*.py[cod]
+.DS_Store

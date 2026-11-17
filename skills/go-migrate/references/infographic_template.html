@@ -796,7 +796,7 @@
         }
       }
       try {
-        localStorage.setItem('migrate_to_golang_theme', resolved);
+        localStorage.setItem('go_migrate_theme', resolved);
       } catch (e) {}
     }
 
@@ -808,7 +808,7 @@
     (function initTheme() {
       let saved = 'light';
       try {
-        const stored = localStorage.getItem('migrate_to_golang_theme');
+        const stored = localStorage.getItem('go_migrate_theme');
         if (stored === 'dark' || stored === 'light') saved = stored;
       } catch (e) {}
       applyTheme(saved);

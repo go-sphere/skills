@@ -68,13 +68,14 @@ Load the smallest set that supports the decision in front of you. Never load eve
 3. Reuse in this order: `entpb` when it already satisfies the external contract, then `shared.v1` for cross-service messages, then a custom DTO/VO. A custom DTO/VO needs at least one of these reasons: sensitive fields must be hidden, cross-aggregate composition is required, or external contract stability must be isolated from storage changes.
 4. Keep service-specific business errors in the same proto file as the owning `service`. Create or reuse a shared error only for cross-service semantics.
 5. List APIs require pagination. Prefer batch APIs over repeated single reads.
-6. Avoid `oneof` in HTTP-exposed request and response messages. Tags land on wrapper structs, generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are never filled. JSON codecs also handle oneof poorly.
-7. Keep error contracts machine-readable and stable.
-8. Never leak sensitive or storage-only fields into an external contract.
-9. Keep routes conflict-safe. Official templates serve on `stdx` (`net/http`), but design for the strictest adapter's subset (Gin's) so routes stay portable. Generated handlers take an `httpx` context, never a framework context.
-10. Add concise `//` business comments on exposed `service`/`rpc`, core messages, and key enum values.
-11. Map only `returns (stream Reply)` methods to SSE. `protoc-gen-sphere`'s HTTP transport does not support client-streaming or bidirectional methods.
-12. For every stream, decide and document completion, failure, cancellation, optional resume, and lazy-versus-eager commit as explicit contract decisions. Streaming events always carry the whole reply message; never use `response_body`.
+6. Never use a real `oneof` anywhere in an HTTP request message tree — it fails `protoc-gen-sphere` generation; use proto3 `optional` fields instead, and avoid `oneof` in response messages too (JSON codecs handle it poorly).
+7. Only scalar and enum fields can bind to `QUERY`, `URI`, or `HEADER`; maps, `bytes`, and message types — including `Timestamp`, `Duration`, and `*Value` well-known types — fail `protoc-gen-sphere` generation there.
+8. Keep error contracts machine-readable and stable.
+9. Never leak sensitive or storage-only fields into an external contract.
+10. Keep routes conflict-safe. Official templates serve on `stdx` (`net/http`), but design for the strictest adapter's subset (Gin's) so routes stay portable. Generated handlers take an `httpx` context, never a framework context.
+11. Add concise `//` business comments on exposed `service`/`rpc`, core messages, and key enum values.
+12. Map only `returns (stream Reply)` methods to SSE. `protoc-gen-sphere`'s HTTP transport does not support client-streaming or bidirectional methods.
+13. For every stream, decide and document completion, failure, cancellation, optional resume, and lazy-versus-eager commit as explicit contract decisions. Streaming events always carry the whole reply message; never use `response_body`.
 
 ## Output
 

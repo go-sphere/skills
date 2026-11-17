@@ -144,6 +144,8 @@ STALE_API_PATTERNS=(
   'return httpx.ParseError('
   'default `httpx.ParseError` fallback'
   'with `httpx.NewError`'
+  'entgo.io/contrib/entproto'
+  'labstack/echox'
 )
 for pattern in "${STALE_API_PATTERNS[@]}"; do
   hits="$(grep -rnF -- "$pattern" "$SKILLS_DIR" "$ROOT_DIR/references" 2>/dev/null || true)"

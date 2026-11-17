@@ -24,7 +24,7 @@ and ask the user to run `make gen/proto` first.
 Read [service-implementation-best-practices.md](service-implementation-best-practices.md) before step 4.
 
 1. Find every `type XxxServiceHTTPServer interface` in `api/<module>/v1/*.sphere.pb.go` and list all method signatures.
-2. Check whether `internal/service/<module>/xxx.go` exists. If it does, list the methods already implemented. If not, mark it for creation.
+2. Check whether the service file exists under `internal/service/<module>/` (snake_case like `admin_session.go`, or flat lowercase like `keyvaluestore.go`). If it does, list the methods already implemented. If not, mark it for creation.
 3. Pick a strategy per method using the table below.
 4. Implement append-only: create the file with the assertion and all methods when missing; append only the missing methods when it exists; add only the imports you need; leave existing implementations untouched.
 5. Run `go build ./internal/service/...`, then `go test ./internal/service/...` and `go test ./cmd/app/...`. If a constructor or provider signature changed, run `make gen/wire` and rerun the tests.
@@ -35,7 +35,7 @@ Read [service-implementation-best-practices.md](service-implementation-best-prac
 | has a `send func(*Reply) error) error` signature | Server-streaming producer. Honor cancellation and every send error. This wins even when the name starts with `List`. |
 | is `Create*`, `Get*`, `List*`, `Update*`, or `Delete*` on a single entity | Simple CRUD, direct Ent through `s.db` with render helpers |
 | has logic you cannot infer | Compilable stub: `return nil, errors.New("not implemented: <Method>")`. A streaming stub returns only the error. |
-| spans entities, is reusable orchestration, or is a long flow | Split into `internal/usecase/` plus wire DI |
+| spans entities, is reusable orchestration, or is a long flow | Split into `internal/biz/<domain>` plus wire DI |
 
 Load the other references from `SKILL.md` as the work needs them:
 [implementation-templates.md](implementation-templates.md) for a CRUD method, an append-only update, or a usecase
@@ -45,7 +45,7 @@ lookups, or a server-streaming method.
 ## Rules
 
 1. One `Service` struct per proto module, one Go file per proto service.
-2. File naming: `XxxService` becomes `xxx.go` — snake_case, `Service` suffix removed.
+2. File naming: `XxxService` becomes `xxx.go` (`Service` suffix removed) — snake_case (`admin_session.go`), or flat lowercase (`keyvaluestore.go`) when matching existing files.
 3. Every service file carries the interface assertion: `var _ <pkg>.<ServiceName>HTTPServer = (*Service)(nil)`.
 4. Never modify generated files under `api/*`.
 5. Never add a new DAO wrapper for simple CRUD.
@@ -61,7 +61,7 @@ created or updated. Under `## Validation`, add these items in this order:
 
 1. Interface Coverage Check — every method of the generated interface exists in the service.
 2. Stub Methods Added — each stub, by method name.
-3. Usecase Split Decision — which methods moved to `internal/usecase/`, or why none did.
+3. Usecase Split Decision — which methods moved to `internal/biz/<domain>`, or why none did.
 4. The build and test results from step 5.
 
 Acceptance, by case:

@@ -48,10 +48,11 @@ stream: the generator warns and sends each whole reply message.
 
 4. **Avoid overly broad wildcards** in paths to prevent ambiguous routing
 5. **Prefer explicit body field** (`body: "fieldName"`) when payloads are nested
-6. **Prefer not to use `oneof`** in HTTP-exposed request/response messages. Tags land on wrapper structs (`Message_Field`); generated handlers bind the parent request, so QUERY/URI/HEADER oneof members are not filled by `BindQuery`/`BindURI`/`BindHeader`. JSON codecs also handle oneof awkwardly on the wire.
-7. **Never combine `body:` with `BINDING_LOCATION_FORM` fields.** Form parameters make the method body-less; declaring a body warns and fails under `fail_on_warn`. Split into two RPCs if you need both.
-8. **Use only server response streams for SSE**. Model uploads and bidirectional conversations as unary HTTP operations, WebSockets, or a separate transport.
-9. **Treat stream termination as part of the contract**. Clients should understand `done`, `error`, and an interrupted connection without either terminal event.
+6. **Never use a real `oneof` in an HTTP request message**: a real `oneof` anywhere in the request tree (top-level or nested) fails `protoc-gen-sphere` generation. Use proto3 `optional` fields instead, and avoid `oneof` in response messages because JSON codecs handle it awkwardly on the wire.
+7. **Bind only scalar and enum fields to `QUERY`, `URI`, or `HEADER`**: maps, `bytes`, and message types — including `Timestamp`, `Duration`, and `wrapperspb.*Value` well-known types (WKTs) — fail `protoc-gen-sphere` generation when bound to `QUERY`, `URI`, or `HEADER` (use scalar fields or a JSON body instead).
+8. **Never combine `body:` with `BINDING_LOCATION_FORM` fields.** Form parameters make the method body-less; declaring a body warns and fails under `fail_on_warn`. Split into two RPCs if you need both.
+9. **Use only server response streams for SSE**. Model uploads and bidirectional conversations as unary HTTP operations, WebSockets, or a separate transport.
+10. **Treat stream termination as part of the contract**. Clients should understand `done`, `error`, and an interrupted connection without either terminal event.
 
 
 ## Integration with buf

@@ -115,15 +115,22 @@ verify: check api-compat
 test: testdata
 	$(GO) test ./...
 
+# Refresh buf dependencies in buf.lock deliberately; init uses the committed lock.
+gen/deps:
+	$(BUF_CLI) dep update
+	$(BUF_CLI) dep prune
+
 # Layout clean-checkout bootstrap.
 init:
 	$(GO) mod download
 	$(MAKE) install
 	$(MAKE) gen/all
-	buf dep update
 	$(GO) mod tidy
 	$(MAKE) gen/conf
+	$(MAKE) codegen-baseline
 ```
+
+When generated `api/**` is gitignored and tracked via a digest file (`codegen.sha256`), pair `codegen-baseline` in `init` with `codegen-check` (compare generated `api/**` against the baseline) and `codegen-verify` (regenerate `api/**` with pinned plugins to verify idempotency and baseline).
 
 Do not copy a specialized target into other repositories solely for symmetry.
 

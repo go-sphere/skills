@@ -84,6 +84,8 @@ Use these headings, in this order, omitting any that carry nothing:
 ## Related Skills  # required; Upstream / Downstream / Boundary / Companion / fallback
 ```
 
+Router exception: `skills/sphere/SKILL.md` is a top-level skill router rather than a task execution skill. Instead of `## Inputs`, `## Steps`, `## Reference Map`, and `## Output`, it uses `## Routing Rules`, `## Workflow Map`, `## Stage Handoffs`, `## Operating Constraints`, and `## Related Skills`, and owns no `references/` files. `tests/validate-skill-references.sh` explicitly checks its `## Workflow Map` coverage and `## Stage Handoffs` contract while still enforcing size budgets, the description formula, and `## Related Skills`.
+
 Rules:
 
 1. **Steps are a path, not a menu.** One numbered list the model can follow top to bottom.

@@ -172,4 +172,4 @@ For detailed information on:
 - **Server streaming**: See [Server Streaming](https://go-sphere.github.io/docs/guides/server-streaming)
 - **Error handling**: See [Defining Proto Errors](error-definition-reference.md)
 - **Proto packages**: See [Proto Packages & Runtime](proto-packages-and-runtime-reference.md)
-- **Upgrading**: See [Upgrading to v0.0.4](https://go-sphere.github.io/docs/guides/upgrading)
+- **Upgrading**: See [Upgrading](https://go-sphere.github.io/docs/guides/upgrading)

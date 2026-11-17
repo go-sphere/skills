@@ -6,7 +6,7 @@ manual ID, and enum examples live in `ent-schema-examples.md`.
 
 ## Example 3: Typed JSON `extra` field
 
-For an entity whose brief lists a few stable sub-keys but flags the structure as volatile, use a typed JSON struct. The struct lives in the domain package, not in `ent/schema`.
+For an entity whose brief lists a few stable sub-keys but flags the structure as volatile, use a typed JSON struct. The struct lives in the domain package, not in `internal/pkg/database/schema`.
 
 ```go
 // internal/domain/order/extra.go
@@ -21,7 +21,7 @@ type Extra struct {
 ```
 
 ```go
-// ent/schema/order.go
+// internal/pkg/database/schema/order.go
 import (
     domainorder "yourapp/internal/domain/order"
 )
@@ -41,7 +41,7 @@ If the brief says "structure is unknown / passthrough", swap the struct for `jso
 When the design brief splits volatile module attributes into an extension entity so the hot main table doesn't churn:
 
 ```go
-// ent/schema/order.go
+// internal/pkg/database/schema/order.go
 func (Order) Edges() []ent.Edge {
     return []ent.Edge{
         edge.To("extension", OrderExtension.Type).Unique(),
@@ -50,7 +50,7 @@ func (Order) Edges() []ent.Edge {
 ```
 
 ```go
-// ent/schema/order_extension.go
+// internal/pkg/database/schema/order_extension.go
 type OrderExtension struct{ ent.Schema }
 
 func (OrderExtension) Annotations() []schema.Annotation {
@@ -59,7 +59,7 @@ func (OrderExtension) Annotations() []schema.Annotation {
 
 func (OrderExtension) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("id").Annotations(entproto.Field(1)),
+        field.Int64("id").Unique().Immutable().DefaultFunc(idgenerator.NextId).Annotations(entproto.Field(1)),
         field.Int64("order_id").Unique().Annotations(entproto.Field(2)),
         field.JSON("marketing", domainorder.MarketingExtra{}).
             Optional().
@@ -124,7 +124,7 @@ func (CustomFieldDef) Annotations() []schema.Annotation {
 
 func (CustomFieldDef) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("id").Annotations(entproto.Field(1)),
+        field.Int64("id").Unique().Immutable().DefaultFunc(idgenerator.NextId).Annotations(entproto.Field(1)),
         field.String("biz_type").Annotations(entproto.Field(2)),
         field.String("field_key").Annotations(entproto.Field(3)),
         field.String("field_name").Annotations(entproto.Field(4)),
@@ -154,7 +154,7 @@ func (CustomFieldValue) Annotations() []schema.Annotation {
 
 func (CustomFieldValue) Fields() []ent.Field {
     return []ent.Field{
-        field.Int64("id").Annotations(entproto.Field(1)),
+        field.Int64("id").Unique().Immutable().DefaultFunc(idgenerator.NextId).Annotations(entproto.Field(1)),
         field.String("biz_type").Annotations(entproto.Field(2)),
         field.Int64("biz_id").Annotations(entproto.Field(3)),
         field.String("field_key").Annotations(entproto.Field(4)),

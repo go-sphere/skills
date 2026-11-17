@@ -14,7 +14,7 @@ editable *and* `mixed`, which means edit it carefully rather than freely.
 | Ent schemas | ✅ YES | `internal/pkg/database/schema/**` |
 | Service logic | ✅ YES | `internal/service/**` |
 | DAO queries | ✅ YES | `internal/pkg/dao/**` |
-| Generated API | ❌ NO | `api/**/*.pb.go`, `api/**/*.sphere.go` |
+| Generated API | ❌ NO | `api/**/*.pb.go`, `api/**/*.sphere.pb.go`, `api/**/*_errors.pb.go`, `api/**/*.<key>.pb.go` |
 | Generated Ent | ❌ NO | `internal/pkg/database/ent/**` |
 | Generated bind/map | ❌ NO | `internal/pkg/render/entbind/**`, `entmap/**` |
 | Wire gen | ❌ NO | `cmd/app/wire_gen.go` |
@@ -28,7 +28,6 @@ editable *and* `mixed`, which means edit it carefully rather than freely.
 | Layer | Path | What Goes Here |
 |-------|------|----------------|
 | API Contract | `proto/**` | Service definitions, RPCs, messages, errors |
-| Proto Imports | `proto/**/sphere/*.proto` | Binding, errors, options packages |
 | DB Schema | `internal/pkg/database/schema/**` | Ent schema definitions |
 | Bind/Map | `cmd/tools/gen/entcrud/main.go` | Entity exposure policy (`conf.NewFilesConf`) |
 | Service | `internal/service/**` | Business API implementation |
@@ -41,7 +40,7 @@ editable *and* `mixed`, which means edit it carefully rather than freely.
 
 | Generated | Path Pattern |
 |-----------|-------------|
-| Proto Go | `api/**/*.{pb,sphere,errors}.go` |
+| Proto Go | `api/**/*.pb.go`, `api/**/*.sphere.pb.go`, `api/**/*_errors.pb.go`, `api/**/*.<key>.pb.go` |
 | Ent code | `internal/pkg/database/ent/**` |
 | Bind/Map | `internal/pkg/render/{entbind,entmap}/**` |
 | entpb proto | `proto/entpb/entpb.proto` |

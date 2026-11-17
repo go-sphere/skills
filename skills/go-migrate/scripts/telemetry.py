@@ -138,6 +138,7 @@ def resolve_effective_model(
   for candidate in (
       cli_model,
       existing_model,
+      os.environ.get("GO_MIGRATE_MODEL"),
       os.environ.get("MIGRATE_TO_GOLANG_MODEL"),
   ):
     if candidate and candidate.strip():

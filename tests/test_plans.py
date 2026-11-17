@@ -3,6 +3,7 @@
 import importlib.util
 import io
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -131,6 +132,35 @@ class TempCase(unittest.TestCase):
         path = self.root / name
         path.write_text(text)
         return plans.lint_plan(plans.parse_plan(path), git_handle)
+
+
+class GitTempCase(TempCase):
+    TEMPLATE_FILES = {"src/a.go": "package a\n"}
+    TEMPLATE_DIRS = ()
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls._template_tmp = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls._template_tmp.cleanup)
+        tpl = Path(cls._template_tmp.name)
+        for rel in cls.TEMPLATE_DIRS:
+            (tpl / rel).mkdir(parents=True, exist_ok=True)
+        for rel, content in cls.TEMPLATE_FILES.items():
+            path = tpl / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+        git(tpl, "init", "-q", "-b", "main")
+        git(tpl, "add", "-A")
+        git(tpl, "commit", "-q", "-m", "init")
+        cls._template_root = tpl
+        cls._template_sha = git(tpl, "rev-parse", "--short=12", "HEAD")
+
+    def setUp(self):
+        super().setUp()
+        shutil.copytree(self._template_root, self.root, dirs_exist_ok=True, symlinks=True)
+        self.sha = self._template_sha
+        self.handle = plans.Git.open(self.root)
 
 
 class MarkdownHelpers(unittest.TestCase):
@@ -316,17 +346,11 @@ class LintPlan(TempCase):
         self.assertFalse(any("Status is missing" in m for m in errors))
 
 
-class LintWithGit(TempCase):
-    def setUp(self):
-        super().setUp()
-        git(self.root, "init", "-q", "-b", "main")
-        (self.root / "src").mkdir()
-        (self.root / "src" / "a.go").write_text("package a\n")
-        (self.root / "src" / "b.go").write_text("package b\nfunc One() int {\n\treturn 1\n}\n")
-        git(self.root, "add", "-A")
-        git(self.root, "commit", "-q", "-m", "init")
-        self.sha = git(self.root, "rev-parse", "--short=12", "HEAD")
-        self.handle = plans.Git.open(self.root)
+class LintWithGit(GitTempCase):
+    TEMPLATE_FILES = {
+        "src/a.go": "package a\n",
+        "src/b.go": "package b\nfunc One() int {\n\treturn 1\n}\n",
+    }
 
     def test_valid_plan_passes_the_git_checks(self):
         self.assertEqual(self.lint(plan_text(sha=self.sha), self.handle), [])
@@ -473,18 +497,11 @@ class LintDirectory(TempCase):
         self.assertEqual((issues, [(r.number, r.status, r.note) for r in rows]), ([], [("001", "DONE", "(merged)")]))
 
 
-class Status(TempCase):
+class Status(GitTempCase):
     def setUp(self):
         super().setUp()
-        git(self.root, "init", "-q", "-b", "main")
-        (self.root / "src").mkdir()
-        (self.root / "src" / "a.go").write_text("package a\n")
-        git(self.root, "add", "-A")
-        git(self.root, "commit", "-q", "-m", "init")
-        self.sha = git(self.root, "rev-parse", "--short=12", "HEAD")
         self.plans = self.root / "plans"
         self.plans.mkdir()
-        self.handle = plans.Git.open(self.root)
 
     def write(self, specs, rows):
         for number, kwargs in specs.items():
@@ -592,17 +609,16 @@ class Status(TempCase):
         self.assertEqual(code, 2)
 
 
-class Scope(TempCase):
+class Scope(GitTempCase):
+    TEMPLATE_FILES = {
+        "src/a.go": "package a\n",
+        "src/b.go": "package b\n",
+    }
+    TEMPLATE_DIRS = ("gen/v1",)
+
     def setUp(self):
         super().setUp()
-        git(self.root, "init", "-q", "-b", "main")
-        (self.root / "src").mkdir()
-        (self.root / "gen" / "v1").mkdir(parents=True)
-        (self.root / "src" / "a.go").write_text("package a\n")
-        (self.root / "src" / "b.go").write_text("package b\n")
-        git(self.root, "add", "-A")
-        git(self.root, "commit", "-q", "-m", "init")
-        self.base = git(self.root, "rev-parse", "--short=12", "HEAD")
+        self.base = self.sha
         text = plan_text(sha=self.base, in_scope="- `src/a.go`\n- `src/new_test.go` (create)",
                          drift="src/a.go src/new_test.go")
         text = text.replace("**Out of scope**", "**Regenerated** (never hand-edit):\n- `gen/**/*.pb.go`\n\n**Out of scope**")

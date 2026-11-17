@@ -13,7 +13,7 @@ Load this reference whenever the output includes service routes, path templates,
 - Gin source (router conflict/panic rules): https://raw.githubusercontent.com/gin-gonic/gin/master/tree.go
 - HttpRouter README (Gin radix behavior model): https://raw.githubusercontent.com/julienschmidt/httprouter/master/README.md
 - Fiber routing guide: https://raw.githubusercontent.com/gofiber/fiber/v2/docs/guide/routing.md
-- Echo routing guide: https://raw.githubusercontent.com/labstack/echox/master/website/docs/guide/routing.md
+- Echo routing guide: https://raw.githubusercontent.com/labstack/echo/master/website/docs/guide/routing.md
 - Hertz routing (CloudWeGo): https://www.cloudwego.io/docs/hertz/tutorials/basic-feature/route/
 - Last synced by this skill update: 2026-08-23
 
@@ -28,7 +28,7 @@ This skill must pre-check route compatibility before finalizing paths.
 ## Table of Contents
 
 - [Gin / HttpRouter Rules (Strict)](#gin--httprouter-rules-strict)
-- [Fiber Rules (Order-sensitive)](#fiber-rules-order-sensitive)
+- [Fiber Rules](#fiber-rules)
 - [Echo Rules (Priority-driven)](#echo-rules-priority-driven)
 - [Hertz](#hertz)
 - [Cross-Backend Design Rules (Required)](#cross-backend-design-rules-required)
@@ -53,11 +53,11 @@ This skill must pre-check route compatibility before finalizing paths.
 2. Avoid sibling static-vs-param segment collisions for the same method.
 3. Avoid catch-all routes in API contracts unless explicitly required.
 
-## Fiber Rules (Order-sensitive)
+## Fiber Rules
 
-1. Route declaration order matters.
-2. Put fixed/static routes before variable routes.
-3. Greedy params (`*`, `+`) can shadow more specific patterns if declared first.
+1. Raw Fiber evaluates routes in registration order, **but** Sphere's `fiberx` adapter sorts `httpx` routes by segment specificity (`Static > Param > Wildcard`) regardless of registration order.
+2. Register any direct/native Fiber entries (`UseNative`, mounts, native routes) before `httpx` routes when they share paths, so `fiberx` reordering does not panic across middleware or mount boundaries.
+3. Avoid ambiguous greedy wildcards (`*`, `+`) that can match more than intended.
 4. Escape special parameter characters when needed as literals (for example custom method suffixes).
 
 ## Echo Rules (Priority-driven)
