@@ -16,9 +16,10 @@ Apply in order. The first rule that matches decides.
 3. The task pulls upstream layout changes into a project, or adopts a project that predates the layout contract — `sphere-sync`, not `sphere-feature`.
 4. The task is Go code quality with no feature to build — `go-test`, `go-doc`, or `go-simplify`, not `sphere-feature`.
 5. The task ports another language to Go — `go-migrate`.
-6. The task audits a repository to decide what to improve, or writes plans for other agents — `improve`, not `go-simplify`.
-7. The task changes go-sphere contracts, schemas, services, or generation commands — `sphere-feature`.
-8. Anything else — match the task in the Workflow Map and name one skill. If none fits, say so and continue without a skill.
+6. The task reviews code (a diff, branch, PR, paths, or a repository), merges review findings, or fixes and verifies approved findings — `review-loop`, not `improve`.
+7. The task audits a repository to decide what to improve, or writes plans for other agents — `improve`, not `go-simplify`.
+8. The task changes go-sphere contracts, schemas, services, or generation commands — `sphere-feature`.
+9. Anything else — match the task in the Workflow Map and name one skill. If none fits, say so and continue without a skill.
 
 ## Workflow Map
 
@@ -46,6 +47,7 @@ Apply in order. The first rule that matches decides.
 
 ### Audit and agents
 
+- `review-loop` — review code with one or several agents, then fix and verify only the findings the user approves.
 - `improve` — audit a codebase read-only and write plans other agents can execute.
 - `delegate` — hand one bounded task to another coding agent and resume its session.
 - `rex-desktop` — run and coordinate several live coding agents in Rex floating panes.

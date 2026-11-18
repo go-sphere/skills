@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Loop"
+  short_description: "Multi-agent code review, approved fixes, and verification"
+  default_prompt: "Use $review-loop to review this code, synthesize the findings into a fix checklist, and verify the fixes I approve."

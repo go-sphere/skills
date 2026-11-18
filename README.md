@@ -39,7 +39,7 @@ assumes:
 |---------|---------|--------|
 | `sphere-*` | a go-sphere scaffold project | `sphere-feature`, `sphere-api`, `sphere-ent`, `sphere-crud`, `sphere-sync`, `sphere-make` |
 | `go-*` | any Go repository | `go-test`, `go-doc`, `go-simplify`, `go-migrate` |
-| no prefix | nothing; general purpose | `sphere`, `interview-me`, `prd`, `spec`, `improve`, `delegate`, `rex-desktop` |
+| no prefix | nothing; general purpose | `sphere`, `interview-me`, `prd`, `spec`, `improve`, `review-loop`, `delegate`, `rex-desktop` |
 
 ## Choosing a Skill
 
@@ -74,13 +74,13 @@ without re-classifying from scratch.
 - `go-doc` writes self-contained Go API comments and verified usage examples so consumers and AI agents can get started through `go doc`.
 - `go-simplify` audits Go code for over-design, over-optimization, and over-defensive checks, then applies behavior-neutral cleanups against a green test baseline while never breaking the exported API.
 - `go-migrate` migrates a legacy or foreign-language codebase to idiomatic Go on the latest stable release, proving behavior parity with a differential A/B harness and recording telemetry, benchmarks, Go PGO results, and an HTML infographic.
-
 ### Requirements and planning
 
 - `interview-me` deeply interviews the user through a decision tree until reaching shared technical and product consensus.
 - `prd` turns agreed direction into a high-quality PRD.
 - `spec` produces implementation-ready specifications.
 - `improve` audits a codebase read-only and writes self-contained implementation plans with verification gates for cheaper agents to execute. It can dispatch an executor through `delegate`, review the diff, and keep the plan backlog current. Adapted from [shadcn/improve](https://github.com/shadcn/improve) (MIT).
+- `review-loop` reviews code in any language, whether a diff, named paths, or a whole repository, with one or several agents, merges the findings into a checklist the user approves by ticking boxes, fixes only the ticked items, and verifies them independently, keeping every artifact under `code_review/<feature>/`. It carries a Go reference for Go repositories. Adapted from [vikingmute/review-forge](https://github.com/vikingmute/review-forge); see its `NOTICE.md`.
 
 ### Agent orchestration
 
